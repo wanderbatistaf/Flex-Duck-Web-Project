@@ -268,7 +268,7 @@
             <!-- CNPJ -->
             <div class="form-group col-md-3" *ngIf="!formCad?.get('natural_person')?.value">
               <label class="form-control-label" for="cnpj_cpf">Número do CNPJ <em>*</em></label>
-              <input type="text" class="form-control" formControlName="cnpj_cpf" id="cnpj_cpf" placeholder="Digite apenas números">
+              <input type="text" class="form-control" formControlName="cnpj_cpf" id="cnpj_cpf" placeholder="Digite apenas números" [textMask]="{ mask: cnpjMask }">
                <div *ngIf="touchedVerify('cnpj')" class="form-control-feedback">O cnpj informado é invalido.</div>
             </div>
 
