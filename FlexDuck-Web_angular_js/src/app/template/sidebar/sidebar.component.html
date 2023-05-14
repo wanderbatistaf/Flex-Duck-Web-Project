@@ -1,0 +1,65 @@
+<div id="layoutSidenav_nav">
+  <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+    <div class="sb-sidenav-menu">
+      <div class="nav">
+        <div class="sb-sidenav-menu-heading">Sistema</div>
+        <a class="nav-link" routerLink="/home"
+        ><div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+          Home</a
+        >
+        <div class="sb-sidenav-menu-heading"
+             (click)="toggleInterfaceMenu()"
+             style="color: white"
+             onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'; this.style.backgroundColor='rgba(0,0,0,0.2)'"
+             onmouseout="this.style.boxShadow=''; this.style.backgroundColor=''">
+          <i class="fas fa-arrow-right"></i> Interface
+        </div>
+        <div *ngIf="isInterfaceMenuOpen">
+          <a class="nav-link collapsed" routerLink="/payments" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+          ><div class="sb-nav-link-icon"><i class="fas fa-coins"></i></div>
+            Payments
+          </a>
+        </div>
+
+        <div class="sb-sidenav-menu-heading"
+             (click)="toggleCadastroMenu()"
+             style="color: white"
+             onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'; this.style.backgroundColor='rgba(0,0,0,0.2)'"
+             onmouseout="this.style.boxShadow=''; this.style.backgroundColor=''">
+          <i class="fas fa-arrow-right"></i> Cadastro
+        </div>
+
+        <div *ngIf="isCadastroMenuOpen">
+          <a class="nav-link collapsed" routerLink="/employes" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+          ><div class="sb-nav-link-icon"><i class="fas fa-user-plus"></i></div>
+            Funcionário
+          </a>
+
+          <a class="nav-link collapsed" routerLink="/products" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+          ><div class="sb-nav-link-icon"><i class="fa fa-archive"></i></div>
+            Produtos
+          </a>
+
+          <a class="nav-link collapsed" routerLink="/clients" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+          ><div class="sb-nav-link-icon"><i class="fa fa-address-book"></i></div>
+            Clientes
+          </a>
+
+          <a class="nav-link collapsed" routerLink="/suppliers" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+          ><div class="sb-nav-link-icon"><i class="fa fa-parachute-box"></i></div>
+            Fornecedores
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="sb-sidenav-footer">
+      <div class="sb-nav-link-icon"><img class="rounded-circle shadow-4-strong" alt="avatar" width="50" height="50" src="https://mdbcdn.b-cdn.net/img/new/avatars/1.webp" /><b> Wanderson Batista</b></div>
+    </div>
+    <a class="nav-link collapsed" routerLink="/" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+    ><div class="sb-nav-link-icon" (click)="logout()">
+      Logout</div>
+    </a>
+  </nav>
+</div>
+

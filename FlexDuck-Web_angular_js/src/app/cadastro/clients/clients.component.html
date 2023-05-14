@@ -1,0 +1,459 @@
+<h1 class="'mt-4">Clientes</h1>
+<ol class="breadcrumb mb-4">
+  <li class="breadcrumb-item active">Cadastro | Consulta</li>
+</ol>
+
+<!-- Abas de Navegação -->
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item">
+    <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro')">Cadastro</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" [class.active]="isTabActive('consulta')" (click)="setActiveTab('consulta')">Clientes</a>
+  </li>
+  <li class="nav-item" [hidden]="true">
+    <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('edicao')">Edição</a>
+  </li>
+</ul>
+
+
+
+
+<!--NavBar superior (Search+Adicionar)-->
+
+<nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+  <a class="navbar-brand">
+  </a>
+  <form class="form-inline mr-auto">
+
+    <input class="form-control mr-sm-2 flex-grow-1" type="search" placeholder="Search" aria-label="Search"
+           [(ngModel)]="searchText" name="searchText">
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" (click)="filterClients(searchText)"
+            style="margin-right: 5px;">Buscar</button>
+
+    <button class="btn btn-outline-success my-2 my-sm-0" type="button" (click)="clearSearch()">Limpar</button>
+  </form>
+</nav>
+
+<!--Clientes renderizam aqui-->
+<div class="card mt-4">
+  <div class="card-body">
+
+    <div *ngIf="loading" class="spinner-border spinner-border-sm"></div>
+
+    <!--Edição renderiza aqui!-->
+    <div *ngIf="activeTab === 'edicao'">
+        <div class="container">
+          <form [formGroup]="formEdit" novalidate>
+
+            <div class="row">
+
+              <!-- RAZÃO SOCIAL -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="business_name">Razão Social <em>*</em></label>
+                <input type="text" class="form-control" formControlName="business_name" id="business_name" placeholder="Ex: Xablau Ltda" maxlength="50">
+                <div *ngIf="touchedVerify('firstName')" class="form-control-feedback">Por favor, insira um nome válido.</div>
+              </div>
+
+              <div class="form-group col-md-4">
+                <label class="form-control-label">Tipo de Cliente <em>*</em></label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" formControlName="natural_person" id="natural_person" [attr.disabled]="true">
+                  <label class="form-check-label" for="natural_person">
+                    Pessoa Física
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" formControlName="blocked_status" id="blocked_status">
+                  <label class="form-check-label" for="blocked_status">
+                    Bloqueado
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" formControlName="inactive_status" id="inactive_status">
+                  <label class="form-check-label" for="inactive_status">
+                    Inativo
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group col-md-4" *ngIf="formEdit.get('blocked_status')?.value">
+                <!-- Caixa de data para blocked_status = true -->
+                <label class="form-control-label" for="blockedSince">Data de Bloqueio</label>
+                <input type="date" class="form-control" formControlName="blocked_since" id="blockedSince">
+              </div>
+
+              <div class="form-group col-md-4" *ngIf="formEdit.get('inactive_status')?.value">
+                <!-- Caixa de data para inactive_status = true -->
+                <label class="form-control-label" for="inactiveSince">Data de Inatividade</label>
+                <input type="date" class="form-control" formControlName="inactive_since" id="inactiveSince">
+              </div>
+
+
+            </div>
+
+            <div class="row">
+
+              <!-- FIRST NAME -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="firstname">Nome <em>*</em></label>
+                <input type="text" class="form-control" formControlName="firstname" id="firstname" placeholder="Ex: Lucas" maxlength="50">
+                <div *ngIf="touchedVerify('firstName')" class="form-control-feedback">Por favor, insira um nome válido.</div>
+              </div>
+
+              <!-- LAST NAME -->
+              <div class="form-group col-md-5">
+                <label class="form-control-label" for="lastname">Sobrenome <em>*</em></label>
+                <input type="text" class="form-control" formControlName="lastname" id="lastname" placeholder="Ex: Renan da Silva" maxlength="60">
+                <div *ngIf="touchedVerify('lastName')" class="form-control-feedback">Por favor, insira um nome válido.</div>
+              </div>
+
+              <!-- CNPJ -->
+              <div class="form-group col-md-3" *ngIf="!formCad?.get('natural_person')?.value">
+                <label class="form-control-label" for="cnpj_cpf">Número do CPF/CNPJ</label>
+                <input type="text" class="form-control" formControlName="cnpj_cpf" id="cnpj_cpf" placeholder="Digite apenas números" [textMask]="{ mask: cpfMask }" readonly>
+                <div *ngIf="touchedVerify('cnpj')" class="form-control-feedback">O cnpj informado é invalido.</div>
+              </div>
+
+
+            </div>
+
+            <div class="row">
+
+              <!-- EMAIL -->
+              <div class="form-group col-md-6">
+                <label class="form-control-label" for="email">Email <em>*</em></label>
+                <input type="email" class="form-control" formControlName="email" id="email" placeholder="Ex: lucas@seuemail.com.br" aria-describedby="emailHelp" maxlength="60">
+                <div *ngIf="touchedVerify('email')" class="form-control-feedback">Por favor, insira um endereço de e-mail válido.</div>
+              </div>
+
+              <!-- PHONE -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="telephone">Telefone <em>*</em></label>
+                <input type="text" class="form-control" formControlName="telephone" id="telephone" placeholder="Ex: (99) 99999-9999" [textMask]="{ mask: phoneMask }">
+                <div *ngIf="touchedVerify('phone')" class="form-control-feedback">Por favor, insira o número do telefone.</div>
+              </div>
+
+              <!-- GENDER -->
+              <div class="form-group col-md-2">
+                <label class="form-control-label" for="gender">Sexo <em>*</em></label>
+                <select class="form-control custom-select" formControlName="gender" id="gender" name="gender">
+                  <option [ngValue]="null">Selecione...</option>
+                  <option *ngFor="let gender of genders" [ngValue]="gender">{{ gender }}</option>
+                </select>
+                <div *ngIf="touchedVerify('gender')" class="form-control-feedback">Campo obrigatório.</div>
+              </div>
+
+            </div>
+
+            <!-- ZIPCODE -->
+            <div class="row">
+              <div class="form-group col-md-3">
+                <label class="form-control-label" for="cep">CEP <em>*</em><a href="http://www.buscacep.correios.com.br/servicos/dnec/index.do" target="_blank" class="cep-link"> Não sei meu CEP</a></label>
+                <div class="input-group">
+                  <input type="text" class="form-control" formControlName="cep" id="cep" placeholder="Digite apenas números" [textMask]="{ mask: zipCodeMask }">
+                  <span class="input-group-btn">
+        <button class="btn btn-secondary" type="button" (click)="searchZipCode(formCad.controls.cep.value)">Buscar</button>
+      </span>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- ADDRESS -->
+            <div class="row">
+              <div class="form-group col-md-6">
+                <label class="form-control-label" for="street">Endereço <em>*</em></label>
+                <input type="text" class="form-control input-readonly" formControlName="street" id="street" placeholder="" tabindex="-1" maxlength="70" >
+                <div *ngIf="touchedVerify('street')" class="form-control-feedback"></div>
+              </div>
+
+              <!-- NUMBER -->
+              <div class="form-group col-md-2">
+                <label class="form-control-label" for="number">Número <em>*</em></label>
+                <input type="text" class="form-control" formControlName="number" id="number" placeholder="Ex: 462" maxlength="10">
+                <div *ngIf="touchedVerify('number')" class="form-control-feedback">Campo obrigatório.</div>
+              </div>
+
+              <!-- COMPLEMENT -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="complement">Complemento</label>
+                <input type="text" class="form-control" formControlName="complement" id="complement" placeholder="Ex: Apto 48" maxlength="20">
+              </div>
+            </div>
+
+            <div class="row">
+
+              <!-- DISTRICT -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="district">Bairro <em>*</em></label>
+                <input type="text" class="form-control input-readonly" formControlName="district" id="district" placeholder="" tabindex="-1" maxlength="70" >
+                <div *ngIf="touchedVerify('neighborhood')" class="form-control-feedback"></div>
+              </div>
+
+              <!-- STATE -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="state">Estado <em>*</em></label>
+                <input type="text" class="form-control input-readonly" formControlName="state" id="state" placeholder="" tabindex="-1" >
+                <div *ngIf="touchedVerify('state')" class="form-control-feedback"></div>
+              </div>
+
+              <!-- CITY -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="city">Cidade <em>*</em></label>
+                <input type="text" class="form-control input-readonly" formControlName="city" id="city" placeholder="" tabindex="-1" >
+                <div *ngIf="touchedVerify('city')" class="form-control-feedback"></div>
+              </div>
+            </div>
+            <div>
+              <br>
+              <button type="button" class="btn btn-secondary mr-2" (click)="setActiveTab('consulta')">Cancelar</button>
+              <button type="submit" class="btn btn-primary" (click)="onUpdate()">Atualizar</button>
+            </div>
+          </form>
+        </div>
+    </div>
+
+
+    <!--Cadastro renderiza aqui-->
+    <div *ngIf="activeTab === 'cadastro'">
+
+      <div class="container">
+        <form [formGroup]="formCad" novalidate>
+
+          <div class="row">
+
+            <!-- RAZÃO SOCIAL -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="business_name">Razão Social <em>*</em></label>
+              <input type="text" class="form-control" formControlName="business_name" id="business_name" placeholder="Ex: Xablau Ltda" maxlength="50">
+                            <div *ngIf="touchedVerify('firstName')" class="form-control-feedback">Por favor, insira um nome válido.</div>
+            </div>
+
+            <div class="form-group col-md-4">
+              <label class="form-control-label">Tipo de Cliente <em>*</em></label>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" formControlName="natural_person" id="natural_person">
+                <label class="form-check-label" for="natural_person">
+                  Pessoa Física
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="row">
+
+            <!-- FIRST NAME -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="firstname">Nome <em>*</em></label>
+              <input type="text" class="form-control" formControlName="firstname" id="firstname" placeholder="Ex: Lucas" maxlength="50">
+              <div *ngIf="touchedVerify('firstName')" class="form-control-feedback">Por favor, insira um nome válido.</div>
+            </div>
+
+            <!-- LAST NAME -->
+            <div class="form-group col-md-5">
+              <label class="form-control-label" for="lastname">Sobrenome <em>*</em></label>
+              <input type="text" class="form-control" formControlName="lastname" id="lastname" placeholder="Ex: Renan da Silva" maxlength="60">
+              <div *ngIf="touchedVerify('lastName')" class="form-control-feedback">Por favor, insira um nome válido.</div>
+            </div>
+
+            <!-- CPF -->
+            <div class="form-group col-md-3" *ngIf="formCad?.get('natural_person')?.value">
+              <label class="form-control-label" for="cnpj_cpf">Número do CPF <em>*</em></label>
+              <input type="text" class="form-control" formControlName="cnpj_cpf" id="cnpj_cpf" placeholder="Digite apenas números" [textMask]="{ mask: cpfMask }">
+               <div *ngIf="touchedVerify('cpf')" class="form-control-feedback">O cpf informado é invalido.</div>
+            </div>
+
+            <!-- CNPJ -->
+            <div class="form-group col-md-3" *ngIf="!formCad?.get('natural_person')?.value">
+              <label class="form-control-label" for="cnpj_cpf">Número do CNPJ <em>*</em></label>
+              <input type="text" class="form-control" formControlName="cnpj_cpf" id="cnpj_cpf" placeholder="Digite apenas números">
+               <div *ngIf="touchedVerify('cnpj')" class="form-control-feedback">O cnpj informado é invalido.</div>
+            </div>
+
+
+          </div>
+
+          <div class="row">
+
+            <!-- EMAIL -->
+            <div class="form-group col-md-6">
+              <label class="form-control-label" for="email">Email <em>*</em></label>
+              <input type="email" class="form-control" formControlName="email" id="email" placeholder="Ex: lucas@seuemail.com.br" aria-describedby="emailHelp" maxlength="60">
+              <div *ngIf="touchedVerify('email')" class="form-control-feedback">Por favor, insira um endereço de e-mail válido.</div>
+            </div>
+
+            <!-- PHONE -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="telephone">Telefone <em>*</em></label>
+              <input type="text" class="form-control" formControlName="telephone" id="telephone" placeholder="Ex: (99) 99999-9999" [textMask]="{ mask: phoneMask }">
+              <div *ngIf="touchedVerify('phone')" class="form-control-feedback">Por favor, insira o número do telefone.</div>
+            </div>
+
+            <!-- GENDER -->
+            <div class="form-group col-md-2">
+              <label class="form-control-label" for="gender">Sexo <em>*</em></label>
+              <select class="form-control custom-select" formControlName="gender" id="gender" name="gender">
+                <option [ngValue]="null">Selecione...</option>
+                <option *ngFor="let gender of genders" [ngValue]="gender">{{ gender }}</option>
+              </select>
+              <div *ngIf="touchedVerify('gender')" class="form-control-feedback">Campo obrigatório.</div>
+            </div>
+
+          </div>
+
+          <!-- ZIPCODE -->
+          <div class="row">
+            <div class="form-group col-md-3">
+              <label class="form-control-label" for="cep">CEP <em>*</em><a href="http://www.buscacep.correios.com.br/servicos/dnec/index.do" target="_blank" class="cep-link"> Não sei meu CEP</a></label>
+              <div class="input-group">
+                <input type="text" class="form-control" formControlName="cep" id="cep" placeholder="Digite apenas números" [textMask]="{ mask: zipCodeMask }">
+                <span class="input-group-btn">
+        <button class="btn btn-secondary" type="button" (click)="searchZipCode(formCad.controls.cep.value)">Buscar</button>
+      </span>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- ADDRESS -->
+          <div class="row">
+            <div class="form-group col-md-6">
+              <label class="form-control-label" for="street">Endereço <em>*</em></label>
+              <input type="text" class="form-control input-readonly" formControlName="street" id="street" placeholder="" tabindex="-1" maxlength="70" readonly>
+              <div *ngIf="touchedVerify('street')" class="form-control-feedback"></div>
+            </div>
+
+            <!-- NUMBER -->
+            <div class="form-group col-md-2">
+              <label class="form-control-label" for="number">Número <em>*</em></label>
+              <input type="text" class="form-control" formControlName="number" id="number" placeholder="Ex: 462" maxlength="10">
+              <div *ngIf="touchedVerify('number')" class="form-control-feedback">Campo obrigatório.</div>
+            </div>
+
+            <!-- COMPLEMENT -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="complement">Complemento</label>
+              <input type="text" class="form-control" formControlName="complement" id="complement" placeholder="Ex: Apto 48" maxlength="20">
+            </div>
+          </div>
+
+          <div class="row">
+
+            <!-- DISTRICT -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="district">Bairro <em>*</em></label>
+              <input type="text" class="form-control input-readonly" formControlName="district" id="district" placeholder="" tabindex="-1" maxlength="70" readonly>
+              <div *ngIf="touchedVerify('neighborhood')" class="form-control-feedback"></div>
+            </div>
+
+            <!-- STATE -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="state">Estado <em>*</em></label>
+              <input type="text" class="form-control input-readonly" formControlName="state" id="state" placeholder="" tabindex="-1" readonly>
+              <div *ngIf="touchedVerify('state')" class="form-control-feedback"></div>
+            </div>
+
+            <!-- CITY -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="city">Cidade <em>*</em></label>
+              <input type="text" class="form-control input-readonly" formControlName="city" id="city" placeholder="" tabindex="-1" readonly>
+              <div *ngIf="touchedVerify('city')" class="form-control-feedback"></div>
+            </div>
+          </div>
+            <div>
+          <br>
+          <button type="button" class="btn btn-secondary mr-2" (click)="formReset()">Limpar</button>
+          <button type="submit" class="btn btn-primary" (click)="onSubmit()">Cadastrar</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+<!--Consulta renderiza aqui-->
+    <table class="table table-condensed table-hover" *ngIf="!loading && activeTab === 'consulta'">
+      <thead>
+      <tr>
+        <th>Razão Social</th>
+        <th>Nome</th>
+        <th>Sobrenome</th>
+        <th>CNPJ/CPF</th>
+<!--        <th>Iscrição Estadual</th>
+        <th>Inscrição Municipal</th> -->
+        <th>Telefone</th>
+        <th>E-mail</th>
+        <th>Inativo</th>
+        <th>Bloqueado</th>
+        <th>Pessoa Fisica</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let clients of filteredClients">
+        <td>{{ clients.business_name }}</td>
+        <td>{{ clients.firstname }}</td>
+        <td>{{ clients.lastname }}</td>
+        <td>{{ clients.cnpj_cpf }}</td>
+<!--        <td>{{ clients.state_registration }}</td>
+        <td>{{ clients.municipal_registration }}</td> -->
+        <td>{{ clients.telephone }}</td>
+        <td>{{ clients.email }}</td>
+        <div *ngIf="editedClients">
+        </div>
+        <td>
+          <input type="checkbox" *ngIf="clients.inactive_status" [checked]="true" disabled>
+        </td>
+        <td>
+          <input type="checkbox" *ngIf="clients.blocked_status" [checked]="true" disabled>
+        </td>
+        <td>
+          <input type="checkbox" *ngIf="clients.natural_person" [checked]="true" disabled>
+        </td>
+        <td>
+
+          <button type="button" class="btn btn-sm btn-outline-info btn-block" (click)="editClients(clients); setActiveTab('edicao')">
+            Editar
+          </button>
+
+          <button type="button" class="btn btn-sm btn-outline-danger btn-block"
+                  (click)="deleteClient(clients.client_id ? clients.client_id : 0)">
+            Deletar
+          </button>
+
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!--Botões de paginação-->
+  <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+    <div class="mt-3">
+      <button class="btn btn-sm btn-outline-secondary mr-2" *ngIf="cPage > 1" (click)="goToPage(1)">
+        Início
+      </button>
+
+      <button class="btn btn-sm btn-outline-secondary mr-2" *ngIf="cPage > 1" (click)="goToPage(cPage - 1)">
+        Anterior
+      </button>
+
+      <ng-container *ngFor="let page of pages">
+        <button class="btn btn-sm mr-2" [class.btn-outline-secondary]="page !== cPage"
+                [class.btn-secondary]="page === cPage" (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button class="btn btn-sm btn-outline-secondary mr-2" *ngIf="cPage < totalPages" (click)="goToPage(cPage + 1)">
+        Próximo
+      </button>
+
+      <button class="btn btn-sm btn-outline-secondary" *ngIf="cPage < totalPages" (click)="goToPage(totalPages)">
+        Final
+      </button>
+    </div>
+
+  </nav>
+</div>
