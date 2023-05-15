@@ -21,6 +21,8 @@ export class ClientsComponent implements OnInit {
   clients: Clients[] = [];
   // Array de pagamentos filtrados
   filteredClients: Clients[] = [];
+  // Lista de clientes visíveis
+  visibleClients: Clients[] = [];
   // Quantidade de itens por página
   itemsPerPage = 10;
   // Página atual
@@ -32,6 +34,17 @@ export class ClientsComponent implements OnInit {
   pages: number[] = [];
   // Variável para armazenar o texto da busca
   searchText = '';
+  // Objeto de busca
+  search = {
+    business_name: '',
+    firstname: '',
+    lastname: '',
+    cnpj_cpf: '',
+    telephone: '',
+    natural_person: '',
+    inactive_status: '',
+    blocked_status: '',
+  };
   // Variável para armazenar o cliente em edição
   editedClients: any;
   // Variavel para armazenar a tab ativa
@@ -55,6 +68,9 @@ export class ClientsComponent implements OnInit {
   submitted = false;
   // Muda para a aba Edição
   selectedTab: string = 'consulta';
+  // Define status do filtro
+  inativoFilter: boolean = false;
+  pessoaFisicaFilter: boolean = false;
 
 
   constructor(private clientsService: ClientsService,
@@ -144,6 +160,7 @@ export class ClientsComponent implements OnInit {
       this.formCad.controls['natural_person'].setValue(false);
     }, 1000);
     this.changeDetectorRef.detectChanges();
+    this.filterClients(this.searchText);
   };
 
 
@@ -153,9 +170,7 @@ export class ClientsComponent implements OnInit {
     // Define o índice inicial e final da lista de pagamentos a serem exibidos com base na página atual e no número de itens por página
     const startIndex = (this.cPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
-
-    // Define a lista de clientes filtrada com base nos índices inicial e final definidos
-    this.filteredClients = this.clients.slice(startIndex, endIndex);
+    this.visibleClients = this.filteredClients.slice(startIndex, endIndex);
   }
 
 
@@ -209,8 +224,6 @@ export class ClientsComponent implements OnInit {
           this.clients = clients;
           // Desativa o sinalizador de carregamento
           this.loading = false;
-          // Exibindo no console
-          console.log(clients);
           // Renderiza os pagamentos
           this.filterClients('');
         },
@@ -222,42 +235,67 @@ export class ClientsComponent implements OnInit {
   }
 
 
-  filterClients(searchValue: string): void {
-    // Transforma o valor digitado em minúsculo
-    searchValue = searchValue.toLowerCase();
-
-    // Filtra a lista de clientes de acordo com o valor digitado pelo usuário
-    const filteredClients = this.clients?.filter(client =>
-      client.business_name?.toLowerCase().includes(searchValue) ||
-      client.firstname?.toLowerCase().includes(searchValue) ||
-      client.lastname?.toLowerCase().includes(searchValue) ||
-      client.cnpj_cpf?.toLowerCase().includes(searchValue) ||
-      client.state_registration?.toString().includes(searchValue) ||
-      client.municipal_registration?.toString().includes(searchValue) ||
-      client.telephone?.toString().includes(searchValue) ||
-      client.email?.toLowerCase().includes(searchValue) ||
-      client.created_at?.toTimeString().includes(searchValue) ||
-      client.inactive_since?.toString().includes(searchValue) ||
-      client.blocked_since?.toTimeString().includes(searchValue) ||
-      client.cep?.toString().includes(searchValue) ||
-      client.street?.toString().includes(searchValue) ||
-      client.district?.toString().includes(searchValue) ||
-      client.city?.toString().includes(searchValue) ||
-      client.state?.toString().includes(searchValue) ||
-      client.natural_person?.toString().includes(searchValue) ||
-      client.inactive_status?.toString().includes(searchValue) ||
-      client.blocked_status?.toString().includes(searchValue)
+  // Método para buscar os clientes
+searchClients() {
+  // Define que a tela está carregando
+  this.loading = true;
+  // Chama o serviço de cliente para obter todos os clientes
+  this.clientsService.getAll()
+    // Realiza um mapeamento para obter apenas a lista de clientes do response
+    .pipe(
+      map((response: any) => response.items as Clients[])
+    )
+    // Quando a requisição obtiver sucesso, executa a função de callback
+    .subscribe(
+      (clients: Clients[]) => {
+        // Armazena os clientes na variável local
+        this.clients = clients;
+        // Define que a tela não está mais carregando
+        this.loading = false;
+        // Aplica os filtros de busca definidos na propriedade searchText
+        this.filterClients(this.searchText);
+      },
+      error => {
+        // Quando a requisição obtiver erro
+        console.log('Houve um erro ao requisitar os clientes.');
+      }
     );
-    // Define a lista filtrada na propriedade da classe
-    this.filteredClients = filteredClients;
+}
 
-    // Atualiza a lista de clientes filtrada
-    this.filteredClients = filteredClients;
 
-    // Calcula o número de páginas e paginates os resultados
-    this.totalPages = Math.ceil(this.filteredClients.length / this.itemsPerPage);
-    this.paginateClients();
+  filterClients(searchValue: string) {
+  // Transforma o valor digitado em minúsculo
+  searchValue = searchValue.toLowerCase();
+
+  // Filtra a lista de clientes de acordo com o valor digitado pelo usuário
+  this.filteredClients = this.clients.filter(client =>
+    client.business_name?.toLowerCase().includes(searchValue) ||
+    client.firstname?.toLowerCase().includes(searchValue) ||
+    client.lastname?.toString().toLowerCase().includes(searchValue) ||
+    client.cnpj_cpf?.toString().toLowerCase().includes(searchValue) ||
+    client.email?.toString().toLowerCase().includes(searchValue) ||
+    client.telephone?.toString().toLowerCase().includes(searchValue) 
+  );
+
+  // Define a página atual como 1 para exibir os primeiros resultados
+  this.cPage = 1;
+
+  // Calcula o número de páginas e paginates os resultados
+  this.totalPages = Math.ceil(this.filteredClients.length / this.itemsPerPage);
+  this.paginateClients();
+}
+
+
+changePage(page: number) {
+  // Verifica se a página solicitada está dentro dos limites
+  if (page < 1 || page > this.totalPages) {
+    return;
   }
+
+  this.cPage = page;
+  this.paginateClients();
+}
+
 
 
   // Método para deletar um cliente
@@ -442,11 +480,39 @@ export class ClientsComponent implements OnInit {
         }
       );
     }
-
-
-
-
   }
+
+  applyFilters() {
+  // Define que nenhum cliente está filtrado
+  this.clients.forEach(client => client.filtered = false);
+
+  // Filtra os clientes de acordo com os valores da busca
+  this.filteredClients = this.clients.filter(client => {
+    return Object.keys(this.search).some(key => {
+      // Se o valor da busca for nulo ou vazio, retorna todos os clientes
+      if (!this.search[key as keyof typeof this.search]) {
+        return true;
+      }
+
+      // Converte o valor da busca e o valor da propriedade do cliente para minúsculas
+      const searchValue = this.search[key as keyof typeof this.search].toString().toLowerCase();
+      const prop = (client[key as keyof typeof client] || '').toString().toLowerCase();
+
+      // Se a chave da busca for 'client_id', verifica se o ID do cliente contém o valor da busca
+      if (key === 'client_id') {
+        return client.client_id?.toString().includes(searchValue);
+      }
+      // Se a chave da busca for qualquer outra, verifica se a propriedade do cliente contém o valor da busca
+      else {
+        return prop.includes(searchValue);
+      }
+    });
+  });
+
+  // Define que os clientes filtrados estão filtrados
+  this.filteredClients.forEach(client => client.filtered = true);
+}
+
 
 
 
