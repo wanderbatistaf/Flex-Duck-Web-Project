@@ -12,7 +12,7 @@ db = mysql_connector.db
 # API USERS #
 # Define a rota GET para buscar dados do banco de dados
 @api_users.route('/users', methods=['GET'])
-# @jwt_required() # Protege a rota com JWT
+@jwt_required() # Protege a rota com JWT
 def buscar_dados():
     current_user = get_jwt_identity()
     if not current_user:
@@ -39,7 +39,7 @@ def buscar_dados():
         "totalPage": 1,
         "items": items
     }
-    return jsonify(resultados)
+    return jsonify(response)
 
 # Define a rota POST para inserir dados no banco de dados
 @api_users.route('/users', methods=['POST'])
@@ -72,14 +72,15 @@ def atualizar_dados(id):
     return jsonify({'mensagem': 'Dados atualizados com sucesso!'})
 
 # Define a rota DELETE para excluir dados do banco de dados
-@api_users.route('/users/<int:id>', methods=['DELETE'])
-def excluir_dados(id):
+@api_users.route('/users/delete/<int:user_id>', methods=['DELETE'])
+@jwt_required() # Protege a rota com JWT
+def excluir_dados(user_id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
     cursor = db.cursor()
-    sql = 'DELETE FROM usuarios WHERE id = %s'
-    val = (id,)
+    sql = 'DELETE FROM usuarios WHERE user_id = %s'
+    val = (user_id,)
     cursor.execute(sql, val)
     db.commit()
     cursor.close()

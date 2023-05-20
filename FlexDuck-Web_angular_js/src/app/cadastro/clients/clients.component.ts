@@ -226,6 +226,7 @@ export class ClientsComponent implements OnInit {
           this.loading = false;
           // Renderiza os pagamentos
           this.filterClients('');
+          console.log(clients);
         },
         // Quando ocorrer um erro na resposta
         error => {

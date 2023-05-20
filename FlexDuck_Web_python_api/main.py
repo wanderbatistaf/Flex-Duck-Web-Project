@@ -31,7 +31,7 @@ def autenticar_usuario():
     user = cursor.fetchone()
     cursor.close()
     if user:
-        token_data = {'username': user['username'], 'level': user['level']}
+        token_data = {'username': user['username'], 'level': user['level'], 'user_id': user['user_id']}
         token = create_access_token(identity=token_data)
         print(token)
         return jsonify({'access_token': token})

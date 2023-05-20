@@ -3,41 +3,58 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import jwt_decode from 'jwt-decode';
 
 import { environment } from '@environments/environment';
 import { User } from '@app/_models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
-    private userSubject: BehaviorSubject<User | null>;
-    public user: Observable<User | null>;
+  private userSubject: BehaviorSubject<User | null>;
+  public user: Observable<User | null>;
 
-    constructor(
-        private router: Router,
-        private http: HttpClient
-    ) {
-        this.userSubject = new BehaviorSubject(JSON.parse(localStorage.getItem('user')!));
-        this.user = this.userSubject.asObservable();
-    }
+  constructor(private router: Router, private http: HttpClient) {
+    this.userSubject = new BehaviorSubject(
+      JSON.parse(localStorage.getItem('user')!)
+    );
+    this.user = this.userSubject.asObservable();
+  }
 
-    public get userValue() {
-        return this.userSubject.value;
-    }
+  public get userValue() {
+    return this.userSubject.value;
+  }
 
-    login(username: string, password: string) {
-        return this.http.post<any>(`${environment.apiUrl}/auth/login`, { username, password })
-            .pipe(map(user => {
-                // store user details and jwt token in local storage to keep user logged in between page refreshes
-                localStorage.setItem('access_token', user.access_token);
-                this.userSubject.next(user);
-                return user;
-            }));
-    }
+  login(username: string, password: string) {
+    return this.http
+      .post<any>(`${environment.apiUrl}/auth/login`, { username, password })
+      .pipe(
+        map((user) => {
+          // store user details and jwt token in local storage to keep user logged in between page refreshes
+          localStorage.setItem('access_token', user.access_token);
 
-    logout() {
-        // remove user from local storage to log user out
-        localStorage.removeItem('user');
-        this.userSubject.next(null);
-        this.router.navigate(['/login']);
-    }
+          // Decode the JWT token to extract information
+          const decodedToken: any = jwt_decode(user.access_token);
+          console.log(decodedToken);
+
+          // Extract the level property from the decoded token
+          const level = decodedToken.sub.level;
+
+          // Create a new User object with the extracted level property
+          const userWithLevel: User = {
+            ...user,
+            level: level,
+          };
+
+          this.userSubject.next(userWithLevel);
+          return user;
+        })
+      );
+  }
+
+  logout() {
+    // remove user from local storage to log user out
+    localStorage.removeItem('access_token');
+    this.userSubject.next(null);
+    this.router.navigate(['/login']);
+  }
 }

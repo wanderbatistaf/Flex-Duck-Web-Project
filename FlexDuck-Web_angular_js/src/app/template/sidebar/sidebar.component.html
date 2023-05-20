@@ -30,22 +30,22 @@
         </div>
 
         <div *ngIf="isCadastroMenuOpen">
-          <a class="nav-link collapsed" routerLink="/employes" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+          <a class="nav-link collapsed" routerLink="/employes" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 15"
           ><div class="sb-nav-link-icon"><i class="fas fa-user-plus"></i></div>
             Funcionário
           </a>
 
-          <a class="nav-link collapsed" routerLink="/products" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+          <a class="nav-link collapsed" routerLink="/products" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 10"
           ><div class="sb-nav-link-icon"><i class="fa fa-archive"></i></div>
             Produtos
           </a>
 
-          <a class="nav-link collapsed" routerLink="/clients" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+          <a class="nav-link collapsed" routerLink="/clients" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 10"
           ><div class="sb-nav-link-icon"><i class="fa fa-address-book"></i></div>
             Clientes
           </a>
 
-          <a class="nav-link collapsed" routerLink="/suppliers" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
+          <a class="nav-link collapsed" routerLink="/suppliers" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 15"
           ><div class="sb-nav-link-icon"><i class="fa fa-parachute-box"></i></div>
             Fornecedores
           </a>
