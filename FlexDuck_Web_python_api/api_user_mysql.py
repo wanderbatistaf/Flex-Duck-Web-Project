@@ -41,23 +41,43 @@ def buscar_dados():
     }
     return jsonify(response)
 
+# Define a rota GET para buscar dados do banco de dados especifico
+@api_users.route('/users/<int:user_id>', methods=['GET'])
+@jwt_required() # Protege a rota com JWT
+def buscar_dados_user(user_id):
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+    cursor = db.cursor()
+    sql = 'SELECT * FROM usuarios WHERE user_id = %s'
+    val = (user_id,)
+    cursor.execute(sql, val)
+    result = cursor.fetchone()
+    cursor.close()
+    if result:
+        return jsonify({'mensagem': 'Cliente localizado com sucesso!', 'cliente': result})
+    else:
+        return jsonify({'mensagem': 'Cliente não encontrado!'}), 404
+
 # Define a rota POST para inserir dados no banco de dados
-@api_users.route('/users', methods=['POST'])
+@api_users.route('/users/add', methods=['POST'])
+@jwt_required()
 def inserir_dados():
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
     dados = request.json
     cursor = db.cursor()
-    sql = 'INSERT INTO usuarios (campo1, campo2) VALUES (%s, %s)'
-    val = (dados['campo1'], dados['campo2'])
+    sql = 'INSERT INTO usuarios (username, name, password, active, email, created_at, level) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    val = (dados['username'], dados['name'], dados['password'], dados['active'], dados['email'], dados['created_at'], dados['level'])
     cursor.execute(sql, val)
     db.commit()
+    print(cursor)
     cursor.close()
     return jsonify({'mensagem': 'Dados inseridos com sucesso!'})
 
 # Define a rota PUT para atualizar dados no banco de dados
-@api_users.route('/users/<int:id>', methods=['PUT'])
+@api_users.route('/users/update/<int:id>', methods=['PUT'])
 def atualizar_dados(id):
     current_user = get_jwt_identity()
     if not current_user:
@@ -85,3 +105,20 @@ def excluir_dados(user_id):
     db.commit()
     cursor.close()
     return jsonify({'mensagem': 'Dados excluídos com sucesso!'})
+
+# Define a rota para obter o último ID de usuário
+@api_users.route('/users/lastUserId', methods=['GET'])
+@jwt_required()
+def get_last_user_id():
+    try:
+        current_user = get_jwt_identity()
+        if not current_user:
+            return abort(404)
+        cursor = db.cursor()
+        cursor.execute('SELECT MAX(user_id) FROM usuarios')
+        last_user_id = cursor.fetchone()[0]
+        cursor.close()
+        response = jsonify(last_user_id)
+        return response
+    except Exception as e:
+        return jsonify(error=str(e)), 500

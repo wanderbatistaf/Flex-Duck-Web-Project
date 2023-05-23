@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { UserService } from '@app/_services';
 import { map } from 'rxjs';
-import { User } from '@app/_models';
+import { Level, User } from '@app/_models';
 import jwt_decode from 'jwt-decode';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-employes',
@@ -19,8 +20,37 @@ export class EmployesComponent implements OnInit {
   filteredUser: User[] = [];
   searchText = '';
   currentUser: number = -1;
+  formCad: FormGroup;
+  lastUserId: number = 0;
+  submitted = false;
+  public passwordVisible: boolean = false;
+  levels = [
+    { value: 22, name: 'Admin' },
+    { value: 20, name: 'Gerente' },
+    { value: 15, name: 'Supervisor' },
+    { value: 10, name: 'Vendedor' },
+  ];
 
-  constructor(private usersService: UserService) {}
+  constructor(private usersService: UserService, private fb: FormBuilder) {
+    const currentDate = new Date();
+    const offset = -3;
+    const adjustedTimestamp = currentDate.getTime() + offset * 60 * 60 * 1000;
+    const adjustedDate = new Date(adjustedTimestamp);
+    const formattedCreatedAt = adjustedDate
+      .toISOString()
+      .slice(0, 19)
+      .replace('T', ' ');
+
+    this.formCad = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(1)]],
+      name: ['', [Validators.required, Validators.minLength(1)]],
+      password: ['', [Validators.required, Validators.minLength(1)]],
+      active: [true],
+      email: [''],
+      created_at: [formattedCreatedAt],
+      level: [''],
+    });
+  }
 
   ngOnInit(): void {
     const token = localStorage.getItem('token');
@@ -28,44 +58,69 @@ export class EmployesComponent implements OnInit {
     this.level = decodedToken?.level;
     this.getUser();
     this.filterUser(this.searchText);
-    this.getCurrentUser(); // Chame o método para obter o usuário atual
+    this.getCurrentUser(); // Call the method to get the current user
     this.getUser();
   }
 
-  isTabActive(tab: string): boolean {
-    return this.activeTab === tab;
+  // Method to format the "created_at" field
+  formatCreatedAt(): string {
+    const createdAt = this.formCad.get('created_at')?.value;
+    const date = new Date(createdAt);
+    const formattedDate = date.toISOString().slice(0, 19).replace('T', ' ');
+    return formattedDate;
   }
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
 
+  isTabActive(tab: string): boolean {
+    return this.activeTab === tab;
+  }
+
   getUser() {
-    // Ativa o sinalizador de carregamento
+    // Activate the loading flag
     this.loading = true;
-    // Recupera todos os usuários do servidor
+    // Retrieve all users from the server
     this.usersService
       .getAll()
       .pipe(map((response: any) => response.items as User[]))
       .subscribe(
-        // Quando a resposta for bem-sucedida
+        // When the response is successful
         (users: User[]) => {
-          // Define os usuários recuperados na propriedade da classe
+          // Set the retrieved users to the class property
           this.users = users;
 
-          // Definir a propriedade isCurrentUser para cada usuário
+          // Set the isCurrentUser property for each user
           this.users.forEach((user) => {
+            switch (user.level) {
+              case 22:
+                user.levelText = 'Admin';
+                break;
+              case 20:
+                user.levelText = 'Gerente';
+                break;
+              case 15:
+                user.levelText = 'Supervisor';
+                break;
+              case 10:
+                user.levelText = 'Vendedor';
+                break;
+              default:
+                user.levelText = undefined;
+                break;
+            }
             user.isCurrentUser = user.user_id === this.currentUser;
           });
-          // Desativa o sinalizador de carregamento
+          // Deactivate the loading flag
           this.loading = false;
-          // Renderiza os usuários
+          // Render the users
           this.filterUser('');
           console.log(users);
         },
-        // Quando ocorrer um erro na resposta
+        // When an error occurs in the response
         (error) => {
-          console.log('Houve um erro ao requisitar os usuários.');
+          console.log('An error occurred while requesting users.');
         }
       );
   }
@@ -80,21 +135,21 @@ export class EmployesComponent implements OnInit {
     );
   }
 
-  // Método para deletar um usere
+  // Method to delete a user
   deleteUser(user_id: number) {
-    // Exibe uma confirmação para o usuário antes de prosseguir
-    if (confirm('Tem certeza que deseja excluir esse usuário?')) {
-      // Faz uma requisição para deletar o usere com o ID especificado
+    // Display a confirmation to the user before proceeding
+    if (confirm('Tem certeza que deseja deletar este usuário?')) {
+      // Make a request to delete the user with the specified ID
       this.usersService.deleteUserById(user_id).subscribe(
-        // Se a requisição for bem-sucedida, remove o usere da lista e atualiza a lista filtrada
+        // If the request is successful, remove the user from the list and update the filtered list
         () => {
-          console.log(`Usuário com ID ${user_id} foi excluído.`);
-          this.users = this.users.filter((users) => users.user_id !== user_id);
+          console.log(`Usuário de ID ${user_id} foi deletado.`);
+          this.users = this.users.filter((user) => user.user_id !== user_id);
           this.filterUser(this.searchText);
         },
-        // Se a requisição falhar, exibe uma mensagem de erro no console
-        (erro) => {
-          console.log('Houve um erro ao excluir o usuário.');
+        // If the request fails, display an error message in the console
+        (error) => {
+          console.log('An error occurred while deleting the user.');
         }
       );
     }
@@ -111,12 +166,53 @@ export class EmployesComponent implements OnInit {
         this.currentUser = user_id;
         console.log(this.currentUser);
       } else {
-        console.log('Token não encontrado no LocalStorage.');
+        console.log('Token not found in LocalStorage.');
       }
     } catch (error) {
-      console.log('Houve um erro ao decodificar o token:', error);
+      console.log('An error occurred while decoding the token:', error);
     }
   }
-}
-  
 
+  getLevelName(levelValue: number | null): string {
+    const level = this.levels.find((level) => level.value === levelValue);
+    return level ? level.name : '';
+  }
+
+  getLastUserId() {
+    this.usersService.getLastUserId().subscribe((lastUserId) => {
+      this.lastUserId = lastUserId + 1;
+    });
+  }
+
+  onSubmit() {
+    this.submitted = true;
+    console.log(this.formCad.controls);
+    console.log(this.formCad.value);
+
+    // Se o formulário for inválido, retorne
+    if (this.formCad.invalid) {
+      console.log('Deu ruim 06!');
+      return;
+    }
+
+    this.usersService.addUser(this.formCad.value).subscribe((newUser) => {
+      this.users.push(newUser);
+      this.formCad.reset();
+
+      // Redireciona para a página de consulta
+      this.setActiveTab('consulta');
+      this.getUser();
+      this.filterUser(this.searchText);
+      this.getCurrentUser();
+      this.getUser();
+    });
+  }
+
+  public togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible;
+  }
+
+  formReset() {
+    this.formCad.reset();
+  }
+}

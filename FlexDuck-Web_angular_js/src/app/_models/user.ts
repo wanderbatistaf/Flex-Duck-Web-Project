@@ -11,4 +11,5 @@
   level: number;
   access_token?: string;
   filtered?: boolean;
+  levelText?: string;
 }

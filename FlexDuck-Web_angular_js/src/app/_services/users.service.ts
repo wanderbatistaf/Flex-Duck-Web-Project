@@ -44,4 +44,15 @@ export class UserService {
       updateClient
     );
   }
+
+  // Cria o método para obter o último ID de usuário
+  getLastUserId(): Observable<number> {
+    return this.http.get<number>(`${environment.apiUrl}/users/lastUserId`).pipe(
+      tap((lastUserId: number) => console.log('API Response:', lastUserId)),
+      catchError((error) => {
+        console.log('Error in API call:', error);
+        return throwError('Houve um erro na chamada à API');
+      })
+    );
+    }
 }

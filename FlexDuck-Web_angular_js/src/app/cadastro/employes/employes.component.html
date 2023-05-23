@@ -1,4 +1,4 @@
-<h1 class="'mt-4">Funcionários</h1>
+<h1 class="mt-4">Funcionários</h1>
 <ol class="breadcrumb mb-4">
     <li class="breadcrumb-item active">Cadastro | Consulta</li>
 </ol>
@@ -6,7 +6,8 @@
 <!-- Abas de Navegação -->
 <ul class="nav nav-tabs mb-4">
     <li class="nav-item">
-        <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro')">Cadastro</a>
+        <a class="nav-link" [class.active]="isTabActive('cadastro')"
+            (click)="setActiveTab('cadastro'); getLastUserId()">Cadastro</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" [class.active]="isTabActive('consulta')" (click)="setActiveTab('consulta')">Funcionários</a>
@@ -21,8 +22,7 @@
 <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
     <a class="navbar-brand"></a>
     <form class="form-inline mr-auto">
-        <input class="form-control mr-sm-2 flex-grow-1" type="search" placeholder="Search" aria-label="Search"
-            name="searchText">
+        <input class="form-control mr-sm-2 flex-grow-1" type="search" placeholder="Search" name="searchText">
         <button class="btn btn-outline-success my-2 my-sm-0" type="submit"
             style="margin-right: 5px;">Buscar</button>
         <button class="btn btn-outline-success my-2 my-sm-0" type="button">Limpar</button>
@@ -39,59 +39,156 @@
 <!--Usuarios renderizam aqui-->
 <div class="card mt-4">
     <div class="card-body">
-
-        <div *ngIf="loading" class="spinner-border spinner-border-sm"></div>
-
-<!--Consulta renderiza aqui-->
-<table class="table table-condensed table-hover" *ngIf="!loading && activeTab === 'consulta'">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Nome</th>
-            <th>Password</th>
-            <th>Active</th>
-            <th>E-mail</th>
-            <th>Crieado em</th>
-            <th>Ultimo Acesso</th>
-            <th>Level</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let user of users">
-            <td>{{ user.user_id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.name }}</td>
-            <td>{{ user.password }}</td>
-            <td>
-                <input type="checkbox" *ngIf="user.active" [checked]="true" disabled>
-            </td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.created_at | date:'yyyy-MM-dd HH:mm:ss' }}</td>
-            <td>{{ user.last_login | date:'yyyy-MM-dd HH:mm:ss' }}</td>
-            <td>{{ user.level }}</td>
-            <td>
-
-                <button type="button" class="btn btn-sm btn-outline-info btn-block"
-                    (click)="setActiveTab('edicao')">
-                    Editar
-                </button>
-
-                <button type="button" class="btn btn-sm btn-outline-danger btn-block"
-                    *ngIf="currentUser !== user.user_id; else currentUserButton" (click)="deleteUser(user.user_id ? user.user_id : 0)">
-                    Deletar
-                </button>
+                <!--Cadastro renderiza aqui-->
+                <div *ngIf="activeTab === 'cadastro'">
                 
-                <ng-template #currentUserButton>
-                    <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
-                        Deletar
-                    </button>
-                </ng-template>
+                    <div class="container">
+                        <form [formGroup]="formCad" novalidate>
+                
+                            <div class="row">
+                
+                                <div class="form-group col-md-2">
+                                    <label class="form-control-label" for="user_id">User ID <em>*</em></label>
+                                    <input type="text" class="form-control" formControlName="user_id" id="user_id" [value]="lastUserId" placeholder=""
+                                        maxlength="6" readonly>
+                                    <!-- <div *ngIf="touchedVerify('firstName')" class="form-control-feedback">Por favor, insira um nome válido.</div> -->
+                                </div>
 
 
-            </td>
-        </tr>
-    </tbody>
-</table>
-</div>
-</div>
+
+                
+                                <div class="form-group col-md-4">
+                                    <label class="form-control-label">Ativo? <em>*</em></label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" formControlName="active" id="active">
+                                        <label class="form-check-label" for="active">
+                                            Ativo
+                                        </label>
+                                    </div>
+                                </div>
+                
+                            </div>
+                
+                            <div class="row">
+                
+                                <!-- USERNAME -->
+                                <div class="form-group col-md-4">
+                                    <label class="form-control-label" for="username">Username <em>*</em></label>
+                                    <input type="text" class="form-control" formControlName="username" id="username"
+                                        placeholder="Ex: Lucas" maxlength="50">
+                                    <!-- <div *ngIf="touchedVerify('firstName')" class="form-control-feedback">Por favor, insira um
+                                            nome válido.</div> -->
+                                </div>
+                
+                                <!-- NAME -->
+                                <div class="form-group col-md-5">
+                                    <label class="form-control-label" for="name">Nome <em>*</em></label>
+                                    <input type="text" class="form-control" formControlName="name" id="name"
+                                        placeholder="Ex: Renan da Silva" maxlength="60">
+                                    <!-- <div *ngIf="touchedVerify('lastName')" class="form-control-feedback">Por favor, insira um
+                                            nome válido.</div> -->
+                                </div>
+                
+                                <!-- Password -->
+                                <div class="form-group col-md-3">
+                                    <label class="form-control-label" for="password">Senha <em>*</em></label>
+                                    <div class="password-input">
+                                        <input [type]="passwordVisible ? 'text' : 'password'" class="form-control" formControlName="password"
+                                            id="password" placeholder="">
+                                        <button type="button" (click)="togglePasswordVisibility()">
+                                            <span class="fa" [class.fa-eye]="passwordVisible" [class.fa-eye-slash]="!passwordVisible"></span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                
+                            <div class="row">
+                
+                                <!-- EMAIL -->
+                                <div class="form-group col-md-6">
+                                    <label class="form-control-label" for="email">Email <em>*</em></label>
+                                    <input type="email" class="form-control" formControlName="email" id="email"
+                                        placeholder="Ex: lucas@seuemail.com.br" aria-describedby="emailHelp" maxlength="60">
+                                    <!-- <div *ngIf="touchedVerify('email')" class="form-control-feedback">Por favor, insira um
+                                            endereço de e-mail válido.</div> -->
+                                </div>
+                
+                                <!-- CREATED AT -->
+                                <div class="form-group col-md-4">
+                                    <label class="form-control-label" for="created_at">Criado em </label>
+                                    <input type="text" class="form-control" formControlName="created_at" id="created_at" [value]="formatCreatedAt()"
+                                        readonly>
+                                </div>
+                
+                                <!-- LEVEL -->
+                                <div class="form-group col-md-2">
+                                    <label class="form-control-label" for="level">Level <em>*</em></label>
+                                    <select class="form-control custom-select" formControlName="level" id="level" name="level">
+                                        <option *ngFor="let level of levels" [ngValue]="level.value">{{ level.name }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <br>
+                                    <button type="button" class="btn btn-secondary mr-2" (click)="formReset()">Limpar</button>
+                                    <button type="submit" class="btn btn-primary" (click)="onSubmit()">Cadastrar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+        <div *ngIf="loading" class="spinner-border spinner-border-sm"></div></div>
+                <!--Consulta renderiza aqui-->
+                <table class="table table-condensed table-hover" *ngIf="!loading && activeTab === 'consulta'">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Nome</th>
+                            <th>Password</th>
+                            <th>Active</th>
+                            <th>E-mail</th>
+                            <th>Crieado em</th>
+                            <th>Ultimo Acesso</th>
+                            <th>Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let user of users">
+                            <td>{{ user.user_id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ '********' }}</td>
+                            <td>
+                                <input type="checkbox" *ngIf="user.active" [checked]="true" disabled>
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.created_at | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                            <td>{{ user.last_login | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                            <td>{{ getLevelName(user.level) }}</td>
+                            <td>
+
+                                <button type="button" class="btn btn-sm btn-outline-info btn-block"
+                                    (click)="setActiveTab('edicao')">
+                                    Editar
+                                </button>
+
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-block"
+                                    *ngIf="currentUser !== user.user_id; else currentUserButton"
+                                    (click)="deleteUser(user.user_id ? user.user_id : 0)">
+                                    Deletar
+                                </button>
+
+                                <ng-template #currentUserButton>
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
+                                        Deletar
+                                    </button>
+                                </ng-template>
+
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
