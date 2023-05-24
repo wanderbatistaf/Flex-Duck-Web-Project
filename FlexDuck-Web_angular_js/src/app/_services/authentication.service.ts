@@ -14,17 +14,17 @@ export class AuthenticationService {
   public user: Observable<User | null>;
 
   constructor(private router: Router, private http: HttpClient) {
-    this.userSubject = new BehaviorSubject(
+    this.userSubject = new BehaviorSubject<User | null>(
       JSON.parse(localStorage.getItem('user')!)
     );
     this.user = this.userSubject.asObservable();
   }
 
-  public get userValue() {
+  public get userValue(): User | null {
     return this.userSubject.value;
   }
 
-  login(username: string, password: string) {
+  login(username: string, password: string): Observable<any> {
     return this.http
       .post<any>(`${environment.apiUrl}/auth/login`, { username, password })
       .pipe(
@@ -34,16 +34,26 @@ export class AuthenticationService {
 
           // Decode the JWT token to extract information
           const decodedToken: any = jwt_decode(user.access_token);
-          console.log(decodedToken);
+          console.log('Decoded Token:', decodedToken);
 
           // Extract the level property from the decoded token
-          const level = decodedToken.sub.level;
+          const level = decodedToken?.sub?.level;
 
-          // Create a new User object with the extracted level property
+          // Set the name property with an appropriate value
+          const name = decodedToken?.sub?.name;
+
+          // Extract the status property from the decoded token
+          const active = decodedToken?.sub?.active;
+
+          // Create a new User object with the extracted level and name properties
           const userWithLevel: User = {
             ...user,
             level: level,
+            name: name,
+            active: active,
           };
+
+          console.log('User with Level:', userWithLevel);
 
           this.userSubject.next(userWithLevel);
           return user;

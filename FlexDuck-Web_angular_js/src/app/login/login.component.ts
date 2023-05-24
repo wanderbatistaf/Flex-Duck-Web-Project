@@ -14,6 +14,7 @@ export class LoginComponent implements OnInit {
   submitted = false;
   error = '';
   showPassword = false;
+  isActive: number | boolean = false; // Property to store the value of 'active'
 
   constructor(
     private formBuilder: FormBuilder,
@@ -21,7 +22,7 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private authenticationService: AuthenticationService
   ) {
-    // redirecionar para a página inicial se já estiver logado
+    // Redirect to the home page if already logged in
     if (this.authenticationService.userValue) {
       this.router.navigate(['/']);
     }
@@ -32,9 +33,14 @@ export class LoginComponent implements OnInit {
       username: ['', Validators.required],
       password: ['', Validators.required]
     });
+
+    this.authenticationService.user.subscribe((user) => {
+      this.isActive = user?.active || false; // Assign the value of 'active' to the isActive property
+      console.log('isActive:', this.isActive);
+    });
   }
 
-// Getter para acesso fácil aos campos do formulário
+  // Getter for easy access to form fields
   get f() {
     return this.loginForm.controls;
   }
@@ -42,7 +48,7 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
 
-    // interrompe se o formulário for inválido
+    // Stop if the form is invalid
     if (this.loginForm.invalid) {
       return;
     }
@@ -53,9 +59,13 @@ export class LoginComponent implements OnInit {
       .pipe(first())
       .subscribe({
         next: () => {
-          // obtém o URL de retorno dos parâmetros da rota ou usa o padrão '/'
-          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-          this.router.navigate([returnUrl]);
+          if (this.isActive) {
+            // Get the return URL from route parameters or use the default '/'
+            const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+            this.router.navigate([returnUrl]);
+          } else {
+            alert('The user is deactivated. Please contact the administrator.');
+          }
         },
         error: error => {
           this.error = error;
