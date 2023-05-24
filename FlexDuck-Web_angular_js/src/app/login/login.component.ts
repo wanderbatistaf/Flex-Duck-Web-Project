@@ -58,13 +58,18 @@ export class LoginComponent implements OnInit {
     this.authenticationService.login(this.f.username.value, this.f.password.value)
       .pipe(first())
       .subscribe({
-        next: () => {
+        next: (user) => {
           if (this.isActive) {
             // Get the return URL from route parameters or use the default '/'
             const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
             this.router.navigate([returnUrl]);
+
+            // Call the updateLastLogin function with the user's ID
+            this.authenticationService.updateLastLogin(user.user_id).subscribe(() => {
+              console.log('Last login updated successfully.');
+            });
           } else {
-            alert('The user is deactivated. Please contact the administrator.');
+            alert('O usuário está desativado. Entre em contato com o Administrador.');
           }
         },
         error: error => {

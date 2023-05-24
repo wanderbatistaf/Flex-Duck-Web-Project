@@ -77,15 +77,18 @@ def inserir_dados():
     return jsonify({'mensagem': 'Dados inseridos com sucesso!'})
 
 # Define a rota PUT para atualizar dados no banco de dados
-@api_users.route('/users/update/<int:id>', methods=['PUT'])
-def atualizar_dados(id):
+@api_users.route('/users/update/<int:user_id>', methods=['PUT'])
+@jwt_required()
+def atualizar_dados(user_id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
     dados = request.json
     cursor = db.cursor()
-    sql = 'UPDATE usuarios SET campo1 = %s, campo2 = %s WHERE id = %s'
-    val = (dados['campo1'], dados['campo2'], id)
+    sql = 'UPDATE usuarios SET username = %s, name = %s, password = %s, active = %s, email = %s, ' \
+          'created_at = %s, last_login = %s, level = %s WHERE user_id = %s'
+    val = (dados['username'], dados['name'], dados['password'], dados['active'], dados['email'], dados['created_at'],
+           dados['last_login'], dados['level'], user_id)
     cursor.execute(sql, val)
     db.commit()
     cursor.close()
@@ -122,3 +125,19 @@ def get_last_user_id():
         return response
     except Exception as e:
         return jsonify(error=str(e)), 500
+
+# Define a rota PUT para atualizar data de acesso no banco de dados
+@api_users.route('/users/update/access-date/<int:user_id>', methods=['PUT'])
+@jwt_required()
+def atualizar_login_access(user_id):
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+    dados = request.json
+    cursor = db.cursor()
+    sql = 'UPDATE usuarios SET last_login = %s WHERE user_id = %s'
+    val = (dados['last_login'], user_id)
+    cursor.execute(sql, val)
+    db.commit()
+    cursor.close()
+    return jsonify({'mensagem': 'Dados atualizados com sucesso!'})

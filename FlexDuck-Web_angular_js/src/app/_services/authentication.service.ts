@@ -45,20 +45,33 @@ export class AuthenticationService {
           // Extract the status property from the decoded token
           const active = decodedToken?.sub?.active;
 
+          // Extract the user_id property from the decoded token
+          const user_id = decodedToken?.sub?.user_id;
+
           // Create a new User object with the extracted level and name properties
           const userWithLevel: User = {
             ...user,
             level: level,
             name: name,
             active: active,
+            user_id: user_id,
           };
 
           console.log('User with Level:', userWithLevel);
+          console.log('User id is:', userWithLevel.user_id);
 
           this.userSubject.next(userWithLevel);
-          return user;
+          return userWithLevel;
         })
       );
+  }
+
+
+  updateLastLogin(userId: number): Observable<any> {
+    const lastLogin = new Date();
+    lastLogin.setHours(lastLogin.getHours() - 3);
+    const lastLoginFormatted = lastLogin.toISOString().replace('T', ' ').substr(0, 19);
+    return this.http.put(`${environment.apiUrl}/users/update/access-date/${userId}`, { last_login: lastLoginFormatted });
   }
 
   logout() {
