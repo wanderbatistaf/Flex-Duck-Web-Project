@@ -86,9 +86,9 @@ def atualizar_dados(user_id):
     dados = request.json
     cursor = db.cursor()
     sql = 'UPDATE usuarios SET username = %s, name = %s, password = %s, active = %s, email = %s, ' \
-          'created_at = %s, last_login = %s, level = %s WHERE user_id = %s'
-    val = (dados['username'], dados['name'], dados['password'], dados['active'], dados['email'], dados['created_at'],
-           dados['last_login'], dados['level'], user_id)
+          'level = %s WHERE user_id = %s'
+    val = (dados['username'], dados['name'], dados['password'], dados['active'], dados['email'],
+           dados['level'], user_id)
     cursor.execute(sql, val)
     db.commit()
     cursor.close()

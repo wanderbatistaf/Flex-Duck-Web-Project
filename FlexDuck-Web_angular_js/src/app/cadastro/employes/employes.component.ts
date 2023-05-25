@@ -4,6 +4,7 @@ import { UserService } from '@app/_services';
 import { map } from 'rxjs';
 import { Level, User } from '@app/_models';
 import jwt_decode from 'jwt-decode';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -21,8 +22,10 @@ export class EmployesComponent implements OnInit {
   searchText = '';
   currentUser: number = -1;
   formCad: FormGroup;
+  formEdit: FormGroup;
   lastUserId: number = 0;
   submitted = false;
+  selectedUser: any;
   public passwordVisible: boolean = false;
   levels = [
     { value: 22, name: 'Admin' },
@@ -31,7 +34,7 @@ export class EmployesComponent implements OnInit {
     { value: 10, name: 'Vendedor' },
   ];
 
-  constructor(private usersService: UserService, private fb: FormBuilder) {
+  constructor(private usersService: UserService, private fb: FormBuilder, private router: Router) {
     const currentDate = new Date();
     const offset = -3;
     const adjustedTimestamp = currentDate.getTime() + offset * 60 * 60 * 1000;
@@ -49,6 +52,18 @@ export class EmployesComponent implements OnInit {
       email: [''],
       created_at: [formattedCreatedAt],
       level: [''],
+    });
+
+    this.formEdit = this.fb.group({
+      user_id: [''],
+      username: ['', [Validators.required, Validators.minLength(1)]],
+      name: ['', [Validators.required, Validators.minLength(1)]],
+      password: ['', [Validators.required, Validators.minLength(1)]],
+      active: [true],
+      email: [''],
+      created_at: [formattedCreatedAt],
+      level: [''],
+      last_login: [''],
     });
   }
 
@@ -214,5 +229,49 @@ export class EmployesComponent implements OnInit {
 
   formReset() {
     this.formCad.reset();
+  }
+
+  // Função para preencher os campos na aba de edição com os dados do cliente selecionado
+  editUser(user: any) {
+    this.selectedUser = user;
+    this.setActiveTab('edicao');
+    console.log(this.selectedUser);
+
+    this.formEdit.patchValue({
+      user_id: this.selectedUser.user_id, // Use the correct property name 'user_id'
+      username: this.selectedUser.username, // Use the correct property name 'username'
+      name: this.selectedUser.name, // Use the correct property name 'name'
+      password: this.selectedUser.password, // Use the correct property name 'password'
+      active: this.selectedUser.active, // Use the correct property name 'active'
+      email: this.selectedUser.email, // Use the correct property name 'email'
+      created_at: this.selectedUser.created_at, // Use the correct property name 'created_at'
+      level: this.selectedUser.level, // Use the correct property name 'level'
+      last_login: this.selectedUser.last_login, // Use the correct property name 'last_login'
+    });
+  }
+
+
+
+  onUpdate() {
+    const updatedUser: User = this.formEdit.value;
+    const userId = this.selectedUser.user_id;
+
+    const confirmUpdate = confirm('Tem certeza que deseja atualizar as informações do usuário?');
+
+    if (confirmUpdate) {
+      this.usersService.updateUserById(userId, updatedUser).subscribe(
+        (response) => {
+          console.log('Usuário atualizado com sucesso', response);
+          console.log(updatedUser);
+          alert('Usuário atualizado com sucesso!');
+          this.setActiveTab('consulta');
+        },
+        (error) => {
+          console.log('Erro ao atualizar o usuário', error);
+          console.log(updatedUser);
+          // Implemente aqui o que deve acontecer em caso de erro
+        }
+      );
+    }
   }
 }
