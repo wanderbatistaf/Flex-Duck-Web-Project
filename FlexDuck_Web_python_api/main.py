@@ -22,6 +22,10 @@ app.register_blueprint(api_users)
 from api_clients_mysql import  api_clients
 app.register_blueprint(api_clients)
 
+# Adiciona as rotas de clientes
+from api_suppliers_mysql import api_suppliers
+app.register_blueprint(api_suppliers)
+
 # Rota para autenticar e obter o token JWT
 @app.route('/auth/login', methods=['POST'])
 def autenticar_usuario():

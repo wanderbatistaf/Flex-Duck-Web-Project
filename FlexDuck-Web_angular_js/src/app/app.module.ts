@@ -16,6 +16,7 @@ import { EmployesComponent } from './cadastro/employes/employes.component';
 import {ClientsComponent} from "@app/cadastro/clients/clients.component";
 import {TextMaskModule} from "angular2-text-mask";
 import {NgOptimizedImage} from "@angular/common";
+import {SuppliersComponent} from "@app/cadastro/suppliers/suppliers.component";
 
 
 
@@ -37,7 +38,8 @@ import {NgOptimizedImage} from "@angular/common";
     LoginComponent,
     LayoutComponent,
     EmployesComponent,
-    ClientsComponent
+    ClientsComponent,
+    SuppliersComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

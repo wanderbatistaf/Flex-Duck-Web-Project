@@ -4,11 +4,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule, MatInputModule, MatFormFieldModule, MatButtonModule, MatCheckboxModule } from '@angular/material'
 import { RouterModule } from '@angular/router';
 import { TextMaskModule } from 'angular2-text-mask';
+import {SuppliersModule} from "@app/cadastro/suppliers/suppliers.module";
+
 
 import { CadastroRoutingModule } from './cadastro-routing.module';
 import { EmployesComponent } from './employes/employes.component';
 import { ProductsComponent } from './products/products.component';
 import { ClientsComponent } from './clients/clients.component';
+
 
 
 
@@ -29,7 +32,8 @@ import { ClientsComponent } from './clients/clients.component';
     MatButtonModule,
     MatCheckboxModule,
     MatCardModule,
-    TextMaskModule
+    TextMaskModule,
+    SuppliersModule
   ],
   exports: [
     EmployesComponent,

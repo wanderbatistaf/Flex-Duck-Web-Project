@@ -1,0 +1,180 @@
+<h1 class="mt-4">Fornecedores</h1>
+<ol class="breadcrumb mb-4">
+  <li class="breadcrumb-item active">Cadastro | Consulta</li>
+</ol>
+
+<!-- Abas de Navegação -->
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item">
+    <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro')">Cadastro</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" [class.active]="isTabActive('consulta')" (click)="setActiveTab('consulta')">Fornecedores</a>
+  </li>
+  <li class="nav-item" [hidden]="true">
+    <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('edicao')">Edição</a>
+  </li>
+</ul>
+
+<!--NavBar superior (Search+Adicionar)-->
+
+<nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+  <a class="navbar-brand"></a>
+  <form class="form-inline mr-auto">
+    <input class="form-control mr-sm-2 flex-grow-1" type="search" placeholder="Search" name="searchText">
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit"
+            style="margin-right: 5px;">Buscar</button>
+    <button class="btn btn-outline-success my-2 my-sm-0" type="button">Limpar</button>
+  </form>
+
+  <div class="filter-options">
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="checkbox" id="inativoCheckbox">
+      <label class="form-check-label" for="inativoCheckbox">Inativo</label>
+    </div>
+  </div>
+</nav>
+
+<!--Fornecedores renderizam aqui-->
+<div class="card mt-4">
+  <div class="card-body">
+    <!-- Edição renderiza aqui! -->
+    <div *ngIf="activeTab === 'edicao'">
+      <div class="container">
+        <form [formGroup]="formEdit" novalidate>
+
+          <div class="row">
+            <div class="form-group col-md-2">
+              <label class="form-control-label" for="id">ID <em>*</em></label>
+              <input type="text" class="form-control" formControlName="id" id="id" placeholder="" maxlength="6" readonly>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- NOME -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="nome">Nome <em>*</em></label>
+              <input type="text" class="form-control" formControlName="nome" id="nome" placeholder="Ex: Lucas" maxlength="50">
+            </div>
+
+            <!-- CONTATO -->
+            <div class="form-group col-md-5">
+              <label class="form-control-label" for="contato">Contato <em>*</em></label>
+              <input type="text" class="form-control" formControlName="contato" id="contato" placeholder="Ex: Renan da Silva" maxlength="60">
+            </div>
+
+            <!-- Detalhes Pagamento -->
+            <div class="form-group col-md-3">
+              <label class="form-control-label" for="detalhes_pagamento">Detalhes do Pagamento <em>*</em></label>
+              <div class="password-input">
+                <input type="text" class="form-control" formControlName="detalhes_pagamento" id="detalhes_pagamento" placeholder="Ex: Renan da Silva">
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- PRAZO DE ENTREGA -->
+            <div class="form-group col-md-6">
+              <label class="form-control-label" for="prazo_entrega">Prazo de Entrega <em>*</em></label>
+              <input type="date" class="form-control" formControlName="prazo_entrega" id="prazo_entrega" placeholder="Ex: lucas@seuemail.com.br">
+            </div>
+
+            <div>
+              <br>
+              <button type="button" class="btn btn-secondary mr-2" (click)="setActiveTab('consulta')">Cancelar</button>
+              <button type="submit" class="btn btn-primary" (click)="onUpdate()">Atualizar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Cadastro renderiza aqui! -->
+    <div *ngIf="activeTab === 'cadastro'">
+      <div class="container">
+        <form [formGroup]="formCad" novalidate>
+          <div class="row">
+            <div class="form-group col-md-2">
+              <label class="form-control-label" for="id">User ID <em>*</em></label>
+              <input type="text" class="form-control" formControlName="id" id="id" placeholder="" maxlength="6" [value]="lastSupplierId" readonly>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- NOME -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="nome">Nome <em>*</em></label>
+              <input type="text" class="form-control" formControlName="nome" id="nome" placeholder="Empresa XYZ" maxlength="50">
+            </div>
+
+            <!-- CONTATO -->
+            <div class="form-group col-md-5">
+              <label class="form-control-label" for="contato">Contato <em>*</em></label>
+              <input type="text" class="form-control" formControlName="contato" id="contato" placeholder="João Silva" maxlength="60">
+            </div>
+
+            <!-- PRAZO DE ENTREGA -->
+            <div class="form-group col-md-6">
+              <label class="form-control-label" for="prazo_entrega">Prazo de Entrega <em>*</em></label>
+              <input type="text" class="form-control" formControlName="prazo_entrega" id="prazo_entrega" placeholder="7 dias úteis">
+            </div>
+          </div>
+
+          <div class="row">
+
+            <!-- Detalhes Pagamento -->
+            <div class="form-group col-md-6">
+              <label class="form-control-label" for="detalhes_pagamento">Detalhes do Pagamento <em>*</em></label>
+              <div class="password-input">
+                <input type="text" class="form-control" formControlName="detalhes_pagamento" id="detalhes_pagamento" placeholder="Pagamento em até 30 dias após a entrega.">
+              </div>
+            </div>
+          </div>
+          <div>
+            <br>
+            <button type="button" class="btn btn-secondary mr-2" (click)="formReset()">Limpar</button>
+            <button type="submit" class="btn btn-primary" (click)="onSubmit()">Cadastrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+
+
+    <div *ngIf="loading" class="spinner-border spinner-border-sm"></div></div>
+  <!--Consulta renderiza aqui-->
+  <table class="table table-condensed table-hover" *ngIf="!loading && activeTab === 'consulta'">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nome</th>
+      <th>Contato</th>
+      <th>Detalhes</th>
+      <th>Entrega</th>
+      <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let supplier of suppliers">
+      <td>{{ supplier.id }}</td>
+      <td>{{ supplier.nome }}</td>
+      <td>{{ supplier.contato }}</td>
+      <td>{{ supplier.detalhes_pagamento }}</td>
+      <td>{{ supplier.prazo_entrega }}</td>
+      <td>
+        <button type="button" class="btn btn-sm btn-outline-info btn-block" (click)="editSupplier(supplier); setActiveTab('edicao')">
+          Editar
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-danger btn-block" (click)="deleteSupplier(supplier.id ? supplier.id : 0)">
+          Deletar
+        </button>
+        <ng-template #currentUserButton>
+          <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
+            Deletar
+          </button>
+        </ng-template>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
