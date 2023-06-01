@@ -22,9 +22,13 @@ app.register_blueprint(api_users)
 from api_clients_mysql import  api_clients
 app.register_blueprint(api_clients)
 
-# Adiciona as rotas de clientes
+# Adiciona as rotas de fornecedores
 from api_suppliers_mysql import api_suppliers
 app.register_blueprint(api_suppliers)
+
+# Adiciona as rotas de produtos
+from api_products_mysql import api_products
+app.register_blueprint(api_products)
 
 # Rota para autenticar e obter o token JWT
 @app.route('/auth/login', methods=['POST'])

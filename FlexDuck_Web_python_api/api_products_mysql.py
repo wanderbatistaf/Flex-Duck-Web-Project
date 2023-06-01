@@ -18,7 +18,7 @@ def buscar_dados():
     if not current_user:
         return abort(404)
     cursor = db.cursor()
-    cursor.execute('SELECT * FROM produtos')
+    cursor.execute('SELECT * FROM produtos_servicos')
     resultados = cursor.fetchall()
     cursor.close()
     items = []
@@ -42,7 +42,6 @@ def buscar_dados():
             'client_id': row[15],
         }
         items.append(item)
-
     response = {
         "totalPage": 1,
         "items": items
