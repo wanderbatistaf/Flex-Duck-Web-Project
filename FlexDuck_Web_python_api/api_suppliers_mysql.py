@@ -64,8 +64,8 @@ def inserir_dados():
         return abort(404)
     dados = request.json
     cursor = db.cursor()
-    sql = 'INSERT INTO usuarios (id, nome, contato, detalhes_pagamento, prazo_entrega) VALUES (%s, %s, %s, %s, %s)'
-    val = (dados['id'], dados['nome'], dados['contato'], dados['detalhes_pagamento'], dados['prazo_entrega'])
+    sql = 'INSERT INTO fornecedores (nome, contato, detalhes_pagamento, prazo_entrega) VALUES (%s, %s, %s, %s)'
+    val = (dados['nome'], dados['contato'], dados['detalhes_pagamento'], dados['prazo_entrega'])
     cursor.execute(sql, val)
     db.commit()
     print(cursor)

@@ -4,6 +4,7 @@ import {Suppliers} from "@app/_models";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {SuppliersService} from "@app/_services";
 import {map} from "rxjs";
+import jwt_decode from "jwt-decode";
 
 @Component({
   selector: 'app-suppliers',
@@ -42,7 +43,6 @@ export class SuppliersComponent implements OnInit {
       .replace('T', ' ');
 
     this.formCad = this.fb.group({
-      id: ['', [Validators.required, Validators.minLength(1)]],
       nome: ['', [Validators.required, Validators.minLength(1)]],
       contato: ['', [Validators.required, Validators.minLength(1)]],
       detalhes_pagamento: ['', [Validators.required, Validators.minLength(1)]],
@@ -154,16 +154,48 @@ export class SuppliersComponent implements OnInit {
       return;
     }
 
-    this.suppliersService.addSupplier(this.formCad.value).subscribe((newSupplier) => {
-      this.suppliers.push(newSupplier);
-      this.formCad.reset();
+    // Remove o campo "id" do valor do formulário
+    const { id, ...newSupplierData } = this.formCad.value;
 
-      // Redireciona para a página de consulta
-      this.setActiveTab('consulta');
-      this.getSupplier();
-      this.filterSupplier(this.searchText);
-      this.getSupplier();
-    });
+    this.suppliersService.addSupplier(newSupplierData).subscribe(
+      (newSupplier) => {
+        this.suppliers.push(newSupplier);
+        this.formCad.reset();
+
+        // Redireciona para a página de consulta
+        this.setActiveTab('consulta');
+        this.getSupplier();
+        this.filterSupplier(this.searchText);
+        this.getSupplier();
+      },
+      (error) => {
+        console.log('An error occurred while adding the supplier.');
+      }
+    );
+  }
+
+  getCurrentLevel(): number | null {
+    const token = localStorage.getItem('access_token');
+
+    try {
+      if (token) {
+        const decodedToken: any = jwt_decode(token);
+        const level = decodedToken.sub.level;
+
+        return level;
+      } else {
+        console.log('Token not found in LocalStorage.');
+        return null;
+      }
+    } catch (error) {
+      console.log('An error occurred while decoding the token:', error);
+      return null;
+    }
+  }
+
+  getLevelName(levelValue: number | null): string {
+    const level = this.levels.find((level) => level.value === levelValue);
+    return level ? level.name : '';
   }
 
   formReset() {

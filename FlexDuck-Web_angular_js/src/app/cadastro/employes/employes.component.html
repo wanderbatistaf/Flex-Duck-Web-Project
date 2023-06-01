@@ -272,17 +272,21 @@
                                 Editar
                               </button>
 
-                                <button type="button" class="btn btn-sm btn-outline-danger btn-block"
-                                    *ngIf="currentUser !== user.user_id; else currentUserButton"
-                                    (click)="deleteUser(user.user_id ? user.user_id : 0)">
-                                    Deletar
-                                </button>
+                              <button type="button" class="btn btn-sm btn-outline-danger btn-block"
+                                      *ngIf="currentUser !== user.user_id && getLevelName(user.level) !== 'Admin'; else currentUserButton"
+                                      (click)="deleteUser(user.user_id ? user.user_id : 0)">
+                                Deletar
+                              </button>
 
-                                <ng-template #currentUserButton>
-                                    <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
-                                        Deletar
-                                    </button>
-                                </ng-template>
+                              <ng-template #currentUserButton>
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
+                                  Deletar
+                                </button>
+                              </ng-template>
+
+
+
+
 
 
                             </td>

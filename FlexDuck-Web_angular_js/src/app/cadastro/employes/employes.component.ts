@@ -29,9 +29,9 @@ export class EmployesComponent implements OnInit {
   public passwordVisible: boolean = false;
   levels = [
     { value: 22, name: 'Admin' },
-    { value: 20, name: 'Gerente' },
-    { value: 15, name: 'Supervisor' },
-    { value: 10, name: 'Vendedor' },
+    { value: 15, name: 'Gerente' },
+    { value: 10, name: 'Supervisor' },
+    { value: 5, name: 'Vendedor' },
   ];
 
   constructor(private usersService: UserService, private fb: FormBuilder, private router: Router) {
@@ -112,13 +112,13 @@ export class EmployesComponent implements OnInit {
               case 22:
                 user.levelText = 'Admin';
                 break;
-              case 20:
+              case 15:
                 user.levelText = 'Gerente';
                 break;
-              case 15:
+              case 10:
                 user.levelText = 'Supervisor';
                 break;
-              case 10:
+              case 5:
                 user.levelText = 'Vendedor';
                 break;
               default:
@@ -274,4 +274,6 @@ export class EmployesComponent implements OnInit {
       );
     }
   }
+
+
 }

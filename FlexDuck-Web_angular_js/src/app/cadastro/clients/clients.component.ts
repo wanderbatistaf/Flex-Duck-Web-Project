@@ -6,6 +6,8 @@ import { ViaCepService } from "@app/_services";
 import { map } from 'rxjs/operators';
 import { FormGroup, Validators, FormBuilder } from "@angular/forms";
 import { Router } from '@angular/router';
+import jwt_decode from "jwt-decode";
+import {User} from "@app/_models";
 
 @Component({
   selector: 'app-clients',
@@ -45,6 +47,14 @@ export class ClientsComponent implements OnInit {
     inactive_status: '',
     blocked_status: '',
   };
+  currentUser: number = -1;
+  users: User[] = [];
+  levels = [
+    { value: 22, name: 'Admin' },
+    { value: 20, name: 'Gerente' },
+    { value: 15, name: 'Supervisor' },
+    { value: 10, name: 'Vendedor' },
+  ];
   // Variável para armazenar o cliente em edição
   editedClients: any;
   // Variavel para armazenar a tab ativa
@@ -275,7 +285,7 @@ searchClients() {
     client.lastname?.toString().toLowerCase().includes(searchValue) ||
     client.cnpj_cpf?.toString().toLowerCase().includes(searchValue) ||
     client.email?.toString().toLowerCase().includes(searchValue) ||
-    client.telephone?.toString().toLowerCase().includes(searchValue) 
+    client.telephone?.toString().toLowerCase().includes(searchValue)
   );
 
   // Define a página atual como 1 para exibir os primeiros resultados
@@ -351,6 +361,31 @@ changePage(page: number) {
 
   formReset() {
     this.formCad.reset();
+  }
+
+  getCurrentLevel(): number | null {
+    const token = localStorage.getItem('access_token');
+
+    try {
+      if (token) {
+        const decodedToken: any = jwt_decode(token);
+        const level = decodedToken.sub.level;
+
+        return level;
+      } else {
+        console.log('Token not found in LocalStorage.');
+        return null;
+      }
+    } catch (error) {
+      console.log('An error occurred while decoding the token:', error);
+      return null;
+    }
+  }
+
+
+  getLevelName(levelValue: number | null): string {
+    const level = this.levels.find((level) => level.value === levelValue);
+    return level ? level.name : '';
   }
 
 
@@ -512,6 +547,7 @@ changePage(page: number) {
 
   // Define que os clientes filtrados estão filtrados
   this.filteredClients.forEach(client => client.filtered = true);
+
 }
 
 

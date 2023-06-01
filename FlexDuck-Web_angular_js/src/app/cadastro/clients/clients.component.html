@@ -425,9 +425,16 @@
           </button>
 
           <button type="button" class="btn btn-sm btn-outline-danger btn-block"
+                  *ngIf="getLevelName(getCurrentLevel()) === 'Admin'; else currentUserButton"
                   (click)="deleteClient(clients.client_id ? clients.client_id : 0)">
             Deletar
           </button>
+
+          <ng-template #currentUserButton>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
+              Deletar
+            </button>
+          </ng-template>
 
         </td>
       </tr>
