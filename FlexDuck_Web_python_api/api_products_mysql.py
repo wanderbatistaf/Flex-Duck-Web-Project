@@ -49,7 +49,7 @@ def buscar_dados():
     return jsonify(response)
 
 # Define a rota GET para buscar dados do banco de dados especifico
-@api_suppliers.route('/products/<int:id>', methods=['GET'])
+@api_products.route('/products/<int:id>', methods=['GET'])
 @jwt_required() # Protege a rota com JWT
 def buscar_dados_user(id):
     current_user = get_jwt_identity()
@@ -67,7 +67,7 @@ def buscar_dados_user(id):
         return jsonify({'mensagem': 'Produto não encontrado!'}), 404
     
 # Define a rota POST para inserir dados no banco de dados
-@api_suppliers.route('/products/add', methods=['POST'])
+@api_products.route('/products/add', methods=['POST'])
 @jwt_required()
 def inserir_dados():
     current_user = get_jwt_identity()
@@ -84,7 +84,7 @@ def inserir_dados():
     return jsonify({'mensagem': 'Dados inseridos com sucesso!'})
 
 # Define a rota PUT para atualizar dados no banco de dados
-@api_suppliers.route('/products/update/<int:id>', methods=['PUT'])
+@api_products.route('/products/update/<int:id>', methods=['PUT'])
 @jwt_required()
 def atualizar_dados(id):
     current_user = get_jwt_identity()
@@ -100,7 +100,7 @@ def atualizar_dados(id):
     return jsonify({'mensagem': 'Dados atualizados com sucesso!'})
 
 # Define a rota DELETE para excluir dados do banco de dados
-@api_suppliers.route('/products/delete/<int:id>', methods=['DELETE'])
+@api_products.route('/products/delete/<int:id>', methods=['DELETE'])
 @jwt_required() # Protege a rota com JWT
 def excluir_dados(id):
     current_user = get_jwt_identity()
