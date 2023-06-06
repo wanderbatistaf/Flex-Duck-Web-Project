@@ -108,8 +108,8 @@ def excluir_dados(id):
     if not current_user:
         return abort(404)
     cursor = db.cursor()
-    sql = 'DELETE FROM produtos_servicos WHERE codigo = %s'
-    val = (codigo,)
+    sql = 'DELETE FROM produtos_servicos WHERE id = %s'
+    val = (id,)
     cursor.execute(sql, val)
     db.commit()
     cursor.close()

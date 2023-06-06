@@ -5,5 +5,5 @@ db = mysql.connector.connect(
     host="localhost",
     user="root",
     password="senha123",
-    database="suprema_embutidos"
+    database="FlexDuck-DB"
 )
