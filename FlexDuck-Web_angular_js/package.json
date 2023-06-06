@@ -1,6 +1,6 @@
 {
-  "name": "angular-14-jwt-authentication-example",
-  "version": "0.0.0",
+  "name": "FlexDuck",
+  "version": "0.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open",
