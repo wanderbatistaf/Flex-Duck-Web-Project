@@ -14,4 +14,4 @@ WORKDIR /app
 RUN pip3 install -r requirements.txt
 
 # Definir o comando de entrada para executar o aplicativo
-CMD ["python3", "app.py"]
+CMD ["python3", "main.py"]
