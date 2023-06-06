@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-14-jwt-authentication-example": {
+    "flex_duck": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/angular-14-jwt-authentication-example",
+            "outputPath": "dist/flex_duck",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -73,10 +73,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "angular-14-jwt-authentication-example:build:production"
+              "browserTarget": "flex_duck:build:production"
             },
             "development": {
-              "browserTarget": "angular-14-jwt-authentication-example:build:development"
+              "browserTarget": "flex_duck:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -84,7 +84,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "angular-14-jwt-authentication-example:build"
+            "browserTarget": "flex_duck:build"
           }
         },
         "test": {
