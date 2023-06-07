@@ -9,7 +9,6 @@ import { AuthGuard } from './_helpers';
 import { EmployesComponent } from "@app/cadastro/employes/employes.component";
 import { ProductsComponent } from "@app/cadastro/products/products.component";
 import { ClientsComponent } from "@app/cadastro/clients/clients.component";
-import { ClientsCadastroComponent } from "@app/cadastro/clients/cadastro/clients-cadastro.component";
 import {SuppliersComponent} from "@app/cadastro/suppliers/suppliers.component";
 
 const routes: Routes = [
@@ -21,7 +20,6 @@ const routes: Routes = [
       { path: 'employes', component: EmployesComponent },
       { path: 'products', component: ProductsComponent },
       { path: 'clients', component: ClientsComponent },
-      { path: 'clients-cadastro', component: ClientsCadastroComponent },
       { path: 'suppliers', component: SuppliersComponent }
     ]},
 

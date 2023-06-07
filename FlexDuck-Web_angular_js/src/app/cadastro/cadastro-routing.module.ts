@@ -4,7 +4,6 @@ import { LayoutComponent } from "@app/layout/layout.component";
 import {EmployesComponent} from "@app/cadastro/employes/employes.component";
 import {ProductsComponent} from "@app/cadastro/products/products.component";
 import {ClientsComponent} from "@app/cadastro/clients/clients.component";
-import {ClientsCadastroComponent} from "@app/cadastro/clients/cadastro/clients-cadastro.component";
 import {SuppliersComponent} from "@app/cadastro/suppliers/suppliers.component";
 
 const routes: Routes = [
@@ -26,13 +25,6 @@ const routes: Routes = [
     path: 'clients', component: LayoutComponent, children: [
       { path: 'list', component: ClientsComponent },
       { path: '', redirectTo: '/clients/list', pathMatch: 'full' }
-    ]
-  },
-
-  {
-    path: 'clients-cadastro', component: LayoutComponent, children: [
-      { path: 'list', component: ClientsCadastroComponent },
-      { path: '', redirectTo: 'clients/cadastro/clients-cadastro', pathMatch: 'full' }
     ]
   },
 
