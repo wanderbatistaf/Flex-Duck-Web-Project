@@ -4,7 +4,7 @@
 
 export const environment = {
     production: false,
-    apiUrl: 'http://127.0.0.1:5000'
+    apiUrl: 'https://w5jcdm-5000.csb.app:5000'
 };
 
 /*
