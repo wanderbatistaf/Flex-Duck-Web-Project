@@ -71,7 +71,7 @@ export class ClientsComponent implements OnInit {
   // Paterns
   cpfPattern = /^\d{3}.\d{3}.\d{3}-\d{2}$/;
   phonePattern = /^\(\d{2}\) \d{5}-\d{4}$/;
-  zipCodePattern = /^\d{5}\-\d{3}$/;
+  zipCodePattern = /^\d{5}\\-\d{3}$/;
   // Variavel de genero
   genders = ['Masculino', 'Feminino'];
   // VAR 1
@@ -148,7 +148,7 @@ export class ClientsComponent implements OnInit {
     const token = localStorage.getItem('token')
     const decodedToken = token ? this.jwtHelper.decodeToken(token) : null;
     this.level = decodedToken?.level;
-    this.formCad.controls['natural_person'].valueChanges.subscribe(value => {
+    this.formCad.controls[''].valueChanges.subscribe(value => {
       // Atualizar a visibilidade dos campos
       if (value) {
         this.formCad.controls['state_registration'].disable();
@@ -427,15 +427,30 @@ changePage(page: number) {
     console.log(this.formCad.controls);
     console.log(this.formCad.value);
 
-    // Para aqui se o formulário for inválido
-    if (this.formCad.invalid) {
-      console.log("Deu ruim 06!")
-      return;
+    if (this.formCad.value.natural_person) {
+      const firstname = this.formCad.value.firstname;
+      const lastname = this.formCad.value.lastname;
+      this.formCad.patchValue({
+        business_name: firstname + ' ' + lastname
+      });
     }
+
+    // // Para aqui se o formulário for inválido
+    // if (this.formCad.invalid) {
+    //   console.log(this.formCad.invalid);
+    //   console.log(this.formCad.controls);
+    //   console.log(this.formCad.value);
+    //   return;
+    // }
 
     this.clientsService.addClient(this.formCad.value).subscribe(newClient => {
       this.clients.push(newClient);
       this.formCad.reset();
+
+      // Redireciona para a página de consulta
+      this.setActiveTab('consulta');
+      this.getClients();
+      this.updatePageList();
     });
   }
 

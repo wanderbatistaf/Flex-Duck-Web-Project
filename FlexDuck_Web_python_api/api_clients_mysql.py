@@ -101,6 +101,9 @@ def inserir_dados_client():
     try:
         dados = request.json
         dados['created_at'] = datetime.now()
+        # Check if business_name is null or undefined
+        if not dados.get('business_name'):
+            dados['business_name'] = f"{dados['firstname']} {dados['lastname']}"
         print(dados)
         cursor = db.cursor()
         sql = 'INSERT INTO clients (business_name, firstname, lastname, cnpj_cpf, telephone, email, blocked_since, cep,' \
