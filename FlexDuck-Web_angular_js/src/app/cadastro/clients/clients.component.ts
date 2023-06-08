@@ -148,7 +148,7 @@ export class ClientsComponent implements OnInit {
     const token = localStorage.getItem('token')
     const decodedToken = token ? this.jwtHelper.decodeToken(token) : null;
     this.level = decodedToken?.level;
-    this.formCad.controls[''].valueChanges.subscribe(value => {
+    this.formCad.controls['natural_person'].valueChanges.subscribe(value => {
       // Atualizar a visibilidade dos campos
       if (value) {
         this.formCad.controls['state_registration'].disable();
