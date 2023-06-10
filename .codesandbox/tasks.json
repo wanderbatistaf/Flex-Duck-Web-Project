@@ -4,18 +4,9 @@
 
   // These tasks can be run from CodeSandbox. Running one will open a log in the app.
   "tasks": {
-    "docker run -d -p 5000:5000 meu-aplicativo-flask": {
-      "name": "docker run -d -p 5000:5000 flex-duck-dev",
-      "command": "docker run -d -p 5000:5000 flex-duck-dev",
-      "runAtStart": true
-    },
-    "web: gunicorn app:app": {
-      "name": "web: gunicorn app:app",
-      "command": "web: gunicorn app:app"
-    },
-    "python.exe main.py": {
-      "name": "python.exe main.py",
-      "command": "python.exe main.py"
+    "docker run -p 5000:5000 flexduckapi": {
+      "name": "docker run -p 5000:5000 flexduckapi",
+      "command": "docker run -p 5000:5000 flexduckapi"
     }
   }
 }
