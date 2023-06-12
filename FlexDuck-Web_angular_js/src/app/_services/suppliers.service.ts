@@ -4,6 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
 import { Suppliers } from '@app/_models';
 import { Observable, catchError, tap, throwError } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 
 @Injectable({ providedIn: 'root' })
 export class SuppliersService {
@@ -26,8 +28,8 @@ export class SuppliersService {
   }
 
   // Cria o método para requisitar um user específico pelo ID
-  getSupplierById(user_id: number): Observable<Suppliers> {
-    return this.http.get<Suppliers>(`${environment.apiUrl}/suppliers/${user_id}`);
+  getSupplierById(id: number): Observable<Suppliers> {
+    return this.http.get<Suppliers>(`${environment.apiUrl}/suppliers/${id}`);
   }
 
   // Cria o método para deletar um user específico pelo ID
@@ -55,4 +57,5 @@ export class SuppliersService {
       })
     );
   }
+
 }

@@ -49,7 +49,9 @@
 <div class="card mt-4">
   <div class="card-body">
 
-    <div *ngIf="loading" class="spinner-border spinner-border-sm"></div>
+    <div class="text-center" *ngIf="loading">
+      <div class="spinner-border spinner-border-sm"></div>
+    </div>
 
     <!--Edição renderiza aqui!-->
     <div *ngIf="activeTab === 'edicao'">
@@ -382,65 +384,60 @@
       </div>
     </div>
 
-<!--Consulta renderiza aqui-->
-    <table class="table table-condensed table-hover" *ngIf="!loading && activeTab === 'consulta'">
-      <thead>
-      <tr>
-        <th>Razão Social</th>
-        <th>Nome</th>
-        <th>Sobrenome</th>
-        <th>CNPJ/CPF</th>
-<!--        <th>Iscrição Estadual</th>
-        <th>Inscrição Municipal</th> -->
-        <th>Telefone</th>
-        <th>E-mail</th>
-        <th>Inativo</th>
-        <th>Bloqueado</th>
-        <th>Pessoa Fisica</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let clients of filteredClients">
-        <td>{{ clients.business_name }}</td>
-        <td>{{ clients.firstname }}</td>
-        <td>{{ clients.lastname }}</td>
-        <td>{{ clients.cnpj_cpf }}</td>
-<!--        <td>{{ clients.state_registration }}</td>
-        <td>{{ clients.municipal_registration }}</td> -->
-        <td>{{ clients.telephone }}</td>
-        <td>{{ clients.email }}</td>
-        <td>
-          <input type="checkbox" *ngIf="clients.inactive_status" [checked]="true" disabled>
-        </td>
-        <td>
-          <input type="checkbox" *ngIf="clients.blocked_status" [checked]="true" disabled>
-        </td>
-        <td>
-          <input type="checkbox" *ngIf="clients.natural_person" [checked]="true" disabled>
-        </td>
-        <td>
-
-          <button type="button" class="btn btn-sm btn-outline-info btn-block" (click)="editClients(clients); setActiveTab('edicao')">
-            Editar
-          </button>
-
-          <button type="button" class="btn btn-sm btn-outline-danger btn-block"
-                  *ngIf="getLevelName(getCurrentLevel()) === 'Admin'; else currentUserButton"
-                  (click)="deleteClient(clients.client_id ? clients.client_id : 0)">
-            Deletar
-          </button>
-
-          <ng-template #currentUserButton>
-            <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
+    <!-- Clientes Rederizam -->
+    <div class="table-responsive" *ngIf="!loading && activeTab === 'consulta'">
+      <table class="table table-condensed table-hover">
+        <thead>
+        <tr>
+          <th>Razão Social</th>
+          <th>Nome</th>
+          <th>Sobrenome</th>
+          <th>CNPJ/CPF</th>
+          <th>Telefone</th>
+          <th>E-mail</th>
+          <th>Inativo</th>
+          <th>Bloqueado</th>
+          <th>Pessoa Fisica</th>
+          <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let clients of filteredClients">
+          <td>{{ clients.business_name }}</td>
+          <td>{{ clients.firstname }}</td>
+          <td>{{ clients.lastname }}</td>
+          <td>{{ clients.cnpj_cpf }}</td>
+          <td>{{ clients.telephone }}</td>
+          <td>{{ clients.email }}</td>
+          <td>
+            <input type="checkbox" *ngIf="clients.inactive_status" [checked]="true" disabled>
+          </td>
+          <td>
+            <input type="checkbox" *ngIf="clients.blocked_status" [checked]="true" disabled>
+          </td>
+          <td>
+            <input type="checkbox" *ngIf="clients.natural_person" [checked]="true" disabled>
+          </td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-info btn-block" (click)="editClients(clients); setActiveTab('edicao')">
+              Editar
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-block"
+                    *ngIf="getLevelName(getCurrentLevel()) === 'Admin'; else currentUserButton"
+                    (click)="deleteClient(clients.client_id ? clients.client_id : 0)">
               Deletar
             </button>
-          </ng-template>
 
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
+            <ng-template #currentUserButton>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
+                Deletar
+              </button>
+            </ng-template>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
 
 
   <!--Botões de paginação-->
