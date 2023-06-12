@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://zdqnhp-5000.csb.app'
+    apiUrl: 'https://m5pdc4-5000.csb.app'
 };
