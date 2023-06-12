@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { JwtHelperService } from "@auth0/angular-jwt";
-import { Clients, Products, Suppliers, User } from "@app/_models";
+import { Products, Suppliers, User } from "@app/_models";
 import {FormBuilder, FormGroup, Validators, ɵElement} from "@angular/forms";
 import { UserService, ProductService, SuppliersService } from "@app/_services";
 import { Router } from "@angular/router";
