@@ -188,17 +188,18 @@
                                             nome válido.</div> -->
                                 </div>
 
-                                <!-- Password -->
-                                <div class="form-group col-md-3">
-                                    <label class="form-control-label" for="password">Senha <em>*</em></label>
-                                    <div class="password-input">
-                                        <input [type]="passwordVisible ? 'text' : 'password'" class="form-control" formControlName="password"
-                                            id="password" placeholder="">
-                                        <button type="button" (click)="togglePasswordVisibility()">
-                                            <span class="fa" [class.fa-eye]="passwordVisible" [class.fa-eye-slash]="!passwordVisible"></span>
-                                        </button>
-                                    </div>
+                              <!-- Password -->
+                              <div class="form-group col-md-3">
+                                <label class="form-control-label" for="password">Senha <em>*</em></label>
+                                <div class="password-input">
+                                  <input [type]="passwordVisible ? 'text' : 'password'" class="form-control" formControlName="password"
+                                         id="password" placeholder="">
+                                  <button type="button" (click)="togglePasswordVisibility()">
+                                    <span id="toggle-password" class="fa fa-eye"></span>
+                                  </button>
                                 </div>
+                              </div>
+
 
                             </div>
 
@@ -238,8 +239,10 @@
 
 
         <div *ngIf="loading" class="spinner-border spinner-border-sm"></div></div>
+
                 <!--Consulta renderiza aqui-->
-                <table class="table table-condensed table-hover" *ngIf="!loading && activeTab === 'consulta'">
+                <div class="table-responsive" *ngIf="!loading && activeTab === 'consulta'">
+                  <table class="table table-condensed table-hover">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -251,6 +254,7 @@
                             <th>Crieado em</th>
                             <th>Ultimo Acesso</th>
                             <th>Level</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -293,6 +297,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 
