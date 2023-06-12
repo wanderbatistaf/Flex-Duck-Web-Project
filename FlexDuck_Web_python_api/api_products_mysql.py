@@ -1,5 +1,6 @@
+import json
 from flask import Blueprint
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, Response
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
 from Controller import mysql_connector
@@ -20,26 +21,28 @@ def buscar_dados():
     cursor = db.cursor()
     cursor.execute('SELECT * FROM produtos_servicos')
     resultados = cursor.fetchall()
+    print(resultados)
     cursor.close()
     items = []
     for row in resultados:
         item = {
-            'codigo': row[0] ,
-            'descricao': row[1],
-            'nome': row[2],
-            'categoria': row[3],
-            'marca': row[4],
-            'preco_venda': row[5],
-            'preco_custo': row[6],
-            'margem_lucro': row[7],
-            'desconto': row[8],
-            'quantidade': row[9],
-            'localizacao': row[10],
-            'estoque_minimo': row[11],
-            'estoque_maximo': row[12],
-            'alerta_reposicao': row[13],
-            'fornecedor_id': row[14],
-            'client_id': row[15],
+            'id': row[0],
+            'codigo': row[1],
+            'descricao': row[2],
+            'nome': row[3],
+            'categoria': row[4],
+            'marca': row[5],
+            'preco_venda': row[6],
+            'preco_custo': row[7],
+            'margem_lucro': row[8],
+            'desconto': row[9],
+            'quantidade': row[10],
+            'localizacao': row[11],
+            'estoque_minimo': row[12],
+            'estoque_maximo': row[13],
+            'alerta_reposicao': row[14],
+            'fornecedor_id': row[15],
+            'fornecedor_nome': row[16]
         }
         items.append(item)
     response = {
@@ -51,7 +54,7 @@ def buscar_dados():
 # Define a rota GET para buscar dados do banco de dados especifico
 @api_products.route('/products/<int:id>', methods=['GET'])
 @jwt_required() # Protege a rota com JWT
-def buscar_dados_user(id):
+def buscar_dados_produtos(id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
@@ -114,3 +117,20 @@ def excluir_dados(id):
     db.commit()
     cursor.close()
     return jsonify({'mensagem': 'Dados excluídos com sucesso!'})
+
+@api_products.route('/products/lastCode/<int:is_product>', methods=['GET'])
+@jwt_required() # Protege a rota com JWT
+def buscar_dados_user(is_product):
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+    cursor = db.cursor()
+    sql = 'SELECT max(created_at) as created_at, id, codigo, is_product FROM produtos_servicos WHERE is_product = %s group by 2,3'
+    val = (is_product,)
+    cursor.execute(sql, val)
+    result = cursor.fetchone()
+    cursor.close()
+    if result:
+        return jsonify({'mensagem': 'Produto localizado com sucesso!', 'produto': result})
+    else:
+        return jsonify({'mensagem': 'Produto não encontrado!'}), 404
