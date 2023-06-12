@@ -120,6 +120,7 @@ export class ProductsComponent implements OnInit {
   getLastProductCode() {
     const isProductDefault = 1; // Define o valor de is_product para produtos como true
 
+    // @ts-ignore
     this.productService.getLastCode(isProductDefault).subscribe((response: any) => {
       if (response && response.produto && response.produto[2]) {
         this.lastProductCode = response.produto[2];
@@ -281,20 +282,20 @@ export class ProductsComponent implements OnInit {
 
   formatarPrecoCusto() {
     const inputPrecoCusto = document.getElementById('preco_custo_c') as HTMLInputElement;
-    const valor = parseFloat(inputPrecoCusto.value).toFixed(2);
-    inputPrecoCusto.value = valor;
+    const valorCusto = parseFloat(inputPrecoCusto.value).toFixed(2);
+    inputPrecoCusto.value = valorCusto;
   }
 
   formatarPrecoVenda() {
     const inputPrecoVenda = document.getElementById('preco_venda_c') as HTMLInputElement;
-    const valor = parseFloat(inputPrecoVenda.value).toFixed(2);
-    inputPrecoVenda.value = valor;
+    const valorVenda = parseFloat(inputPrecoVenda.value).toFixed(2);
+    inputPrecoVenda.value = valorVenda;
   }
 
   formatarPrecoDesconto() {
     const inputDesconto = document.getElementById('desconto_c') as HTMLInputElement;
-    const valor = parseFloat(inputDesconto.value).toFixed(2);
-    inputDesconto.value = valor;
+    const valorDesconto = parseFloat(inputDesconto.value).toFixed(2);
+    inputDesconto.value = valorDesconto;
   }
 
 
