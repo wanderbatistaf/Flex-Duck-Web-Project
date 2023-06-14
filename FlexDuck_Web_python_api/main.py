@@ -56,8 +56,7 @@ def autenticar_usuario():
             'level': user['level'],
             'user_id': user['user_id'],
             'name': user['name'],
-            'active': user['active'],
-            'user_id': user['user_id']
+            'active': user['active']
         }
         token = create_access_token(identity=token_data)
         print(token)
@@ -89,7 +88,7 @@ def check_db_connection():
             encerrar_aplicativo()
             # Reinicia o aplicativo em um novo processo
             reiniciar_aplicativo()
-        time.sleep(50)  # Aguarda 2 minutos
+        time.sleep(50)  # Aguarda 50 segundos
 
 # Função para encerrar o aplicativo Flask
 def encerrar_aplicativo():

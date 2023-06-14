@@ -1,9 +1,10 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first } from 'rxjs/operators';
+import {delay, first, retry} from 'rxjs/operators';
 
 import { AuthenticationService } from '@app/_services';
+import {catchError, throwError} from "rxjs";
 
 @Component({
   templateUrl: 'login.component.html'
@@ -56,7 +57,17 @@ export class LoginComponent implements OnInit {
     this.error = '';
     this.loading = true;
     this.authenticationService.login(this.f.username.value, this.f.password.value)
-      .pipe(first())
+      .pipe(
+        first(),
+        // retry(100), // Tenta a solicitação novamente até 10 vezes em caso de erro
+        // delay(9000), // Atraso de 9 segundos entre as tentativas
+        catchError(error => {
+          // Trata o erro após todas as tentativas
+          this.error = error;
+          this.loading = false;
+          return throwError(error);
+        })
+      )
       .subscribe({
         next: (user) => {
           if (this.isActive) {

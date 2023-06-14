@@ -36,8 +36,6 @@
       <input class="form-check-input" type="checkbox" id="productCheckbox">
       <label class="form-check-label" for="productCheckbox">Produto</label>
       <div></div>
-      <input class="form-check-input" type="checkbox" id="serviceCheckbox">
-      <label class="form-check-label" for="serviceCheckbox">Serviço</label>
     </div>
   </div>
 </nav>
@@ -47,6 +45,59 @@
   <div class="card-body">
     <div class="text-center" *ngIf="loading">
       <div class="spinner-border spinner-border-sm"></div>
+    </div>
+
+    <!--Consulta renderiza aqui-->
+    <div class="table-responsive" *ngIf="!loading && activeTab === 'consulta'">
+      <table class="table table-condensed table-hover">
+        <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>Marca</th>
+          <th>Categoria</th>
+          <th>Fornecedor</th>
+          <th>Preço</th>
+          <th>Estoque</th>
+          <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let product of products">
+          <td>{{ product.codigo }}</td>
+          <td>{{ product.nome }}</td>
+          <td>{{ product.marca }}</td>
+          <td>{{ product.categoria }}</td>
+          <td>{{ product.fornecedor_nome }}</td>
+          <td>R$ {{ product.preco_venda }}</td>
+          <td>{{ product.quantidade }} un</td>
+          <td>
+
+            <button type="button" class="btn btn-sm btn-outline-primary btn-block" (click)="setActiveTab('detalhes')">
+              Detalhes
+            </button>
+
+            <button type="button" class="btn btn-sm btn-outline-info btn-block" (click)="editProduct(product); setActiveTab('edicao')">
+              Editar
+            </button>
+
+            <button type="button" class="btn btn-sm btn-outline-danger btn-block"
+                    *ngIf="currentLevel >= 15; else currentUserButton"
+                    (click)="deleteProduct(product.id ? product.id : 0)">
+              Deletar
+            </button>
+
+            <ng-template #currentUserButton>
+              <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
+                Deletar
+              </button>
+            </ng-template>
+
+
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
 
     <!--Cadastro renderiza aqui-->
@@ -59,11 +110,8 @@
 
             <div class="form-group col-md-2">
               <label class="form-control-label" for="codigo_c">Código</label>
-              <input type="text" class="form-control" [value]="generateNextCode()" id="codigo_c" placeholder=""
-                     maxlength="6" readonly>
-              <!-- <div *ngIf="touchedVerify('firstName')" class="form-control-feedback">Por favor, insira um nome válido.</div> -->
+              <input type="text" class="form-control" [value]="generateNextCode()" id="codigo_c" placeholder="" maxlength="6" readonly>
             </div>
-
 
 
           </div>
@@ -116,15 +164,6 @@
               </div>
             </div>
 
-            <!-- DESCONTO -->
-            <div class="form-group col-md-4">
-              <label class="form-control-label" for="desconto_c">Desconto </label>
-              <div class="input-group">
-                <span class="input-group-text">R$</span>
-                <input type="number" class="form-control" formControlName="desconto" id="desconto_c" [value]="calculateDiscount" (blur)="formatarPrecoDesconto()">
-              </div>
-            </div>
-
             <!-- MARGEM LUCRO -->
             <div class="form-group col-md-2">
               <label class="form-control-label" for="margem_lucro_c">Margem Lucro</label>
@@ -171,59 +210,6 @@
           </div>
         </form>
       </div>
-
-<!--      &lt;!&ndash;Consulta renderiza aqui&ndash;&gt;-->
-<!--      <div class="table-responsive" *ngIf="!loading && activeTab === 'consulta'">-->
-<!--        <table class="table table-condensed table-hover">-->
-<!--          <thead>-->
-<!--          <tr>-->
-<!--            <th>Código</th>-->
-<!--            <th>Nome</th>-->
-<!--            <th>Marca</th>-->
-<!--            <th>Categoria</th>-->
-<!--            <th>Fornecedor</th>-->
-<!--            <th>Preço</th>-->
-<!--            <th>Estoque</th>-->
-<!--            <th>Ações</th>-->
-<!--          </tr>-->
-<!--          </thead>-->
-<!--          <tbody>-->
-<!--          <tr *ngFor="let product of products">-->
-<!--            <td>{{ product.codigo }}</td>-->
-<!--            <td>{{ product.nome }}</td>-->
-<!--            <td>{{ product.marca }}</td>-->
-<!--            <td>{{ product.categoria }}</td>-->
-<!--            <td>{{ product.fornecedor_nome }}</td>-->
-<!--            <td>R$ {{ product.preco_venda }}</td>-->
-<!--            <td>{{ product.quantidade }} un</td>-->
-<!--            <td>-->
-
-<!--              <button type="button" class="btn btn-sm btn-outline-primary btn-block" (click)="setActiveTab('detalhes')">-->
-<!--                Detalhes-->
-<!--              </button>-->
-
-<!--              <button type="button" class="btn btn-sm btn-outline-info btn-block" (click)="editProduct(product); setActiveTab('edicao')">-->
-<!--                Editar-->
-<!--              </button>-->
-
-<!--              <button type="button" class="btn btn-sm btn-outline-danger btn-block"-->
-<!--                      *ngIf="currentLevel >= 15; else currentUserButton"-->
-<!--                      (click)="deleteProduct(product.id ? product.id : 0)">-->
-<!--                Deletar-->
-<!--              </button>-->
-
-<!--              <ng-template #currentUserButton>-->
-<!--                <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>-->
-<!--                  Deletar-->
-<!--                </button>-->
-<!--              </ng-template>-->
-
-
-<!--            </td>-->
-<!--          </tr>-->
-<!--          </tbody>-->
-<!--        </table>-->
-<!--      </div>-->
     </div>
   </div>
 

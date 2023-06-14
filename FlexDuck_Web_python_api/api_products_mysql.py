@@ -19,7 +19,7 @@ def buscar_dados():
     if not current_user:
         return abort(404)
     cursor = db.cursor()
-    cursor.execute('SELECT * FROM produtos_servicos')
+    cursor.execute('SELECT * FROM produtos_servicos where is_product = 1')
     resultados = cursor.fetchall()
     print(resultados)
     cursor.close()
@@ -68,7 +68,7 @@ def buscar_dados_produtos(id):
         return jsonify({'mensagem': 'Produto localizado com sucesso!', 'produto': result})
     else:
         return jsonify({'mensagem': 'Produto não encontrado!'}), 404
-    
+
 # Define a rota POST para inserir dados no banco de dados
 @api_products.route('/products/add', methods=['POST'])
 @jwt_required()

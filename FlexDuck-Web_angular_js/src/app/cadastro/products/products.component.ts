@@ -33,6 +33,7 @@ export class ProductsComponent implements OnInit {
   is_product_default: number = 1;
   selectedProduct: any;
   lastProductCode: string = 'P000000';
+  lastServiceCode: string = 'S000000';
   public passwordVisible: boolean = false;
   levels = [
     { value: 22, name: 'Admin' },
@@ -82,7 +83,6 @@ export class ProductsComponent implements OnInit {
       preco_venda: [0.00, [Validators.required]],
       preco_custo: [0.00, [Validators.required]],
       margem_lucro: ['', [Validators.required]],
-      desconto: [0.00, [Validators.required, Validators.min(0)]],
       quantidade: ['', [Validators.required, Validators.min(0)]],
       localizacao: ['', [Validators.required, Validators.minLength(1)]],
       estoque_minimo: ['', [Validators.required, Validators.minLength(1)]],
@@ -90,6 +90,7 @@ export class ProductsComponent implements OnInit {
       alerta_reposicao: ['', [Validators.required, Validators.minLength(1)]],
       fornecador_id: ['', [Validators.required, Validators.minLength(1)]],
       fornecedor_nome: ['', [Validators.required, Validators.minLength(1)]],
+      is_product: [false]
     });
 
     this.formEdit = this.fb.group({
@@ -130,7 +131,6 @@ export class ProductsComponent implements OnInit {
       }
     });
   }
-
 
   generateNextCode(): string {
     const prefix = this.lastProductCode.charAt(0);
@@ -239,14 +239,12 @@ export class ProductsComponent implements OnInit {
   calcularMargemLucro() {
     const precoCustoControl = this.formCad.get('preco_custo');
     const precoVendaControl = this.formCad.get('preco_venda');
-    const descontoControl = this.formCad.get('desconto');
 
-    if (precoCustoControl && precoVendaControl && descontoControl && precoCustoControl.value && precoVendaControl.value && descontoControl.value) {
+    if (precoCustoControl && precoVendaControl && precoCustoControl.value && precoVendaControl.value) {
       const precoCusto = precoCustoControl.value;
       const precoVenda = precoVendaControl.value;
-      const desconto = descontoControl.value;
 
-      const margemLucro = this.calculateMarginOfProfit(precoCusto, precoVenda, desconto);
+      const margemLucro = this.calculateMarginOfProfit(precoCusto, precoVenda);
       this.formCad.patchValue({ margem_lucro: margemLucro });
       console.log(margemLucro);
     }
@@ -256,25 +254,18 @@ export class ProductsComponent implements OnInit {
   registerValueChangeListeners() {
     const precoCustoControl = this.formCad.get('preco_custo');
     const precoVendaControl = this.formCad.get('preco_venda');
-    const descontoControl = this.formCad.get('desconto');
 
-    if (precoCustoControl && precoVendaControl && descontoControl) {
+    if (precoCustoControl && precoVendaControl) {
       precoCustoControl.valueChanges.subscribe(() => this.calcularMargemLucro());
       precoVendaControl.valueChanges.subscribe(() => this.calcularMargemLucro());
-      descontoControl.valueChanges.subscribe(() => this.calcularMargemLucro());
     }
   }
 
 
-  calculateMarginOfProfit(precoCusto: number, precoVenda: number, desconto: number): number {
-    const precoVendaComDesconto = precoVenda - desconto;
-    return ((precoVendaComDesconto - precoCusto) / precoCusto) * 100;
+  calculateMarginOfProfit(precoCusto: number, precoVenda: number): number {
+    return ((precoVenda - precoCusto) / precoCusto) * 100;
   }
 
-
-  calculateDiscount(precoVenda: number, margemLucro: number): number {
-    return precoVenda * (margemLucro / 100);
-  }
 
   calculateFinalPrice(precoVenda: number, desconto: number): number {
     return precoVenda - desconto;
@@ -291,13 +282,6 @@ export class ProductsComponent implements OnInit {
     const valorVenda = parseFloat(inputPrecoVenda.value).toFixed(2);
     inputPrecoVenda.value = valorVenda;
   }
-
-  formatarPrecoDesconto() {
-    const inputDesconto = document.getElementById('desconto_c') as HTMLInputElement;
-    const valorDesconto = parseFloat(inputDesconto.value).toFixed(2);
-    inputDesconto.value = valorDesconto;
-  }
-
 
 
   onSubmit() {
@@ -344,7 +328,6 @@ export class ProductsComponent implements OnInit {
       preco_venda: this.selectedProduct.preco_venda,
       preco_custo: this.selectedProduct.preco_custo,
       margem_lucro: this.selectedProduct.margem_lucro,
-      desconto: this.selectedProduct.desconto,
       quantidade: this.selectedProduct.quantidade,
       localizacao: this.selectedProduct.localizacao,
       estoque_minimo: this.selectedProduct.estoque_minimo,
