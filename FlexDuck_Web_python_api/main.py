@@ -62,10 +62,17 @@ def autenticar_usuario():
         print(token)
         return jsonify({'access_token': token})
     else:
-        # Encerra o aplicativo Flask
-        encerrar_aplicativo()
-        # Reinicia o aplicativo em um novo processo
-        reiniciar_aplicativo()
+        # Tentar novamente até conectar
+        while True:
+            try:
+                # Encerra o aplicativo Flask
+                encerrar_aplicativo()
+                # Reinicia o aplicativo em um novo processo
+                reiniciar_aplicativo()
+            except Exception as e:
+                print("Erro ao tentar novamente:", str(e))
+                time.sleep(3)  # Aguarda 3 segundos antes de tentar novamente
+
 
 @app.route('/auth/user-level', methods=['GET'])
 @jwt_required()
