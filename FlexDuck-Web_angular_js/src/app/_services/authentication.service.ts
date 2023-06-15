@@ -1,7 +1,7 @@
 ﻿import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, catchError, Observable, throwError} from 'rxjs';
 import { map } from 'rxjs/operators';
 import jwt_decode from 'jwt-decode';
 
@@ -67,8 +67,12 @@ export class AuthenticationService {
   }
 
   checkDbConnection(): Observable<any> {
-    const url = `${environment.apiUrl}/server/status/check-connection`;
-    return this.http.get(url);
+    return this.http.get(`${environment.apiUrl}/server/status/check-connection`)
+      .pipe(
+        catchError(error => {
+          return throwError(error);
+        })
+      );
   }
 
   updateLastLogin(userId: number): Observable<any> {
