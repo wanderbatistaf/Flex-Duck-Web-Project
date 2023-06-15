@@ -16,6 +16,7 @@ export class LoginComponent implements OnInit {
   error = '';
   showPassword = false;
   isActive: number | boolean = false; // Property to store the value of 'active'
+  isDbConnectionSuccess = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -39,12 +40,35 @@ export class LoginComponent implements OnInit {
       this.isActive = user?.active || false; // Assign the value of 'active' to the isActive property
       console.log('isActive:', this.isActive);
     });
+
+    this.checkDbConnection()
   }
 
   // Getter for easy access to form fields
   get f() {
     return this.loginForm.controls;
   }
+
+  checkDbConnection() {
+    this.authenticationService.checkDbConnection()
+      .subscribe(
+        () => {
+          // Conexão com o banco de dados OK
+          this.isDbConnectionSuccess = true;
+          console.log('Conectado ao banco de dados.')
+        },
+        (error) => {
+          // Falha na conexão com o banco de dados
+          this.isDbConnectionSuccess = false;
+          console.log('Falha na conexão com o banco de dados.')
+          if (error.status === 500) {
+            this.error = 'Falha na conexão com o banco de dados.';
+          }
+        }
+      );
+  }
+
+
 
   onSubmit() {
     this.submitted = true;

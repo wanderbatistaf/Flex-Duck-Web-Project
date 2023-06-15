@@ -42,6 +42,14 @@ app.register_blueprint(api_suppliers)
 from api_products_mysql import api_products
 app.register_blueprint(api_products)
 
+@app.route('/server/status/check-connection')
+def check_connection():
+    try:
+        db.engine.execute('SELECT 1')  # Execute uma consulta simples para verificar a conexão com o banco de dados
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 # Rota para autenticar e obter o token JWT
 @app.route('/auth/login', methods=['POST'])
 def autenticar_usuario():

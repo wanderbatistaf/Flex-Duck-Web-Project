@@ -66,6 +66,10 @@ export class AuthenticationService {
       );
   }
 
+  checkDbConnection(): Observable<any> {
+    const url = `${environment.apiUrl}/server/status/check-connection`;
+    return this.http.get(url);
+  }
 
   updateLastLogin(userId: number): Observable<any> {
     const lastLogin = new Date();

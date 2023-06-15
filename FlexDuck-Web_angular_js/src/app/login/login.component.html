@@ -1,6 +1,12 @@
 ﻿<div id="layoutAuthentication">
   <div id="layoutAuthentication_content">
     <main>
+      <div *ngIf="isDbConnectionSuccess" class="alert alert-success mt-3 mb-0">
+        Conexão com o banco de dados OK
+      </div>
+      <div *ngIf="!isDbConnectionSuccess" class="alert alert-danger mt-3 mb-0">
+        {{ error }}
+      </div>
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-lg-5">
