@@ -56,7 +56,7 @@ def check_connection():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@api_products.route('/qrscan/<int:codigo>', methods=['GET'])
+@api_products.route('/qrscan/<str:codigo>', methods=['GET'])
 def buscar_dados_do_produto_qrscan(codigo):
     cursor = db.cursor()
     sql = 'SELECT codigo, nome, quantidade, preco_venda, descricao FROM produtos_servicos WHERE codigo = %s'
