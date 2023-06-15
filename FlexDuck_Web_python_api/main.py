@@ -57,7 +57,7 @@ def check_connection():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
-@api_products.route('/qrscan/<string:codigo>', methods=['GET'])
+@app.route('/qrscan/<string:codigo>', methods=['GET'])
 def buscar_dados_do_produto_qrscan(codigo):
     cursor = db.cursor()
     sql = 'SELECT codigo, nome, quantidade, preco_venda, descricao FROM produtos_servicos WHERE codigo = %s'
