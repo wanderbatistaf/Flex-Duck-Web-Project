@@ -383,6 +383,8 @@ export class ProductsComponent implements OnInit {
     const urlproduct: string =  `${environment.apiUrl}/products/qrscan/${codigo}`
 
     this.formCad.get('qrcode')?.setValue(qrCodeValue);
+    // Redireciona para a página "products/qrscan"
+    // this.router.navigate(['products/qrscan'], { state: { urlproduct } });
 
     return urlproduct;
   }
@@ -403,6 +405,24 @@ export class ProductsComponent implements OnInit {
         }
       );
   }
+
+  scanQRCode() {
+    const codigo = this.formCad.get('codigo')?.value;
+
+    this.formCad.get('qrcode')?.setValue(codigo);
+
+    if (this.isMobileDevice()) {
+      const urlproduct: string = `${environment.apiUrl}/products/qrscan/${codigo}`;
+
+      // Redireciona para a página "products/qrscan"
+      this.router.navigate(['products/qrscan'], { state: { urlproduct } });
+    }
+  }
+
+  isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
 
 
 

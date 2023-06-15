@@ -1,14 +1,14 @@
 <div class="container">
-    <h3 class="text-center font-weight-light my-4">
-      <img alt="OnDash" ngSrc="../../assets/on_logo.png" width="200" height="245">
-    </h3>
+  <h3 class="text-center font-weight-light my-4">
+    <img alt="OnDash" ngSrc="../../assets/on_logo.png" width="200" height="245">
+  </h3>
   <div class="row justify-content-center">
     <div class="col-md-6">
       <div class="card">
         <div class="card-body">
           <h1 class="mt-4 text-center">Informações do Produto</h1>
           <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item active text-center">NOME DO PRODUTO</li>
+            <li class="breadcrumb-item active text-center"></li>
           </ol>
 
           <div class="table-responsive">
@@ -16,23 +16,23 @@
               <tbody>
               <tr>
                 <th>Código:</th>
-                <td></td>
+                <td id="codigo">{{ produto?.codigo }}</td>
               </tr>
               <tr>
                 <th>Nome:</th>
-                <td></td>
+                <td id="nome">{{ produto?.nome }}</td>
               </tr>
               <tr>
                 <th>Quantidade:</th>
-                <td></td>
+                <td id="quantidade">{{ produto?.quantidade }} Unid(s).</td>
               </tr>
               <tr>
                 <th>Preço:</th>
-                <td></td>
+                <td id="preco">R$ {{ produto?.preco_venda }}</td>
               </tr>
               <tr>
                 <th>Descrição:</th>
-                <td></td>
+                <td id="descricao">{{ produto?.descricao }}</td>
               </tr>
               </tbody>
             </table>

@@ -23,7 +23,7 @@ const routes: Routes = [
       { path: 'clients', component: ClientsComponent },
       { path: 'suppliers', component: SuppliersComponent }
     ]},
-  { path: 'products/qrscan', component: QrscanComponent },
+  { path: 'products/qrscan/:codigo', component: QrscanComponent },
 
 
   // otherwise redirect to home
