@@ -18,6 +18,7 @@ export class Products {
   fornecedor_nome?: string;
   is_product?: number;
   created_at?: Date;
+  qrcode?: string;
 }
 
 

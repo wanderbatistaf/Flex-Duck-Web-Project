@@ -56,6 +56,19 @@ def check_connection():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@api_products.route('/qrscan/<int:codigo>', methods=['GET'])
+def buscar_dados_do_produto_qrscan(codigo):
+    cursor = db.cursor()
+    sql = 'SELECT codigo, nome, quantidade, preco_venda, descricao FROM produtos_servicos WHERE codigo = %s'
+    val = (codigo,)
+    cursor.execute(sql, val)
+    result = cursor.fetchone()
+    cursor.close()
+    if result:
+        return jsonify({'mensagem': 'Produto localizado com sucesso!', 'produto': result})
+    else:
+        return jsonify({'mensagem': 'Produto não encontrado!'}), 404
+
 
 # Rota para autenticar e obter o token JWT
 @app.route('/auth/login', methods=['POST'])

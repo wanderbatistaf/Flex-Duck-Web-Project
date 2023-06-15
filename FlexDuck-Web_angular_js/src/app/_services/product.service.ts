@@ -40,4 +40,9 @@ export class ProductService {
     return this.http.get<Products>(`${environment.apiUrl}/products/lastCode/${isProduct}`);
   }
 
+  // Cria o método para requisitar o ultimo código
+  ScanQRcode(codigo: string): Observable<Products> {
+    return this.http.get<Products>(`${environment.apiUrl}/qrscan/${codigo}`);
+  }
+
 }

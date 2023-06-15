@@ -10,6 +10,7 @@ import { EmployesComponent } from "@app/cadastro/employes/employes.component";
 import { ProductsComponent } from "@app/cadastro/products/products.component";
 import { ClientsComponent } from "@app/cadastro/clients/clients.component";
 import {SuppliersComponent} from "@app/cadastro/suppliers/suppliers.component";
+import {QrscanComponent} from "@app/cadastro/products/qrscan/qrscan.component";
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -22,7 +23,7 @@ const routes: Routes = [
       { path: 'clients', component: ClientsComponent },
       { path: 'suppliers', component: SuppliersComponent }
     ]},
-
+  { path: 'products/qrscan', component: QrscanComponent },
 
 
   // otherwise redirect to home

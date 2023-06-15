@@ -3,7 +3,6 @@
   <li class="breadcrumb-item active">Cadastro | Consulta</li>
 </ol>
 
-
 <!-- Abas de Navegação -->
 <ul class="nav nav-tabs mb-4">
   <li class="nav-item">
@@ -108,6 +107,7 @@
 
           <div class="row">
 
+            <!-- CODIGO -->
             <div class="form-group col-md-2">
               <label class="form-control-label" for="codigo_c">Código</label>
               <input type="text" class="form-control" [value]="generateNextCode()" id="codigo_c" placeholder="" maxlength="6" readonly>
@@ -126,6 +126,20 @@
               <!-- <div *ngIf="touchedVerify('lastName')" class="form-control-feedback">Por favor, insira um
                       nome válido.</div> -->
             </div>
+
+          </div>
+
+          <div class="row">
+
+            <!-- FORNECEDOR -->
+            <div class="form-group col-md-3">
+              <label class="form-control-label" for="fornecedor_c">Fornecedor<em>*</em></label>
+              <select class="form-control" formControlName="fornecedor_nome" id="fornecedor_c">
+                <option value="">Selecione um fornecedor</option>
+                <option *ngFor="let fornecedor of fornecedores" [value]="fornecedor.id">{{ fornecedor.nome }}</option>
+              </select>
+            </div>
+
 
             <!-- CATEGORIA -->
             <div class="form-group col-md-3">
@@ -182,6 +196,24 @@
               </div>
             </div>
 
+            <!-- ESTOQUE MINIMO -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="estoque_minimo_c">Estoque Minimo<em>*</em> </label>
+              <div class="input-group">
+                <span class="input-group-text">UN</span>
+                <input type="number" class="form-control" formControlName="estoque_minimo" id="estoque_minimo_c">
+              </div>
+            </div>
+
+            <!-- ESTOQUE MAXIMO -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="estoque_maximo_c">Estoque Maximo<em>*</em> </label>
+              <div class="input-group">
+                <span class="input-group-text">UN</span>
+                <input type="number" class="form-control" formControlName="estoque_maximo" id="estoque_maximo_c">
+              </div>
+            </div>
+
             <!-- ALERTA REPOSIÇÃO -->
             <div class="form-group col-md-4">
               <label class="form-control-label" for="alerta_reposicao_c">Alerta Reposição<em>*</em> </label>
@@ -200,6 +232,12 @@
             <div class="form-group col-md-6">
               <label class="form-control-label" for="descricao_c">Descrição <em>*</em></label>
               <textarea class="form-control" formControlName="descricao" id="descricao_c" placeholder="Descrição do produto/serviço" rows="4" maxlength="60"></textarea>
+            </div>
+
+            <!-- QR CODE -->
+            <div>
+              <qrcode [level]="2" [qrvalue]="generateQRCodeValue()" class="form-control" id="qrcode_c"></qrcode>
+              <input type="hidden" formControlName="qrcode">
             </div>
 
           </div>

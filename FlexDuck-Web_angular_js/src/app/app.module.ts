@@ -20,6 +20,8 @@ import { TextMaskModule } from "angular2-text-mask";
 import { NgOptimizedImage } from "@angular/common";
 import { SuppliersComponent } from "@app/cadastro/suppliers/suppliers.component";
 import { ProductsComponent } from "@app/cadastro/products/products.component";
+import { AnQrcodeModule } from "an-qrcode";
+import { QrscanComponent } from "@app/cadastro/products/qrscan/qrscan.component";
 
 @NgModule({
   imports: [
@@ -32,7 +34,8 @@ import { ProductsComponent } from "@app/cadastro/products/products.component";
     FormsModule,
     TextMaskModule,
     NgOptimizedImage,
-    MatIconModule
+    MatIconModule,
+    AnQrcodeModule
   ],
   declarations: [
     AppComponent,
@@ -42,7 +45,8 @@ import { ProductsComponent } from "@app/cadastro/products/products.component";
     EmployesComponent,
     ClientsComponent,
     SuppliersComponent,
-    ProductsComponent
+    ProductsComponent,
+    QrscanComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

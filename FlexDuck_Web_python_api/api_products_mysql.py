@@ -134,3 +134,4 @@ def buscar_dados_user(is_product):
         return jsonify({'mensagem': 'Produto localizado com sucesso!', 'produto': result})
     else:
         return jsonify({'mensagem': 'Produto não encontrado!'}), 404
+

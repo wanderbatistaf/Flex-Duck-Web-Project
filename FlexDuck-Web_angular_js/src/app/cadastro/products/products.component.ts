@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { JwtHelperService } from "@auth0/angular-jwt";
-import { Products, Suppliers, User } from "@app/_models";
+import {Products, Suppliers, User} from "@app/_models";
 import {FormBuilder, FormGroup, Validators, ɵElement} from "@angular/forms";
 import { UserService, ProductService, SuppliersService } from "@app/_services";
 import { Router } from "@angular/router";
-import { map, Observable } from "rxjs";
+import { map } from "rxjs";
 import jwt_decode from "jwt-decode";
-import { environment } from "@environments/environment";
 import { HttpClient } from "@angular/common/http";
-import { of } from 'rxjs';
+import {environment} from "@environments/environment";
 
 
 @Component({
@@ -17,12 +16,11 @@ import { of } from 'rxjs';
   styleUrls: ['./products.component.less']
 })
 export class ProductsComponent implements OnInit {
-  lastCode: string = '';
   jwtHelper: JwtHelperService = new JwtHelperService();
   level?: string;
   activeTab: string = 'consulta';
   loading = false;
-  users: User[] = [];
+  qrcode: string = ''
   products: Products[] = [];
   filteredProduct: Products[] = [];
   searchText = '';
@@ -30,10 +28,8 @@ export class ProductsComponent implements OnInit {
   formCad: FormGroup;
   formEdit: FormGroup;
   submitted = false;
-  is_product_default: number = 1;
   selectedProduct: any;
   lastProductCode: string = 'P000000';
-  lastServiceCode: string = 'S000000';
   public passwordVisible: boolean = false;
   levels = [
     { value: 22, name: 'Admin' },
@@ -41,6 +37,7 @@ export class ProductsComponent implements OnInit {
     { value: 10, name: 'Supervisor' },
     { value: 5, name: 'Vendedor' },
   ];
+  fornecedores: any[] = [];
   currentLevel: any;
   public form: FormGroup<{
     [K in keyof { margem_lucro: any[]; preco_venda: any[]; preco_custo: any[] }]: ɵElement<{
@@ -88,9 +85,10 @@ export class ProductsComponent implements OnInit {
       estoque_minimo: ['', [Validators.required, Validators.minLength(1)]],
       estoque_maximo: ['', [Validators.required, Validators.min(0)]],
       alerta_reposicao: ['', [Validators.required, Validators.minLength(1)]],
-      fornecador_id: ['', [Validators.required, Validators.minLength(1)]],
+      fornecedor_id: ['', [Validators.required, Validators.minLength(1)]],
       fornecedor_nome: ['', [Validators.required, Validators.minLength(1)]],
-      is_product: [false]
+      is_product: [false],
+      qrcode: ['', [Validators.required, Validators.minLength(1)]],
     });
 
     this.formEdit = this.fb.group({
@@ -114,7 +112,11 @@ export class ProductsComponent implements OnInit {
     this.level = decodedToken?.level;
     this.getProduct();
     this.filterProduct(this.searchText);
-    this.getCurrentUser();
+      this.getCurrentUser();
+      setTimeout(() => {
+        this.buscarFornecedores();
+      }, 1000);
+
 
   }
 
@@ -137,6 +139,8 @@ export class ProductsComponent implements OnInit {
     const numericPart = parseInt(this.lastProductCode.substring(1), 10);
     const newNumericPart = numericPart + 1;
     const newFormattedCode = `${prefix}${newNumericPart.toString().padStart(6, '0')}`;
+
+    this.formCad.get('codigo')?.setValue(newFormattedCode);
 
     return newFormattedCode;
   }
@@ -286,15 +290,21 @@ export class ProductsComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
+    // Gerar o QR Code
+    this.generateQRCodeValue();
+    // Gerar o novo Código
+    this.generateNextCode();
 
     // Se o formulário for inválido, retorne
     if (this.formCad.invalid) {
+      console.log(this.formCad.invalid);
+      console.log(this.formCad);
       console.log('Deu ruim 06!');
       return;
     }
 
-    this.usersService.addUser(this.formCad.value).subscribe((newUser) => {
-      this.users.push(newUser);
+    this.productService.addProduct(this.formCad.value).subscribe((newProduct) => {
+      this.products.push(newProduct);
       this.formCad.reset();
 
       // Redireciona para a página de consulta
@@ -314,7 +324,7 @@ export class ProductsComponent implements OnInit {
     this.formCad.reset();
   }
 
-  // Função para preencher os campos na aba de edição com os dados do cliente selecionado
+  // Função para preencher os campos na aba de edição com os dados do produto selecionado
   editProduct(product: any) {
     this.selectedProduct = product;
     this.setActiveTab('edicao');
@@ -335,6 +345,7 @@ export class ProductsComponent implements OnInit {
       alerta_reposicao: this.selectedProduct.alerta_reposicao,
       fornecedor_id: this.selectedProduct.fornecedor_id,
       fornecedor_nome: this.selectedProduct.fornecedor_nome,
+      qrcode: this.selectedProduct.qrcode,
     });
   }
 
@@ -360,4 +371,39 @@ export class ProductsComponent implements OnInit {
       );
     }
   }
+
+  generateQRCodeValue(): string {
+    const codigo = this.formCad.get('codigo')?.value;
+    const nome = this.formCad.get('nome')?.value;
+    const descricao = this.formCad.get('descricao')?.value;
+    const quantidade = this.formCad.get('quantidade')?.value;
+    const preco = this.formCad.get('preco_venda')?.value;
+
+    const qrCodeValue = `Código: ${codigo}\nNome: ${nome}\nQuantidade: ${quantidade}\nPreço: ${preco}\n\nDescrição: ${descricao}`;
+    const urlproduct: string =  `${environment.apiUrl}/products/qrscan/${codigo}`
+
+    this.formCad.get('qrcode')?.setValue(qrCodeValue);
+
+    return urlproduct;
+  }
+
+  buscarFornecedores() {
+    this.suppliersService
+      .getAll()
+      .pipe(map((response: any) => response.items as Suppliers[]))
+      .subscribe(
+        (suppliers: Suppliers[]) => {
+          // Mapeie apenas as propriedades necessárias (nome e id) dos fornecedores
+          this.fornecedores = suppliers.map((supplier: Suppliers) => ({ id: supplier.id, nome: supplier.nome }));
+          this.loading = false;
+          console.log(this.fornecedores);
+        },
+        (error) => {
+          console.log('Ocorreu um erro ao solicitar os fornecedores.');
+        }
+      );
+  }
+
+
+
 }
