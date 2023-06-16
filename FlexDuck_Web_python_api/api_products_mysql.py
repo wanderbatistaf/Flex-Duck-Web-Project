@@ -78,8 +78,8 @@ def inserir_dados():
         return abort(404)
     dados = request.json
     cursor = db.cursor()
-    sql = 'INSERT INTO produtos_servicos (codigo, descricao, nome, categoria,marca,preco_venda, preco_custo, margem_lucro,desconto,quantidade, localizacao, estoque_minimo, estoque_maximo, alerta_reposicao, fornecedor_id,client_id    ) VALUES (%s, %s, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s)'
-    val = (dados['codigo'], dados['descricao'], dados['nome'], dados['categoria'],dados['marca'],dados['preco_venda'], dados['preco_custo'], dados['margem_lucro'],dados['desconto'],dados['quantidade'], dados['localizacao'], dados['estoque_minimo'], dados['estoque_maximo'], dados['alerta_reposicao'], dados['fornecedor_id'],dados['client_id'])
+    sql = 'INSERT INTO produtos_servicos (codigo, descricao, nome, categoria,marca,preco_venda, preco_custo, margem_lucro, quantidade, localizacao, estoque_minimo, estoque_maximo, alerta_reposicao, fornecedor_id,client_id    ) VALUES (%s, %s, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s,%s, %s, %s)'
+    val = (dados['codigo'], dados['descricao'], dados['nome'], dados['categoria'],dados['marca'],dados['preco_venda'], dados['preco_custo'], dados['margem_lucro'], dados['quantidade'], dados['localizacao'], dados['estoque_minimo'], dados['estoque_maximo'], dados['alerta_reposicao'], dados['fornecedor_id'],dados['client_id'])
     cursor.execute(sql, val)
     db.commit()
     print(cursor)
@@ -96,8 +96,8 @@ def atualizar_dados(id):
     dados = request.json
     print(dados)
     cursor = db.cursor()
-    sql = 'UPDATE produtos_servicos SET id= %s, codigo= %s, descricao= %s, nome= %s, categoria= %s,marca= %s,preco_venda= %s, preco_custo= %s, margem_lucro= %s, quantidade= %s, localizacao= %s, estoque_minimo= %s, estoque_maximo= %s, alerta_reposicao= %s, fornecedor_id= %s, client_id= %s'
-    val = (dados['id'], dados['codigo'], dados['descricao'], dados['nome'], dados['categoria'],dados['marca'],dados['preco_venda'], dados['preco_custo'], dados['margem_lucro'],dados['quantidade'], dados['localizacao'], dados['estoque_minimo'], dados['estoque_maximo'], dados['alerta_reposicao'], dados['fornecedor_id'],dados['client_id'])
+    sql = 'UPDATE produtos_servicos SET id= %s, codigo= %s, descricao= %s, nome= %s, categoria= %s,marca= %s,preco_venda= %s, preco_custo= %s, margem_lucro= %s, desconto= %s, quantidade= %s, localizacao= %s, estoque_minimo= %s, estoque_maximo= %s, alerta_reposicao= %s, fornecedor_id= %s, client_id= %s'
+    val = (dados['id'], dados['codigo'], dados['descricao'], dados['nome'], dados['categoria'],dados['marca'],dados['preco_venda'], dados['preco_custo'], dados['margem_lucro'], dados['desconto'], dados['quantidade'], dados['localizacao'], dados['estoque_minimo'], dados['estoque_maximo'], dados['alerta_reposicao'], dados['fornecedor_id'],dados['client_id'])
     cursor.execute(sql, val)
     db.commit()
     cursor.close()
