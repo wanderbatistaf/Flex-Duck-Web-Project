@@ -1,5 +1,5 @@
 FROM ubuntu:latest
-LABEL authors="wandfreitasn"
+LABEL authors="wandfreitasb"
 
 # Instalar dependências
 RUN apt-get update && apt-get install -y \

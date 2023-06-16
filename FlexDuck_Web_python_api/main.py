@@ -57,20 +57,6 @@ def check_connection():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
-@app.route('/qrscan/<string:codigo>', methods=['GET'])
-def buscar_dados_do_produto_qrscan(codigo):
-    cursor = db.cursor()
-    sql = 'SELECT codigo, nome, quantidade, preco_venda, descricao FROM produtos_servicos WHERE codigo = %s'
-    val = (codigo,)
-    cursor.execute(sql, val)
-    result = cursor.fetchone()
-    cursor.close()
-    if result:
-        return jsonify({'mensagem': 'Produto localizado com sucesso!', 'produto': result})
-    else:
-        return jsonify({'mensagem': 'Produto não encontrado!'}), 404
-
-
 # Rota para autenticar e obter o token JWT
 @app.route('/auth/login', methods=['POST'])
 def autenticar_usuario():
@@ -124,7 +110,7 @@ def check_db_connection():
             encerrar_aplicativo()
             # Reinicia o aplicativo em um novo processo
             reiniciar_aplicativo()
-        time.sleep(50)  # Aguarda 50 segundos
+        time.sleep(35)  # Aguarda 35 segundos
 
 # Função para encerrar o aplicativo Flask
 def encerrar_aplicativo():
@@ -133,11 +119,25 @@ def encerrar_aplicativo():
     if func is not None:
         func()
 
+
 # Função para reiniciar o aplicativo em um novo processo
 def reiniciar_aplicativo():
     print("Reiniciando o aplicativo...")
     subprocess.Popen([sys.executable] + sys.argv)
     sys.exit()
+
+@app.route('/qrscan/<string:codigo>', methods=['GET'])
+def buscar_dados_do_produto_qrscan(codigo):
+    cursor = db.cursor()
+    sql = 'SELECT codigo, nome, quantidade, preco_venda, descricao FROM produtos_servicos WHERE codigo = %s'
+    val = (codigo,)
+    cursor.execute(sql, val)
+    result = cursor.fetchone()
+    cursor.close()
+    if result:
+        return jsonify({'mensagem': 'Produto localizado com sucesso!', 'produto': result})
+    else:
+        return jsonify({'mensagem': 'Produto não encontrado!'}), 404
 
 # Thread para executar a função de verificação de conexão
 check_db_thread = threading.Thread(target=check_db_connection)

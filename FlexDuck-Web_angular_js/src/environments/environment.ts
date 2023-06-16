@@ -4,7 +4,8 @@
 
 export const environment = {
     production: false,
-    apiUrl: 'https://m5pdc4-5000.csb.app'
+    apiUrl: 'https://m5pdc4-5000.csb.app',
+    webUrl: 'https://flex-duck-web-project.vercel.app/'
 };
 
 /*

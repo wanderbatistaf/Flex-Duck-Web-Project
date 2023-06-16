@@ -81,13 +81,13 @@ export class ProductsComponent implements OnInit {
       preco_custo: [0.00, [Validators.required]],
       margem_lucro: ['', [Validators.required]],
       quantidade: ['', [Validators.required, Validators.min(0)]],
-      localizacao: ['', [Validators.required, Validators.minLength(1)]],
+      localizacao: null,
       estoque_minimo: ['', [Validators.required, Validators.minLength(1)]],
       estoque_maximo: ['', [Validators.required, Validators.min(0)]],
       alerta_reposicao: ['', [Validators.required, Validators.minLength(1)]],
       fornecedor_id: ['', [Validators.required, Validators.minLength(1)]],
       fornecedor_nome: ['', [Validators.required, Validators.minLength(1)]],
-      is_product: [false],
+      is_product: [true],
       qrcode: ['', [Validators.required, Validators.minLength(1)]],
     });
 
@@ -305,6 +305,8 @@ export class ProductsComponent implements OnInit {
 
     this.productService.addProduct(this.formCad.value).subscribe((newProduct) => {
       this.products.push(newProduct);
+      console.log(newProduct);
+      console.log(this.formCad.value);
       this.formCad.reset();
 
       // Redireciona para a página de consulta
@@ -412,7 +414,7 @@ export class ProductsComponent implements OnInit {
     this.formCad.get('qrcode')?.setValue(codigo);
 
     if (this.isMobileDevice()) {
-      const urlproduct: string = `${environment.apiUrl}/products/qrscan/${codigo}`;
+      const urlproduct: string = `${environment.webUrl}/products/qrscan/${codigo}`;
 
       // Redireciona para a página "products/qrscan"
       this.router.navigate(['products/qrscan'], { state: { urlproduct } });
@@ -423,6 +425,13 @@ export class ProductsComponent implements OnInit {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 
+  updateFornecedorId(event: any) {
+    const nome = event.target.value;
+    const fornecedor = this.fornecedores.find(f => f.nome === nome);
+    if (fornecedor) {
+      this.formCad.get('fornecedor_id')?.setValue(fornecedor.id);
+    }
+  }
 
 
 

@@ -134,9 +134,18 @@
             <!-- FORNECEDOR -->
             <div class="form-group col-md-3">
               <label class="form-control-label" for="fornecedor_c">Fornecedor<em>*</em></label>
-              <select class="form-control" formControlName="fornecedor_nome" id="fornecedor_c">
+              <select class="form-control" formControlName="fornecedor_nome" id="fornecedor_c" (change)="updateFornecedorId($event)">
+              <option value="">Selecione um fornecedor</option>
+                <option *ngFor="let fornecedor of fornecedores" [value]="fornecedor.nome">{{ fornecedor.nome }}</option>
+              </select>
+            </div>
+
+            <!-- FORNECEDOR ID-->
+            <div class="form-group col-md-3" [hidden]="true">
+              <label class="form-control-label" for="fornecedor_id_c">Fornecedor<em>*</em></label>
+              <select class="form-control" formControlName="fornecedor_id" id="fornecedor_id_c">
                 <option value="">Selecione um fornecedor</option>
-                <option *ngFor="let fornecedor of fornecedores" [value]="fornecedor.id">{{ fornecedor.nome }}</option>
+                <option *ngFor="let fornecedor of fornecedores" [value]="fornecedor.id">{{ fornecedor.id }}</option>
               </select>
             </div>
 
