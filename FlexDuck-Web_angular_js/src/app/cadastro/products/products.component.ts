@@ -384,7 +384,7 @@ export class ProductsComponent implements OnInit {
     const preco = this.formCad.get('preco_venda')?.value;
 
     const qrCodeValue = `Código: ${codigo}\nNome: ${nome}\nQuantidade: ${quantidade}\nPreço: ${preco}\n\nDescrição: ${descricao}`;
-    const urlproduct: string =  `${environment.apiUrl}/products/qrscan/${codigo}`
+    const urlproduct: string =  `${environment.webUrl}/products/qrscan/${codigo}`
 
     this.formCad.get('qrcode')?.setValue(qrCodeValue);
     // Redireciona para a página "products/qrscan"
