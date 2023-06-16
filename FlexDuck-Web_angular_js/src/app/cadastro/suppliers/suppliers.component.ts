@@ -24,13 +24,14 @@ export class SuppliersComponent implements OnInit {
   lastSupplierId: number = 0;
   submitted = false;
   selectedSupplier: any;
-  public passwordVisible: boolean = false;
   levels = [
     { value: 22, name: 'Admin' },
     { value: 20, name: 'Gerente' },
     { value: 15, name: 'Supervisor' },
     { value: 10, name: 'Vendedor' },
   ];
+  defaultPaymentTypes = ['Dinheiro', 'Cartão de Credito', 'TED', 'PIX', 'Boleto'];
+  defaultDeliveryTimes = ['7 dias úteis', '15 dias úteis', '30 dias úteis', '90 dias úteis'];
 
   constructor(private suppliersService: SuppliersService, private fb: FormBuilder) {
     const currentDate = new Date();
@@ -43,6 +44,7 @@ export class SuppliersComponent implements OnInit {
       .replace('T', ' ');
 
     this.formCad = this.fb.group({
+      id: [''],
       nome: ['', [Validators.required, Validators.minLength(1)]],
       contato: ['', [Validators.required, Validators.minLength(1)]],
       detalhes_pagamento: ['', [Validators.required, Validators.minLength(1)]],
@@ -140,8 +142,12 @@ export class SuppliersComponent implements OnInit {
   getLastSupplierId() {
     this.suppliersService.getLastSupplierId().subscribe((lastSupplierId) => {
       this.lastSupplierId = lastSupplierId + 1;
+      this.formCad.get('id')?.patchValue(this.lastSupplierId);
     });
   }
+
+
+
 
   onSubmit() {
     this.submitted = true;

@@ -49,8 +49,8 @@ export class SuppliersService {
 
   // Cria o método para obter o último ID de usuário
   getLastSupplierId(): Observable<number> {
-    return this.http.get<number>(`${environment.apiUrl}/suppliers/lastUserId`).pipe(
-      tap((lastUserId: number) => console.log('API Response:', lastUserId)),
+    return this.http.get<number>(`${environment.apiUrl}/suppliers/lastSupplierId`).pipe(
+      tap((lastSupplierId: number) => console.log('API Response:', lastSupplierId)),
       catchError((error) => {
         console.log('Error in API call:', error);
         return throwError('Houve um erro na chamada à API');

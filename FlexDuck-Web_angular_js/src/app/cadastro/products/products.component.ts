@@ -82,13 +82,15 @@ export class ProductsComponent implements OnInit {
       margem_lucro: ['', [Validators.required]],
       quantidade: ['', [Validators.required, Validators.min(0)]],
       localizacao: null,
+      created_at: [formattedCreatedAt],
       estoque_minimo: ['', [Validators.required, Validators.minLength(1)]],
       estoque_maximo: ['', [Validators.required, Validators.min(0)]],
       alerta_reposicao: ['', [Validators.required, Validators.minLength(1)]],
       fornecedor_id: ['', [Validators.required, Validators.minLength(1)]],
       fornecedor_nome: ['', [Validators.required, Validators.minLength(1)]],
-      is_product: [true],
+      is_product: [1],
       qrcode: ['', [Validators.required, Validators.minLength(1)]],
+
     });
 
     this.formEdit = this.fb.group({

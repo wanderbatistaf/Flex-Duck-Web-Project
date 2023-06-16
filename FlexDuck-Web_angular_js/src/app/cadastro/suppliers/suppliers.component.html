@@ -6,7 +6,7 @@
 <!-- Abas de Navegação -->
 <ul class="nav nav-tabs mb-4">
   <li class="nav-item">
-    <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro')">Cadastro</a>
+    <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro'); getLastSupplierId()">Cadastro</a>
   </li>
   <li class="nav-item">
     <a class="nav-link" [class.active]="isTabActive('consulta')" (click)="setActiveTab('consulta')">Fornecedores</a>
@@ -45,7 +45,7 @@
 
           <div class="row">
             <div class="form-group col-md-2">
-              <label class="form-control-label" for="id">ID <em>*</em></label>
+              <label class="form-control-label" for="id">ID <em></em></label>
               <input type="text" class="form-control" formControlName="id" id="id" placeholder="" maxlength="6" readonly>
             </div>
           </div>
@@ -95,28 +95,30 @@
         <form [formGroup]="formCad" novalidate>
           <div class="row">
             <div class="form-group col-md-2">
-              <label class="form-control-label" for="id">User ID <em>*</em></label>
-              <input type="text" class="form-control" formControlName="id" id="id" placeholder="" maxlength="6" [value]="lastSupplierId" readonly>
+              <label class="form-control-label" for="id_c">ID <em>*</em></label>
+              <input type="text" class="form-control" formControlName="id" id="id_c" placeholder="" maxlength="6" [value]="lastSupplierId" readonly>
             </div>
           </div>
 
           <div class="row">
             <!-- NOME -->
             <div class="form-group col-md-4">
-              <label class="form-control-label" for="nome">Nome <em>*</em></label>
-              <input type="text" class="form-control" formControlName="nome" id="nome" placeholder="Empresa XYZ" maxlength="50">
+              <label class="form-control-label" for="nome_c">Nome <em>*</em></label>
+              <input type="text" class="form-control" formControlName="nome" id="nome_c" placeholder="Empresa XYZ" maxlength="50">
             </div>
 
             <!-- CONTATO -->
             <div class="form-group col-md-5">
-              <label class="form-control-label" for="contato">Contato <em>*</em></label>
-              <input type="text" class="form-control" formControlName="contato" id="contato" placeholder="João Silva" maxlength="60">
+              <label class="form-control-label" for="contato_c">Contato <em>*</em></label>
+              <input type="text" class="form-control" formControlName="contato" id="contato_c" placeholder="João Silva" maxlength="60">
             </div>
 
             <!-- PRAZO DE ENTREGA -->
             <div class="form-group col-md-6">
-              <label class="form-control-label" for="prazo_entrega">Prazo de Entrega <em>*</em></label>
-              <input type="text" class="form-control" formControlName="prazo_entrega" id="prazo_entrega" placeholder="7 dias úteis">
+              <label class="form-control-label" for="prazo_entrega_c">Detalhes do Pagamento <em>*</em></label>
+              <select class="form-control" formControlName="prazo_entrega" id="prazo_entrega_c" >
+                <option *ngFor="let deliveryTime of defaultDeliveryTimes" [value]="deliveryTime">{{ deliveryTime }}</option>
+              </select>
             </div>
           </div>
 
@@ -124,12 +126,12 @@
 
             <!-- Detalhes Pagamento -->
             <div class="form-group col-md-6">
-              <label class="form-control-label" for="detalhes_pagamento">Detalhes do Pagamento <em>*</em></label>
-              <div class="password-input">
-                <input type="text" class="form-control" formControlName="detalhes_pagamento" id="detalhes_pagamento" placeholder="Pagamento em até 30 dias após a entrega.">
+              <label class="form-control-label" for="detalhes_pagamento_c">Detalhes do Pagamento <em>*</em></label>
+                <select class="form-control" formControlName="detalhes_pagamento" id="detalhes_pagamento_c" >
+                  <option *ngFor="let paymentType of defaultPaymentTypes" [value]="paymentType">{{ paymentType }}</option>
+                </select>
               </div>
             </div>
-          </div>
           <div>
             <br>
             <button type="button" class="btn btn-secondary mr-2" (click)="formReset()">Limpar</button>
