@@ -119,7 +119,7 @@ def excluir_dados(id):
     cursor.close()
     return jsonify({'mensagem': 'Dados excluídos com sucesso!'})
 
-@api_products.route('/products/lastCode/<int:is_product>', methods=['GET'])
+@api_products.route('/products/lastCode/<string:is_product>', methods=['GET'])
 @jwt_required() # Protege a rota com JWT
 def buscar_dados_user(is_product):
     current_user = get_jwt_identity()
