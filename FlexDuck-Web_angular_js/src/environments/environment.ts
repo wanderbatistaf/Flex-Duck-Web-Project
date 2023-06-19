@@ -4,8 +4,8 @@
 
 export const environment = {
     production: false,
-    apiUrl: 'https://pz5sjz-5000.csb.app',
-    webUrl: 'https://flex-duck-web-project.vercel.app/'
+    apiUrl: 'http://127.0.0.1:5000',
+    webUrl: 'https://flex-duck-web-project.vercel.app'
 };
 
 /*
