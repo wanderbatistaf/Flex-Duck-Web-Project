@@ -115,7 +115,7 @@
 
             <!-- PRAZO DE ENTREGA -->
             <div class="form-group col-md-6">
-              <label class="form-control-label" for="prazo_entrega_c">Detalhes do Pagamento <em>*</em></label>
+              <label class="form-control-label" for="prazo_entrega_c">Prazo de Entrega <em>*</em></label>
               <select class="form-control" formControlName="prazo_entrega" id="prazo_entrega_c" >
                 <option *ngFor="let deliveryTime of defaultDeliveryTimes" [value]="deliveryTime">{{ deliveryTime }}</option>
               </select>
