@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { JwtHelperService } from "@auth0/angular-jwt";
 import {Products, Suppliers, User} from "@app/_models";
 import {FormBuilder, FormGroup, Validators, ɵElement} from "@angular/forms";
@@ -8,6 +8,9 @@ import { map } from "rxjs";
 import jwt_decode from "jwt-decode";
 import { HttpClient } from "@angular/common/http";
 import {environment} from "@environments/environment";
+import * as pdfMake from 'pdfmake/build/pdfmake'
+import { PageOrientation, TDocumentDefinitions } from 'pdfmake/interfaces';
+import html2canvas from "html2canvas";
 
 
 @Component({
@@ -16,6 +19,7 @@ import {environment} from "@environments/environment";
   styleUrls: ['./products.component.less']
 })
 export class ProductsComponent implements OnInit {
+  @ViewChild('content') content!: ElementRef;
   jwtHelper: JwtHelperService = new JwtHelperService();
   level?: string;
   activeTab: string = 'consulta';
@@ -474,7 +478,59 @@ export class ProductsComponent implements OnInit {
     }
   }
 
+  // Função para gerar o PDF
+  gerarPDF() {
+    const element = this.content.nativeElement;
 
+    html2canvas(element).then((canvas) => {
+      const imgData = canvas.toDataURL('image/png');
+      const imgLogo = 'src/assets/on_logo.png';
+
+      const pdfDefinition: TDocumentDefinitions = {
+        pageSize: 'A4',
+        pageOrientation: 'landscape' as PageOrientation,
+        content: [
+          {
+            table: {
+              widths: ['*'],
+              body: [
+                [
+                  {
+                    image: imgData,
+                    width: 980,
+                    margin: [-210, 0, 0, 0],
+                    background: '#F2A74B' // Cor de fundo da tabela
+                  }
+                ]
+              ]
+            },
+            layout: {
+              defaultBorder: false
+            },
+            alignment: 'center',
+            margin: [0, 10],
+            background: '#F2D0A7' // Cor de fundo do conteúdo
+          }
+        ],
+        background: [
+          {
+            canvas: [
+              {
+                type: 'rect',
+                x: 0,
+                y: 0,
+                w: 1000,
+                h: 1000,
+                color: '#F2F2F2' // Cor de fundo da página inteira
+              }
+            ]
+          }
+        ]
+      };
+
+      pdfMake.createPdf(pdfDefinition).open();
+    });
+  }
 
 
 

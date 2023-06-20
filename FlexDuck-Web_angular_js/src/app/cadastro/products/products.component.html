@@ -48,6 +48,7 @@
 
     <!--Detalhes renderiza aqui!-->
     <div *ngIf="activeTab === 'detalhes'">
+      <div #content>
       <div class="container">
         <div class="row">
           <!-- CÓDIGO -->
@@ -111,7 +112,7 @@
 
           <!-- QUANTIDADE -->
           <div class="form-group col-md-4">
-            <label class="form-control-label">Quantidade</label>
+            <label class="form-control-label">Disponivel</label>
             <p class="shadowed-row">{{ formEdit.get('quantidade')?.value }} UN</p>
           </div>
 
@@ -161,15 +162,16 @@
               <input type="hidden">
             </div>
           </div>
-
         </div>
+      </div>
+      </div>
         <!-- Botões -->
         <div class="row">
           <div class="col-md-6">
+            <button class="btn btn-primary" (click)="gerarPDF()">Imprimir em PDF</button>
             <button type="button" class="btn btn-secondary mr-2" (click)="setActiveTab('consulta')">Cancelar</button>
-      </div>
+          </div>
     </div>
-      </div>
     </div>
 
 
