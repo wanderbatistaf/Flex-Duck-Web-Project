@@ -6066,6 +6066,10 @@ a.close.disabled {
   vertical-align: text-top !important;
 }
 
+.shadowed-row {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ajuste a sombra de acordo com suas preferências */
+}
+
 .bg-primary {
   background-color: #007bff !important;
 }

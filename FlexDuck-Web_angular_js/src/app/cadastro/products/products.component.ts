@@ -83,26 +83,34 @@ export class ProductsComponent implements OnInit {
       quantidade: ['', [Validators.required, Validators.min(0)]],
       localizacao: null,
       created_at: [formattedCreatedAt],
+      estoque_minimo: [1, [Validators.required, Validators.minLength(1)]],
+      estoque_maximo: [9999, [Validators.required, Validators.min(0)]],
+      alerta_reposicao: [10, [Validators.required, Validators.minLength(1)]],
+      fornecedor_id: ['', [Validators.required, Validators.minLength(1)]],
+      fornecedor_nome: ['', [Validators.required, Validators.minLength(1)]],
+      is_product: [1],
+
+    });
+
+    this.formEdit = this.fb.group({
+      codigo: ['', [Validators.required, Validators.minLength(1)]],
+      descricao: ['', [Validators.required, Validators.minLength(1)]],
+      nome: ['', [Validators.required, Validators.minLength(1)]],
+      categoria: ['', [Validators.required, Validators.minLength(1)]],
+      marca: ['', [Validators.required, Validators.minLength(1)]],
+      preco_venda: [0.00, [Validators.required]],
+      preco_custo: [0.00, [Validators.required]],
+      margem_lucro: ['', [Validators.required]],
+      quantidade: ['', [Validators.required, Validators.min(0)]],
+      localizacao: null,
+      created_at: [formattedCreatedAt],
       estoque_minimo: ['', [Validators.required, Validators.minLength(1)]],
       estoque_maximo: ['', [Validators.required, Validators.min(0)]],
       alerta_reposicao: ['', [Validators.required, Validators.minLength(1)]],
       fornecedor_id: ['', [Validators.required, Validators.minLength(1)]],
       fornecedor_nome: ['', [Validators.required, Validators.minLength(1)]],
       is_product: [1],
-      qrcode: ['', [Validators.required, Validators.minLength(1)]],
-
-    });
-
-    this.formEdit = this.fb.group({
-      user_id: [''],
-      username: ['', [Validators.required, Validators.minLength(1)]],
-      name: ['', [Validators.required, Validators.minLength(1)]],
-      password: ['', [Validators.required, Validators.minLength(1)]],
-      active: [true],
-      email: [''],
-      created_at: [formattedCreatedAt],
-      level: [''],
-      last_login: [''],
+      desconto: ['0.00', [Validators.required]],
     });
     this._margemLucro = 0;
     this.registerValueChangeListeners();
@@ -273,9 +281,14 @@ export class ProductsComponent implements OnInit {
   }
 
 
-  calculateFinalPrice(precoVenda: number, desconto: number): number {
-    return precoVenda - desconto;
+  calculateTotalValue(): number {
+    const precoCusto = this.formEdit.get('preco_custo')?.value || 0;
+    const desconto = this.formEdit.get('desconto')?.value || 0;
+    const precoVenda = this.formEdit.get('preco_venda')?.value || 0;
+
+    return precoVenda - (precoCusto + desconto);
   }
+
 
   formatarPrecoCusto() {
     const inputPrecoCusto = document.getElementById('preco_custo_c') as HTMLInputElement;
@@ -335,6 +348,7 @@ export class ProductsComponent implements OnInit {
     console.log(this.selectedProduct);
 
     this.formEdit.patchValue({
+      nome: this.selectedProduct.nome,
       codigo: this.selectedProduct.codigo,
       descricao: this.selectedProduct.descricao,
       categoria: this.selectedProduct.categoria,
@@ -349,26 +363,27 @@ export class ProductsComponent implements OnInit {
       alerta_reposicao: this.selectedProduct.alerta_reposicao,
       fornecedor_id: this.selectedProduct.fornecedor_id,
       fornecedor_nome: this.selectedProduct.fornecedor_nome,
-      qrcode: this.selectedProduct.qrcode,
+      desconto: this.selectedProduct.desconto,
     });
   }
 
   onUpdate() {
-    const updatedProduct: User = this.formEdit.value;
-    const userId = this.selectedProduct.user_id;
+    const updatedProduct: Products = this.formEdit.value;
+    const productId = this.selectedProduct.id;
 
     const confirmUpdate = confirm('Tem certeza que deseja atualizar as informações do produto?');
 
     if (confirmUpdate) {
-      this.usersService.updateUserById(userId, updatedProduct).subscribe(
+      this.productService.updateProductById(productId, updatedProduct).subscribe(
         (response) => {
           console.log('Produto atualizado com sucesso', response);
           console.log(updatedProduct);
           alert('Produto atualizado com sucesso!');
+          this.getProduct();
           this.setActiveTab('consulta');
         },
         (error) => {
-          console.log('Erro ao atualizar o usuário', error);
+          console.log('Erro ao atualizar o produto', error);
           console.log(updatedProduct);
           // Implemente aqui o que deve acontecer em caso de erro
         }
@@ -387,6 +402,23 @@ export class ProductsComponent implements OnInit {
     const urlproduct: string =  `${environment.webUrl}/products/qrscan/${codigo}`
 
     this.formCad.get('qrcode')?.setValue(qrCodeValue);
+    // Redireciona para a página "products/qrscan"
+    // this.router.navigate(['products/qrscan'], { state: { urlproduct } });
+
+    return urlproduct;
+  }
+
+  generateQRCodeValueEdit(): string {
+    const codigo = this.formEdit.get('codigo')?.value;
+    const nome = this.formEdit.get('nome')?.value;
+    const descricao = this.formEdit.get('descricao')?.value;
+    const quantidade = this.formEdit.get('quantidade')?.value;
+    const preco = this.formEdit.get('preco_venda')?.value;
+
+    const qrCodeValue = `Código: ${codigo}\nNome: ${nome}\nQuantidade: ${quantidade}\nPreço: ${preco}\n\nDescrição: ${descricao}`;
+    const urlproduct: string =  `${environment.webUrl}/products/qrscan/${codigo}`
+
+    this.formEdit.get('qrcode')?.setValue(qrCodeValue);
     // Redireciona para a página "products/qrscan"
     // this.router.navigate(['products/qrscan'], { state: { urlproduct } });
 
@@ -431,9 +463,20 @@ export class ProductsComponent implements OnInit {
     const nome = event.target.value;
     const fornecedor = this.fornecedores.find(f => f.nome === nome);
     if (fornecedor) {
-      this.formCad.get('fornecedor_id')?.setValue(fornecedor.id);
+      const fornecedorId = fornecedor.id;
+      if (this.formCad) {
+        this.formCad.get('fornecedor_id')?.setValue(fornecedorId);
+      }
+      if (this.formEdit) {
+        this.formEdit.get('fornecedor_id')?.setValue(fornecedorId);
+        this.formEdit.get('fornecedor_nome')?.setValue(fornecedor.nome);
+      }
     }
   }
+
+
+
+
 
 
 

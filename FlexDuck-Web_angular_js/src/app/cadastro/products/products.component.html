@@ -1,4 +1,4 @@
-<h1 class="mt-4">Produtos</h1>
+<h1 class="mt-4" xmlns="http://www.w3.org/1999/html">Produtos</h1>
 <ol class="breadcrumb mb-4">
   <li class="breadcrumb-item active">Cadastro | Consulta</li>
 </ol>
@@ -46,6 +46,302 @@
       <div class="spinner-border spinner-border-sm"></div>
     </div>
 
+    <!--Detalhes renderiza aqui!-->
+    <div *ngIf="activeTab === 'detalhes'">
+      <div class="container">
+        <div class="row">
+          <!-- CÓDIGO -->
+          <div class="form-group col-md-2">
+            <label class="form-control-label">Código</label>
+            <div class="input-group">
+              <span class="form-control font-weight-bold" readonly>{{ formEdit.get('codigo')?.value }}</span>
+            </div>
+          </div>
+
+
+        </div>
+
+        <div class="row">
+          <!-- NOME -->
+          <div class="form-group col-md-5">
+            <label class="form-control-label">Nome</label>
+            <p class="shadowed-row">{{ formEdit.get('nome')?.value }}</p>
+          </div>
+
+        </div>
+
+        <div class="row">
+          <!-- FORNECEDOR -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Fornecedor</label>
+            <p class="shadowed-row">{{ formEdit.get('fornecedor_nome')?.value }}</p>
+          </div>
+
+          <!-- CATEGORIA -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Categoria</label>
+            <p class="shadowed-row">{{ formEdit.get('categoria')?.value }}</p>
+          </div>
+
+          <!-- MARCA -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Marca</label>
+            <p class="shadowed-row">{{ formEdit.get('marca')?.value }}</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- PREÇO CUSTO -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Preço Custo</label>
+            <p class="shadowed-row">R$ {{ formEdit.get('preco_custo')?.value }}</p>
+          </div>
+
+          <!-- PREÇO VENDA -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Preço Venda</label>
+            <p class="shadowed-row">R$ {{ formEdit.get('preco_venda')?.value }}</p>
+          </div>
+
+          <!-- MARGEM LUCRO -->
+          <div class="form-group col-md-2">
+            <label class="form-control-label">Margem Lucro</label>
+            <p class="shadowed-row">{{ formEdit.get('margem_lucro')?.value }}%</p>
+          </div>
+
+          <!-- QUANTIDADE -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Quantidade</label>
+            <p class="shadowed-row">{{ formEdit.get('quantidade')?.value }} UN</p>
+          </div>
+
+          <!-- ESTOQUE MINIMO -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Estoque Mínimo</label>
+            <p class="shadowed-row">{{ formEdit.get('estoque_minimo')?.value }} UN</p>
+          </div>
+
+          <!-- ESTOQUE MAXIMO -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Estoque Máximo</label>
+            <p class="shadowed-row">{{ formEdit.get('estoque_maximo')?.value }} UN</p>
+          </div>
+
+          <!-- ALERTA REPOSIÇÃO -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Alerta Reposição</label>
+            <p class="shadowed-row">{{ formEdit.get('alerta_reposicao')?.value }} UN</p>
+          </div>
+
+          <!-- DESCONTO -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Desconto</label>
+            <p class="shadowed-row">R$ {{ formEdit.get('desconto')?.value }}</p>
+          </div>
+
+          <!-- LUCRO TOTAL -->
+          <div class="form-group col-md-4">
+            <label class="form-control-label">Lucro Total</label>
+            <p class="shadowed-row; font-weight-bold">R$ {{ calculateTotalValue() }}</p>
+          </div>
+
+        </div>
+
+        <div class="row">
+          <!-- DESCRIÇÃO -->
+          <div class="form-group col-md-6">
+            <label class="form-control-label">Descrição</label>
+            <p class="shadowed-row">{{ formEdit.get('descricao')?.value }}</p>
+          </div>
+
+          <!-- QR CODE -->
+          <div class="col-md-10 d-flex justify-content-end">
+            <div class="mt-auto" style="border: 1px solid #ccc; padding: 5px;">
+              <qrcode [level]="2" [qrvalue]="generateQRCodeValueEdit()" id="qrcode_d"></qrcode>
+              <input type="hidden">
+            </div>
+          </div>
+
+        </div>
+        <!-- Botões -->
+        <div class="row">
+          <div class="col-md-6">
+            <button type="button" class="btn btn-secondary mr-2" (click)="setActiveTab('consulta')">Cancelar</button>
+      </div>
+    </div>
+      </div>
+    </div>
+
+
+    <!--Edição renderiza aqui!-->
+    <div *ngIf="activeTab === 'edicao'">
+      <div class="container">
+        <form [formGroup]="formEdit" novalidate>
+          <div class="row">
+
+            <!-- CODIGO -->
+            <div class="form-group col-md-2">
+              <label class="form-control-label" for="codigo_e">Código</label>
+              <input type="text" class="form-control" formControlName="codigo" id="codigo_e" placeholder="" maxlength="6" readonly>
+            </div>
+
+
+          </div>
+
+          <div class="row">
+
+            <!-- NOME -->
+            <div class="form-group col-md-5">
+              <label class="form-control-label" for="nome_e">Nome <em>*</em></label>
+              <input type="text" class="form-control" formControlName="nome" id="nome_e"
+                     placeholder="Ex: Camisa Gola V" maxlength="60">
+              <!-- <div *ngIf="touchedVerify('lastName')" class="form-control-feedback">Por favor, insira um
+                      nome válido.</div> -->
+            </div>
+
+          </div>
+
+          <div class="row">
+
+            <!-- FORNECEDOR -->
+            <div class="form-group col-md-3">
+              <label class="form-control-label" for="fornecedor_e">Fornecedor<em>*</em></label>
+              <select class="form-control" formControlName="fornecedor_nome" id="fornecedor_e" (change)="updateFornecedorId($event)">
+                <option value="">Selecione um fornecedor</option>
+                <option *ngFor="let fornecedor of fornecedores" [value]="fornecedor.nome">{{ fornecedor.nome }}</option>
+              </select>
+            </div>
+
+            <!-- FORNECEDOR ID-->
+            <div class="form-group col-md-3" [hidden]="true">
+              <label class="form-control-label" for="fornecedor_id_e">Fornecedor<em>*</em></label>
+              <select class="form-control" formControlName="fornecedor_id" id="fornecedor_id_e">
+                <option value="">Selecione um fornecedor</option>
+                <option *ngFor="let fornecedor of fornecedores" [value]="fornecedor.id">{{ fornecedor.id }}</option>
+              </select>
+            </div>
+
+
+            <!-- CATEGORIA -->
+            <div class="form-group col-md-3">
+              <label class="form-control-label" for="categoria_e">Categoria<em>*</em></label>
+              <input type="text" class="form-control" formControlName="categoria"
+                     id="categoria_e" placeholder="Ex: Camisas">
+            </div>
+
+            <!-- MARCA -->
+            <div class="form-group col-md-3">
+              <label class="form-control-label" for="marca_e">Marca<em>*</em></label>
+              <input type="text" class="form-control" formControlName="marca"
+                     id="marca_e" placeholder="Ex: Indus">
+            </div>
+
+          </div>
+
+          <div class="row">
+
+            <!-- PREÇO CUSTO -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="preco_custo_e">Preço Custo <em>*</em></label>
+              <div class="input-group">
+                <span class="input-group-text">R$</span>
+                <input type="number" class="form-control" formControlName="preco_custo" id="preco_custo_e" (input)="calcularMargemLucro()" (blur)="formatarPrecoCusto()">
+              </div>
+            </div>
+
+
+            <!-- PREÇO VENDA -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="preco_venda_e">Preço Venda <em>*</em></label>
+              <div class="input-group">
+                <span class="input-group-text">R$</span>
+                <input type="number" class="form-control" formControlName="preco_venda" id="preco_venda_e" (input)="calcularMargemLucro()" (blur)="formatarPrecoVenda()">
+              </div>
+            </div>
+
+            <!-- MARGEM LUCRO -->
+            <div class="form-group col-md-2">
+              <label class="form-control-label" for="margem_lucro_e">Margem Lucro</label>
+              <div class="input-group">
+                <span class="input-group-text">%</span>
+                <input type="number" class="form-control" formControlName="margem_lucro" id="margem_lucro_e" [value]="_margemLucro" readonly>
+              </div>
+            </div>
+
+            <!-- QUANTIDADE -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="quantidade_e">Quantidade<em>*</em> </label>
+              <div class="input-group">
+                <span class="input-group-text">UN</span>
+                <input type="number" class="form-control" formControlName="quantidade" id="quantidade_e">
+              </div>
+            </div>
+
+            <!-- ESTOQUE MINIMO -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="estoque_minimo_e">Estoque Minimo<em>*</em> </label>
+              <div class="input-group">
+                <span class="input-group-text">UN</span>
+                <input type="number" class="form-control" formControlName="estoque_minimo" id="estoque_minimo_e">
+              </div>
+            </div>
+
+            <!-- ESTOQUE MAXIMO -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="estoque_maximo_e">Estoque Maximo<em>*</em> </label>
+              <div class="input-group">
+                <span class="input-group-text">UN</span>
+                <input type="number" class="form-control" formControlName="estoque_maximo" id="estoque_maximo_e">
+              </div>
+            </div>
+
+            <!-- ALERTA REPOSIÇÃO -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="alerta_reposicao_e">Alerta Reposição<em>*</em> </label>
+              <div class="input-group">
+                <span class="input-group-text">UN</span>
+                <input type="number" class="form-control" formControlName="alerta_reposicao" id="alerta_reposicao_e">
+              </div>
+            </div>
+
+            <!-- DESCONTO -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="preco_venda_e">Desconto <em></em></label>
+              <div class="input-group">
+                <span class="input-group-text">R$</span>
+                <input type="number" class="form-control" formControlName="desconto" id="desconto_e">
+              </div>
+            </div>
+
+
+          </div>
+
+          <div class="row">
+
+            <!-- DESCRIÇÃO -->
+            <div class="form-group col-md-6">
+              <label class="form-control-label" for="descricao_e">Descrição <em>*</em></label>
+              <textarea class="form-control" formControlName="descricao" id="descricao_e" placeholder="Descrição do produto/serviço" rows="4" maxlength="60"></textarea>
+            </div>
+
+            <!-- QR CODE -->
+            <div style="border: 1px solid #ccc; padding: 5px;">
+              <qrcode [level]="2" [qrvalue]="generateQRCodeValueEdit()" id="qrcode_e"></qrcode>
+              <input type="hidden">
+            </div>
+
+          </div>
+          <div>
+            <br>
+            <button type="button" class="btn btn-secondary mr-2" (click)="setActiveTab('consulta')">Cancelar</button>
+            <button type="submit" class="btn btn-primary" (click)="onUpdate()">Atualizar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+
+
     <!--Consulta renderiza aqui-->
     <div class="table-responsive" *ngIf="!loading && activeTab === 'consulta'">
       <table class="table table-condensed table-hover">
@@ -72,7 +368,7 @@
           <td>{{ product.quantidade }} un</td>
           <td>
 
-            <button type="button" class="btn btn-sm btn-outline-primary btn-block" (click)="setActiveTab('detalhes')">
+            <button type="button" class="btn btn-sm btn-outline-primary btn-block" (click)="editProduct(product); setActiveTab('detalhes')">
               Detalhes
             </button>
 
@@ -244,8 +540,8 @@
             </div>
 
             <!-- QR CODE -->
-            <div>
-              <qrcode [level]="2" [qrvalue]="generateQRCodeValue()" class="form-control" id="qrcode_c"></qrcode>
+            <div style="border: 1px solid #ccc; padding: 5px;">
+              <qrcode [level]="2" [qrvalue]="generateQRCodeValue()" id="qrcode_c"></qrcode>
               <input type="hidden" formControlName="qrcode">
             </div>
 
