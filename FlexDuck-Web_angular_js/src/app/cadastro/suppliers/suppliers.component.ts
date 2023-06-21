@@ -30,8 +30,8 @@ export class SuppliersComponent implements OnInit {
     { value: 15, name: 'Supervisor' },
     { value: 10, name: 'Vendedor' },
   ];
-  defaultPaymentTypes = ['Dinheiro', 'Cartão de Credito', 'TED', 'PIX', 'Boleto'];
-  defaultDeliveryTimes = ['7 dias úteis', '15 dias úteis', '30 dias úteis', '90 dias úteis'];
+  defaultPaymentTypes = ['Dinheiro', 'Cartão de Credito', 'TED', 'Cartão de Débito', 'PIX', 'Boleto', 'Outros'];
+  defaultDeliveryTimes = [7, 15, 30, 90, 120];
 
   constructor(private suppliersService: SuppliersService, private fb: FormBuilder) {
     const currentDate = new Date();

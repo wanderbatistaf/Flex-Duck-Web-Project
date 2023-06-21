@@ -114,23 +114,25 @@
             </div>
 
             <!-- PRAZO DE ENTREGA -->
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-4">
               <label class="form-control-label" for="prazo_entrega_c">Prazo de Entrega <em>*</em></label>
               <select class="form-control" formControlName="prazo_entrega" id="prazo_entrega_c" >
-                <option *ngFor="let deliveryTime of defaultDeliveryTimes" [value]="deliveryTime">{{ deliveryTime }}</option>
+                <option *ngFor="let deliveryTime of defaultDeliveryTimes" [value]="deliveryTime">{{ deliveryTime }} dias</option>
               </select>
             </div>
-          </div>
 
-          <div class="row">
-
-            <!-- Detalhes Pagamento -->
-            <div class="form-group col-md-6">
+            <!-- DETALHES DO PAGAMENTO -->
+            <div class="form-group col-md-4">
               <label class="form-control-label" for="detalhes_pagamento_c">Detalhes do Pagamento <em>*</em></label>
                 <select class="form-control" formControlName="detalhes_pagamento" id="detalhes_pagamento_c" >
                   <option *ngFor="let paymentType of defaultPaymentTypes" [value]="paymentType">{{ paymentType }}</option>
                 </select>
               </div>
+          </div>
+
+          <div class="row">
+
+
             </div>
           <div>
             <br>
@@ -162,7 +164,7 @@
       <td>{{ supplier.nome }}</td>
       <td>{{ supplier.contato }}</td>
       <td>{{ supplier.detalhes_pagamento }}</td>
-      <td>{{ supplier.prazo_entrega }}</td>
+      <td>{{ supplier.prazo_entrega }} dias</td>
       <td>
         <button type="button" class="btn btn-sm btn-outline-info btn-block" (click)="editSupplier(supplier); setActiveTab('edicao')">
           Editar
