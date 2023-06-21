@@ -10,7 +10,8 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^16.1.1",
+    "@angular/animations": "^14.2.0",
+    "@angular/cdk": "^7.3.7",
     "@angular/common": "^14.2.0",
     "@angular/compiler": "^14.2.0",
     "@angular/core": "^14.2.0",
@@ -29,7 +30,6 @@
     "install": "^0.13.0",
     "jquery": "^3.6.3",
     "jwt-decode": "^3.1.2",
-    "ngx-toastr": "^12.1.0",
     "pdfmake": "^0.2.7",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",

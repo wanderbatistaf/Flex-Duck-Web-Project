@@ -100,8 +100,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.less",
-              "node_modules/ngx-toastr/toastr.css"
+              "src/styles.less"
             ],
             "scripts": []
           }
