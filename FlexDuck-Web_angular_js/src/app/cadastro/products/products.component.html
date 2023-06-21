@@ -1,4 +1,4 @@
-<h1 class="mt-4" xmlns="http://www.w3.org/1999/html">Produtos</h1>
+<h1 class="mt-4">Produtos</h1>
 <ol class="breadcrumb mb-4">
   <li class="breadcrumb-item active">Cadastro | Consulta</li>
 </ol>
@@ -157,7 +157,7 @@
 
           <!-- QR CODE -->
           <div class="col-md-10 d-flex justify-content-end">
-            <div class="mt-auto" style="border: 1px solid #ccc; padding: 5px;">
+            <div class="mt-auto" style="border: 1px solid rgba(204,204,204,0); padding: 5px;">
               <qrcode [level]="2" [qrvalue]="generateQRCodeValueEdit()" id="qrcode_d"></qrcode>
               <input type="hidden">
             </div>
@@ -168,8 +168,8 @@
         <!-- Botões -->
         <div class="row">
           <div class="col-md-6">
-            <button class="btn btn-primary" (click)="gerarPDF()">Imprimir em PDF</button>
             <button type="button" class="btn btn-secondary mr-2" (click)="setActiveTab('consulta')">Cancelar</button>
+            <button class="btn btn-primary" (click)="gerarPDF()">Imprimir em PDF</button>
           </div>
     </div>
     </div>
@@ -327,7 +327,7 @@
             </div>
 
             <!-- QR CODE -->
-            <div style="border: 1px solid #ccc; padding: 5px;">
+            <div style="border: 1px solid rgba(204,204,204,0); padding: 5px;">
               <qrcode [level]="2" [qrvalue]="generateQRCodeValueEdit()" id="qrcode_e"></qrcode>
               <input type="hidden">
             </div>
@@ -356,6 +356,7 @@
           <th>Fornecedor</th>
           <th>Preço</th>
           <th>Estoque</th>
+          <th>Quick Buttons</th>
           <th>Ações</th>
         </tr>
         </thead>
@@ -368,6 +369,20 @@
           <td>{{ product.fornecedor_nome }}</td>
           <td>R$ {{ product.preco_venda }}</td>
           <td>{{ product.quantidade }} un</td>
+          <td>
+            <button class="btn btn-outline-secondary" title="Copiar" (click)="copyProductCode(product)">
+              <span class="bi bi-files"></span>
+              📋
+            </button>
+            <button id="PrintButton" class="btn btn-outline-secondary" title="Imprimir">
+              <span class="bi bi-print"></span>
+              🖨️
+            </button>
+            <button id="AddButton" class="btn btn-outline-secondary" title="Adicionar">
+              <span class="bi bi-add"></span>
+              ➕
+            </button>
+          </td>
           <td>
 
             <button type="button" class="btn btn-sm btn-outline-primary btn-block" (click)="editProduct(product); setActiveTab('detalhes')">

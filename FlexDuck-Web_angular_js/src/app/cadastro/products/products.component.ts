@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild, InjectionToken, FactoryProvider} from '@angular/core';
 import { JwtHelperService } from "@auth0/angular-jwt";
 import {Products, Suppliers, User} from "@app/_models";
 import {FormBuilder, FormGroup, Validators, ɵElement} from "@angular/forms";
@@ -11,12 +11,27 @@ import {environment} from "@environments/environment";
 import * as pdfMake from 'pdfmake/build/pdfmake'
 import { PageOrientation, TDocumentDefinitions } from 'pdfmake/interfaces';
 import html2canvas from "html2canvas";
+import { ToastrService } from 'ngx-toastr';
+import { trigger, state, style, animate, transition } from '@angular/animations';
+
 
 
 @Component({
   selector: 'app-products',
   templateUrl: './products.component.html',
-  styleUrls: ['./products.component.less']
+  styleUrls: ['./products.component.less'],
+  animations: [
+    trigger('flyInOut', [
+      state('in', style({ transform: 'translateX(0)' })),
+      transition(':enter', [
+        style({ transform: 'translateX(-100%)' }),
+        animate(500)
+      ]),
+      transition(':leave', [
+        animate(500, style({ transform: 'translateX(100%)' }))
+      ])
+    ])
+  ]
 })
 export class ProductsComponent implements OnInit {
   @ViewChild('content') content!: ElementRef;
@@ -58,7 +73,8 @@ export class ProductsComponent implements OnInit {
               private productService: ProductService,
               private suppliersService: SuppliersService,
               private http: HttpClient,
-              private formBuilder: FormBuilder) {
+              private formBuilder: FormBuilder,
+              private toastr: ToastrService) {
 
     this.form = this.formBuilder.group({
       preco_custo: [],
@@ -531,6 +547,31 @@ export class ProductsComponent implements OnInit {
       pdfMake.createPdf(pdfDefinition).open();
     });
   }
+
+
+  copyProductCode(product: Products) {
+    const productCode = product.codigo; // Código do produto a copiar
+
+    if (productCode) {
+      navigator.clipboard.writeText(productCode)
+        .then(() => {
+          this.toastr.success('Código do produto copiado para a área de transferência!', '', {
+            timeOut: 3000,
+            toastClass: 'toast-yellow',
+            positionClass: 'toast-top-full-width'
+          });
+        })
+        .catch((error) => {
+          console.error('Erro ao copiar o código do produto:', error);
+        });
+    }
+  }
+
+
+
+
+
+
 
 
 

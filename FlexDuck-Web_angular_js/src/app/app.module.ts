@@ -22,6 +22,9 @@ import { SuppliersComponent } from "@app/cadastro/suppliers/suppliers.component"
 import { ProductsComponent } from "@app/cadastro/products/products.component";
 import { AnQrcodeModule } from "an-qrcode";
 import { QrscanComponent } from "@app/cadastro/products/qrscan/qrscan.component";
+import { ToastrModule } from 'ngx-toastr';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 
 @NgModule({
   imports: [
@@ -35,7 +38,10 @@ import { QrscanComponent } from "@app/cadastro/products/qrscan/qrscan.component"
     TextMaskModule,
     NgOptimizedImage,
     MatIconModule,
-    AnQrcodeModule
+    AnQrcodeModule,
+    ToastrModule,
+    ToastrModule.forRoot(),
+    BrowserAnimationsModule
   ],
   declarations: [
     AppComponent,
