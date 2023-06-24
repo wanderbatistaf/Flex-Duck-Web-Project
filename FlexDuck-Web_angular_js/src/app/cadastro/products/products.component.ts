@@ -33,7 +33,10 @@ export class ProductsComponent implements OnInit {
   formCad: FormGroup;
   formEdit: FormGroup;
   submitted = false;
+  valor: number = 0;
   selectedProduct: any;
+  produtoAtivo: any;
+  botaoAtivo: boolean = false;
   lastProductCode: string = 'P000000';
   public passwordVisible: boolean = false;
   levels = [
@@ -52,6 +55,7 @@ export class ProductsComponent implements OnInit {
     }[K], null>
   }>;
   _margemLucro: number;
+  mostrarInput: boolean = false;
 
   constructor(private usersService: UserService,
               private fb: FormBuilder,
@@ -127,13 +131,64 @@ export class ProductsComponent implements OnInit {
     this.level = decodedToken?.level;
     this.getProduct();
     this.filterProduct(this.searchText);
-      this.getCurrentUser();
-      setTimeout(() => {
-        this.buscarFornecedores();
-      }, 1000);
+    this.getCurrentUser();
+    setTimeout(() => {
+      this.buscarFornecedores();
+    }, 1000);
 
 
   }
+
+  incrementar() {
+    this.valor++;
+  }
+
+  decrementar() {
+    if (this.valor > 0) {
+      this.valor--;
+    }
+  }
+
+
+  toggleInput(product: any) {
+    this.produtoAtivo = this.produtoAtivo === product ? null : product;
+    this.mostrarInput = this.produtoAtivo !== null;
+  }
+
+  atualizarQuantidade(id: number | undefined, valor: number) {
+    if (id === undefined || valor === 0) {
+      // ID inválido ou valor igual a zero, retorna ou executa alguma ação apropriada
+      return;
+    }
+
+    // Obtém o produto atual ou executa alguma ação apropriada para obter o produto
+
+    // Verifica se é uma adição ou subtração
+    const quantidadeAtual = this.produtoAtivo?.quantidade || 0;
+    const novaQuantidade = quantidadeAtual + valor;
+
+    // Atualiza a quantidade do produto
+    const updateProduct: Products = {
+      quantidade: novaQuantidade
+    };
+
+    this.productService.updateProductByIdShortCut(id, updateProduct).subscribe(
+      (response) => {
+        console.log(response);
+        this.getProduct();
+        this.hideUpdateQtdConfirmationAfterDelay(2500);
+        this.valor = 0; // Limpa o campo de input
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+
+
+
+
+
 
   getLastProductCode() {
     const isProductDefault = 1; // Define o valor de is_product para produtos como true
@@ -559,7 +614,15 @@ export class ProductsComponent implements OnInit {
     }
   }
 
-
+  hideUpdateQtdConfirmationAfterDelay(delay: number) {
+    const UpdateQtdConfirmation = document.getElementById('qtd-shortcut-confirmation');
+    if (UpdateQtdConfirmation) {
+      UpdateQtdConfirmation.classList.add('show');
+      setTimeout(() => {
+        UpdateQtdConfirmation.classList.remove('show');
+      }, delay);
+    }
+  }
 
 
 

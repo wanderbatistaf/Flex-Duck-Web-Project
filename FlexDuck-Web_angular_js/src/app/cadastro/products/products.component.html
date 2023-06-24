@@ -3,6 +3,7 @@
   <li class="breadcrumb-item active">Cadastro | Consulta</li>
 </ol>
 <div id="copy-confirmation" class="copy-confirmation">Código do produto copiado para a área de transferência!</div>
+<div id="qtd-shortcut-confirmation" class="qtd-shortcut-confirmation">A quantidade do produto foi atualizada com sucesso!</div>
 
 <!-- Abas de Navegação -->
 <ul class="nav nav-tabs mb-4">
@@ -379,10 +380,24 @@
               <span class="bi bi-print"></span>
               🖨️
             </button>
-            <button id="AddButton" class="btn btn-outline-secondary" title="Adicionar">
-              <span class="bi bi-add"></span>
-              ➕
+            <button id="AddButton" class="btn btn-outline-secondary" title="Adicionar" (click)="toggleInput(product)">
+              <span *ngIf="!mostrarInput">➕</span>
+              <span *ngIf="mostrarInput && product === produtoAtivo" (click)="atualizarQuantidade(product.id, valor)">✔️</span>
+              <span *ngIf="mostrarInput && product !== produtoAtivo">➕</span>
             </button>
+
+
+            <div *ngIf="mostrarInput && product === produtoAtivo">
+              <button (click)="decrementar()">-</button>
+              <input type="number" [align]="'center'" [(ngModel)]="valor" class="input-pequeno">
+              <button (click)="incrementar()">+</button>
+            </div>
+
+
+
+
+
+
           </td>
           <td>
 

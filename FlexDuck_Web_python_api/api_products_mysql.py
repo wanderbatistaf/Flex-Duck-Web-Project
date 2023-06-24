@@ -136,3 +136,68 @@ def buscar_dados_user(is_product):
     else:
         return jsonify({'mensagem': 'Produto não encontrado!'}), 404
 
+
+# Define a rota PUT para atualizar dados no banco de dados
+@api_products.route('/products/shortcut/update/<int:id>', methods=['PUT'])
+@jwt_required()
+def atualizar_dados_atalho(id):
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+    dados = request.json
+    print(dados)
+    cursor = db.cursor()
+    sql = 'UPDATE produtos_servicos SET quantidade = %s WHERE id = %s'
+    val = (dados['quantidade'], id)
+    cursor.execute(sql, val)
+    db.commit()
+    cursor.close()
+    return jsonify({'mensagem': 'Dados atualizados com sucesso!'})
+
+# @api_products.route('/products/increment/<int:id>', methods=['PUT'])
+# @jwt_required()
+# def incrementar_quantidade(id):
+#     current_user = get_jwt_identity()
+#     if not current_user:
+#         return abort(404)
+#
+#     cursor = db.cursor()
+#     # Consultar a quantidade atual do produto
+#     cursor.execute('SELECT quantidade FROM produtos_servicos WHERE id = %s', (id,))
+#     quantidade_atual = cursor.fetchone()[0]
+#
+#     # Incrementar a quantidade em 1
+#     nova_quantidade = quantidade_atual + 1
+#
+#     # Atualizar a quantidade no banco de dados
+#     cursor.execute('UPDATE produtos_servicos SET quantidade = %s WHERE id = %s', (nova_quantidade, id))
+#     db.commit()
+#     cursor.close()
+#
+#     return jsonify({'mensagem': 'Quantidade incrementada com sucesso!'})
+#
+#
+# @api_products.route('/products/decrement/<int:id>', methods=['PUT'])
+# @jwt_required()
+# def decrementar_quantidade(id):
+#     current_user = get_jwt_identity()
+#     if not current_user:
+#         return abort(404)
+#
+#     cursor = db.cursor()
+#     # Consultar a quantidade atual do produto
+#     cursor.execute('SELECT quantidade FROM produtos_servicos WHERE id = %s', (id,))
+#     quantidade_atual = cursor.fetchone()[0]
+#
+#     # Verificar se a quantidade atual é maior que 0 antes de decrementar
+#     if quantidade_atual > 0:
+#         nova_quantidade = quantidade_atual - 1
+#
+#         # Atualizar a quantidade no banco de dados
+#         cursor.execute('UPDATE produtos_servicos SET quantidade = %s WHERE id = %s', (nova_quantidade, id))
+#         db.commit()
+#
+#     cursor.close()
+#
+#     return jsonify({'mensagem': 'Quantidade decrementada com sucesso!'})
+

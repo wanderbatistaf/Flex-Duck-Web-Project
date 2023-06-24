@@ -31,7 +31,7 @@ export class ProductService {
   }
 
   // Cria o método para atualizar um produto específico pelo ID
-  updateProductById(id: number, updateProduct: Products): Observable<Products> {
+  updateProductById(id: number | undefined, updateProduct: Products): Observable<Products> {
     return this.http.put<Products>(`${environment.apiUrl}/products/update/${id}`, updateProduct)
   }
 
@@ -44,5 +44,11 @@ export class ProductService {
   ScanQRcode(codigo: string): Observable<Products> {
     return this.http.get<Products>(`${environment.apiUrl}/qrscan/${codigo}`);
   }
+
+  // Cria o método para atualizar um produto específico pelo ID através do atalho
+  updateProductByIdShortCut(id: number | undefined, updateProduct: Products): Observable<Products> {
+    return this.http.put<Products>(`${environment.apiUrl}/products/shortcut/update/${id}`, updateProduct)
+  }
+
 
 }

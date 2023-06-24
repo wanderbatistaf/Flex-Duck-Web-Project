@@ -110,7 +110,7 @@ def check_db_connection():
             encerrar_aplicativo()
             # Reinicia o aplicativo em um novo processo
             reiniciar_aplicativo()
-        time.sleep(35)  # Aguarda 35 segundos
+        time.sleep(15)  # Aguarda 35 segundos
 
 # Função para encerrar o aplicativo Flask
 def encerrar_aplicativo():
