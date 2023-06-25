@@ -53,6 +53,7 @@ def buscar_dados_user(user_id):
     val = (user_id,)
     cursor.execute(sql, val)
     result = cursor.fetchone()
+    print(result)
     cursor.close()
     if result:
         return jsonify({'mensagem': 'Cliente localizado com sucesso!', 'cliente': result})

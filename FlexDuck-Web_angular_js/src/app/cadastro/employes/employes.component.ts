@@ -4,8 +4,9 @@ import { UserService } from '@app/_services';
 import { map } from 'rxjs';
 import { Level, User } from '@app/_models';
 import jwt_decode from 'jwt-decode';
-import { Router } from '@angular/router';
+import {ActivatedRoute, Router, Params, ParamMap} from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {environment} from "@environments/environment";
 
 @Component({
   selector: 'app-employes',
@@ -34,7 +35,10 @@ export class EmployesComponent implements OnInit {
     { value: 5, name: 'Vendedor' },
   ];
 
-  constructor(private usersService: UserService, private fb: FormBuilder, private router: Router) {
+  constructor(private usersService: UserService,
+              private fb: FormBuilder,
+              private router: Router,
+              private route: ActivatedRoute) {
     const currentDate = new Date();
     const offset = -3;
     const adjustedTimestamp = currentDate.getTime() + offset * 60 * 60 * 1000;
@@ -68,14 +72,65 @@ export class EmployesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const token = localStorage.getItem('token');
-    const decodedToken = token ? this.jwtHelper.decodeToken(token) : null;
-    this.level = decodedToken?.level;
-    this.getUser();
+    const token = localStorage.getItem('access_token');
+
+    try {
+      if (token) {
+        const decodedToken: any = jwt_decode(token);
+        const user_id = decodedToken.sub.user_id;
+        this.currentUser = user_id;
+      }
+    } catch (error) {
+      console.error('Failed to decode token:', error);
+    }
+
     this.filterUser(this.searchText);
     this.getCurrentUser(); // Call the method to get the current user
-    this.getUser();
+    const currentUrl = this.router.url; // Obtém a URL atual
+    console.log(currentUrl);
+
+    if (currentUrl.endsWith('/consulta')) {
+      this.getUser();
+    } else if (currentUrl.endsWith('/edicao_user')) {
+      const userId = this.currentUser; // Use o currentUser obtido anteriormente
+      this.setActiveTab('edicao_user');
+      this.usersService.getUserById(userId).subscribe((response: any) => {
+        const user = response.cliente;
+        this.selectedUser = {
+          user_id: user[0],
+          username: user[1],
+          name: user[2],
+          password: user[3],
+          active: user[4],
+          email: user[5],
+          created_at: user[6],
+          level: user[8],
+          last_login: user[7]
+        };
+        console.log(this.selectedUser);
+
+        // Preenche os campos do formulário com os dados do usuário atual
+        this.formEdit.patchValue({
+          user_id: this.selectedUser.user_id,
+          username: this.selectedUser.username,
+          name: this.selectedUser.name,
+          password: this.selectedUser.password,
+          active: this.selectedUser.active,
+          email: this.selectedUser.email,
+          created_at: this.selectedUser.created_at,
+          level: this.selectedUser.level,
+          last_login: this.selectedUser.last_login,
+        });
+      });
+    }
   }
+
+
+
+
+
+
+
 
   // Method to format the "created_at" field
   formatCreatedAt(): string {
@@ -236,7 +291,6 @@ export class EmployesComponent implements OnInit {
     this.selectedUser = user;
     this.setActiveTab('edicao');
     console.log(this.selectedUser);
-
     this.formEdit.patchValue({
       user_id: this.selectedUser.user_id, // Use the correct property name 'user_id'
       username: this.selectedUser.username, // Use the correct property name 'username'
@@ -250,6 +304,9 @@ export class EmployesComponent implements OnInit {
     });
   }
 
+  redirectToHome(): void {
+    this.router.navigateByUrl('/home');
+  }
 
 
   onUpdate() {
@@ -265,6 +322,29 @@ export class EmployesComponent implements OnInit {
           console.log(updatedUser);
           alert('Usuário atualizado com sucesso!');
           this.setActiveTab('consulta');
+        },
+        (error) => {
+          console.log('Erro ao atualizar o usuário', error);
+          console.log(updatedUser);
+          // Implemente aqui o que deve acontecer em caso de erro
+        }
+      );
+    }
+  }
+
+  onUpdateProfile() {
+    const updatedUser: User = this.formEdit.value;
+    const userId = this.selectedUser.user_id;
+
+    const confirmUpdate = confirm('Tem certeza que deseja atualizar as informações do usuário?');
+
+    if (confirmUpdate) {
+      this.usersService.updateUserById(userId, updatedUser).subscribe(
+        (response) => {
+          console.log('Usuário atualizado com sucesso', response);
+          console.log(updatedUser);
+          alert('Usuário atualizado com sucesso!');
+          this.redirectToHome();
         },
         (error) => {
           console.log('Erro ao atualizar o usuário', error);

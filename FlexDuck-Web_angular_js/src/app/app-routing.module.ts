@@ -14,21 +14,34 @@ import {QrscanComponent} from "@app/cadastro/products/qrscan/qrscan.component";
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: '', component:LayoutComponent, children: [
-      { path: '', component: HomeComponent, canActivate: [AuthGuard] },
+  {
+    path: '',
+    component: LayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
+      { path: '', component: HomeComponent },
       { path: 'home', component: HomeComponent },
       { path: 'payments', component: PaymentsListComponent },
-      { path: 'employes', component: EmployesComponent },
+      {
+        path: 'employes',
+        component: EmployesComponent,
+        children: [
+          { path: '', redirectTo: 'consulta', pathMatch: 'full' },
+          { path: 'cadastro', component: EmployesComponent },
+          { path: 'consulta', component: EmployesComponent },
+          { path: 'edicao_user', component: EmployesComponent },
+        ]
+      },
       { path: 'products', component: ProductsComponent },
       { path: 'clients', component: ClientsComponent },
       { path: 'suppliers', component: SuppliersComponent }
-    ]},
+    ]
+  },
   { path: 'products/qrscan/:codigo', component: QrscanComponent },
-
-
   // otherwise redirect to home
   { path: '**', redirectTo: '' }
 ];
+
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

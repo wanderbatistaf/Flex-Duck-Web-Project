@@ -1,0 +1,16 @@
+.text-center {
+  text-align: center;
+}
+
+.avatar-name {
+  text-align: center;
+  padding-left: 5px;
+  color: white;
+  font-weight: normal;
+  transition: font-weight 0.3s ease-in-out;
+}
+
+.avatar-name:hover {
+  font-weight: bold;
+}
+

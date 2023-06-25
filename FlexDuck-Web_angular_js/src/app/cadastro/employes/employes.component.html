@@ -6,16 +6,18 @@
 
 <!-- Abas de Navegação -->
 <ul class="nav nav-tabs mb-4">
-    <li class="nav-item">
-        <a class="nav-link" [class.active]="isTabActive('cadastro')"
-            (click)="setActiveTab('cadastro'); getLastUserId()">Cadastro</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" [class.active]="isTabActive('consulta')" (click)="setActiveTab('consulta')">Funcionários</a>
-    </li>
-    <li class="nav-item" [hidden]="true">
-        <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('edicao')">Edição</a>
-    </li>
+  <li class="nav-item" *ngIf="activeTab !== 'edicao_user'">
+    <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro')">Cadastro</a>
+  </li>
+  <li class="nav-item" *ngIf="activeTab !== 'edicao_user'">
+    <a class="nav-link" [class.active]="isTabActive('consulta')" (click)="setActiveTab('consulta')">Funcionários</a>
+  </li>
+  <li class="nav-item" *ngIf="activeTab !== 'edicao_user' && activeTab === 'edicao'">
+    <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('edicao')">Edição</a>
+  </li>
+  <li class="nav-item" *ngIf="activeTab === 'edicao_user'">
+    <a class="nav-link" [class.active]="isTabActive('edicao_user')" (click)="setActiveTab('edicao_user')">Profile</a>
+  </li>
 </ul>
 
 <!--NavBar superior (Search+Adicionar)-->
@@ -40,6 +42,107 @@
 <!--Usuarios renderizam aqui-->
 <div class="card mt-4">
     <div class="card-body">
+      <!--Edição_User renderiza aqui!-->
+      <div *ngIf="activeTab === 'edicao_user'">
+        <div class="container">
+          <form [formGroup]="formEdit" novalidate>
+
+            <div class="row">
+
+              <div class="form-group col-md-2">
+                <label class="form-control-label" for="user_id_eu">User ID <em>*</em></label>
+                <input type="text" class="form-control" formControlName="user_id" id="user_id_eu" placeholder=""
+                       maxlength="6" readonly>
+                <!-- <div *ngIf="touchedVerify('firstName')" class="form-control-feedback">Por favor, insira um nome válido.</div> -->
+              </div>
+
+              <!-- LAST LOGIN -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="last_login_eu">Último acesso</label>
+                <input type="text" class="form-control" formControlName="last_login" id="last_login_eu"
+                       readonly>
+              </div>
+
+
+              <div class="form-group col-md-4">
+                <label class="form-control-label">Ativo? <em>*</em></label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" formControlName="active" id="active_eu">
+                  <label class="form-check-label" for="active_eu">
+                    Ativo
+                  </label>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="row">
+
+              <!-- USERNAME -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="username_eu">Username <em>*</em></label>
+                <input type="text" class="form-control" formControlName="username" id="username_eu" placeholder="Ex: Lucas" maxlength="50">
+                <!-- <div *ngIf="touchedVerify('firstName')" class="form-control-feedback">Por favor, insira um
+                        nome válido.</div> -->
+              </div>
+
+              <!-- NAME -->
+              <div class="form-group col-md-5">
+                <label class="form-control-label" for="name_eu">Nome <em>*</em></label>
+                <input type="text" class="form-control" formControlName="name" id="name_eu"
+                       placeholder="Ex: Renan da Silva" maxlength="60">
+                <!-- <div *ngIf="touchedVerify('lastName')" class="form-control-feedback">Por favor, insira um
+                        nome válido.</div> -->
+              </div>
+
+              <!-- Password -->
+              <div class="form-group col-md-3">
+                <label class="form-control-label" for="password_eu">Senha <em>*</em></label>
+                <div class="password-input">
+                  <input [type]="passwordVisible ? 'text' : 'password'" class="form-control" formControlName="password"
+                         id="password_eu" placeholder="">
+                </div>
+              </div>
+
+            </div>
+
+            <div class="row">
+
+              <!-- EMAIL -->
+              <div class="form-group col-md-6">
+                <label class="form-control-label" for="email_eu">Email <em>*</em></label>
+                <input type="email" class="form-control" formControlName="email" id="email_eu"
+                       placeholder="Ex: lucas@seuemail.com.br" aria-describedby="emailHelp" maxlength="60">
+                <!-- <div *ngIf="touchedVerify('email')" class="form-control-feedback">Por favor, insira um
+                        endereço de e-mail válido.</div> -->
+              </div>
+
+              <!-- CREATED AT -->
+              <div class="form-group col-md-4">
+                <label class="form-control-label" for="created_at_eu">Criado em </label>
+                <input type="text" class="form-control" formControlName="created_at" id="created_at_eu"
+                       readonly>
+              </div>
+
+              <!-- LEVEL -->
+              <div class="form-group col-md-2">
+                <label class="form-control-label" for="level_eu">Level <em>*</em></label>
+                <select class="form-control custom-select" formControlName="level" id="level_eu" name="level">
+                  <option *ngFor="let level of levels" [ngValue]="level.value">{{ level.name }}</option>
+                </select>
+              </div>
+              <div>
+                <br>
+                <button type="button" class="btn btn-secondary mr-2" (click)="redirectToHome()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" (click)="onUpdateProfile()">Atualizar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+
+
       <!--Edição renderiza aqui!-->
       <div *ngIf="activeTab === 'edicao'">
         <div class="container">

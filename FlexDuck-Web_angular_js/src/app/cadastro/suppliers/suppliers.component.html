@@ -147,7 +147,8 @@
 
     <div *ngIf="loading" class="spinner-border spinner-border-sm"></div></div>
   <!--Consulta renderiza aqui-->
-  <table class="table table-condensed table-hover" *ngIf="!loading && activeTab === 'consulta'">
+  <div class="table-responsive" *ngIf="!loading && activeTab === 'consulta'">
+    <table class="table table-condensed table-hover">
     <thead>
     <tr>
       <th>ID</th>
@@ -185,4 +186,5 @@
     </tr>
     </tbody>
   </table>
+</div>
 </div>

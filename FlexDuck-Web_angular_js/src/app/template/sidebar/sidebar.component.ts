@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { AuthenticationService } from '@app/_services';
 import { User } from '@app/_models';
 import { Level } from '@app/_models';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-sidebar',
@@ -11,12 +12,14 @@ import { Level } from '@app/_models';
 })
 export class SidebarComponent {
   user?: User | null;
-  isCadastroMenuOpen = false;
-  isInterfaceMenuOpen = false;
+  isCadastroMenuOpen = true;
+  isInterfaceMenuOpen = true;
   isLevel: number = Level.Default; // Inicializando com um valor padrão
   userName?: string; // Variável para armazenar o nome do usuário
+  userID?: number; // Variável para armazenar o id do usuário
+  private router: any;
 
-  constructor(private authenticationService: AuthenticationService) {
+  constructor(private authenticationService: AuthenticationService, router: Router) {
     this.isLevel = Level.Default; // Atribuindo um valor no construtor
     this.authenticationService.user.subscribe((x) => {
       this.user = x;
@@ -24,6 +27,7 @@ export class SidebarComponent {
       this.getUserName();
     });
     this.getUserName(); // Chamada adicional para garantir que o nome do usuário seja obtido inicialmente
+    this.getUserID();
   }
 
 
@@ -37,6 +41,11 @@ export class SidebarComponent {
 
   logout() {
     this.authenticationService.logout();
+  }
+
+  getUserID() {
+    this.userID = this.user?.user_id;
+    console.log(this.userID)
   }
 
   private checkLevel() {
@@ -68,6 +77,10 @@ export class SidebarComponent {
       this.userName = this.user.name; // Atribui o nome do usuário à variável userName
       console.log(this.userName);
     }
+  }
+
+  navigateToEdit() {
+    this.router.navigate(['/employes/edicao']);
   }
 
 
