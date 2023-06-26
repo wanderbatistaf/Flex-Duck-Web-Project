@@ -5,13 +5,13 @@ from flask import Flask, jsonify, request, abort
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
 
-from Controller import mysql_connector
+from Controller.mysql_connector import get_db_connection
 
 api_clients = Blueprint('api_clients', __name__)
 
 
 # Configura a conexão com o banco de dados MySQL
-db = mysql_connector.db
+db = get_db_connection()
 
 @api_clients.after_request
 def after_request(response):

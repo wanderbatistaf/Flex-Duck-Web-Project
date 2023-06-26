@@ -3,12 +3,12 @@ from flask import Blueprint
 from flask import Flask, jsonify, request, abort, Response
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
-from Controller import mysql_connector
+from Controller.mysql_connector import get_db_connection
 
 api_products = Blueprint('api_products', __name__)
 
 # Configura a conexão com o banco de dados MySQL
-db = mysql_connector.db
+db = get_db_connection()
 
 # API PRODUCTS #
 # Define a rota GET para buscar dados do banco de dados

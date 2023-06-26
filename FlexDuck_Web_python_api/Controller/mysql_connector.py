@@ -1,10 +1,18 @@
-import mysql.connector
+from mysql.connector import pooling
 
-# Configura a conexão com o banco de dados MySQL
-db = mysql.connector.connect(
-    host="db4free.net",
-    port="3306",
-    user="flexduck",
-    password="lavemopato",
-    database="flexduckdb"
-)
+# Configuração do pool de conexões do MySQL
+db_config = {
+    "host": "db4free.net",
+    "port": "3306",
+    "user": "flexduck",
+    "password": "lavemopato",
+    "database": "flexduckdb",
+
+}
+
+# Criação do pool de conexões
+db_pool = pooling.MySQLConnectionPool(pool_name="fleduckdb_pool", pool_size=5, **db_config)
+
+# Função para obter uma conexão do pool
+def get_db_connection():
+    return db_pool.get_connection()

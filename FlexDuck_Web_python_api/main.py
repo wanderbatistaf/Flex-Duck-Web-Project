@@ -5,7 +5,8 @@ import threading
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
-from Controller import mysql_connector
+from Controller.mysql_connector import get_db_connection
+from FlexDuck_Web_python_api.Controller import mysql_connector
 
 # Inicializa o aplicativo Flask
 app = Flask(__name__)
@@ -16,15 +17,14 @@ jwt = JWTManager(app)
 # Função para reconectar ao banco de dados MySQL
 def reconnect_db():
     try:
-        db.ping(reconnect=True)
-        print("Conexão estavel com o banco de dados")
-    except mysql_connector.errors.OperationalError:
+        conn = get_db_connection()
+        conn.ping(reconnect=True)
+        print("Conexão estável com o banco de dados")
+        conn.close()
+    except mysql_connector.OperationalError:
         print("Erro de conexão com o banco de dados. Tentando reconectar...")
-        db.reconnect()
+        conn.reconnect()
         print("Reconexão bem-sucedida ao banco de dados")
-
-# Configura a conexão com o banco de dados MySQL
-db = mysql_connector.db
 
 # Adiciona as rotas de usuários
 from api_user_mysql import api_users
@@ -45,10 +45,12 @@ app.register_blueprint(api_products)
 @app.route('/server/status/check-connection', methods=['GET'])
 def check_connection():
     try:
-        cursor = db.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         cursor.execute("SELECT 1")
         result = cursor.fetchone()
         cursor.close()
+        conn.close()
         if result:
             return jsonify({'status': 'ok'})
         else:
@@ -61,10 +63,12 @@ def check_connection():
 @app.route('/auth/login', methods=['POST'])
 def autenticar_usuario():
     dados = request.json
-    cursor = db.cursor(dictionary=True)
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM usuarios WHERE username=%s AND password=%s", (dados['username'], dados['password']))
     user = cursor.fetchone()
     cursor.close()
+    conn.close()
     if user:
         token_data = {
             'username': user['username'],
@@ -110,7 +114,7 @@ def check_db_connection():
             encerrar_aplicativo()
             # Reinicia o aplicativo em um novo processo
             reiniciar_aplicativo()
-        time.sleep(15)  # Aguarda 35 segundos
+        time.sleep(35)  # Aguarda 35 segundos
 
 # Função para encerrar o aplicativo Flask
 def encerrar_aplicativo():
@@ -128,12 +132,14 @@ def reiniciar_aplicativo():
 
 @app.route('/qrscan/<string:codigo>', methods=['GET'])
 def buscar_dados_do_produto_qrscan(codigo):
-    cursor = db.cursor()
+    conn = get_db_connection()
+    cursor = conn.cursor()
     sql = 'SELECT codigo, nome, quantidade, preco_venda, descricao FROM produtos_servicos WHERE codigo = %s'
     val = (codigo,)
     cursor.execute(sql, val)
     result = cursor.fetchone()
     cursor.close()
+    conn.close()
     if result:
         return jsonify({'mensagem': 'Produto localizado com sucesso!', 'produto': result})
     else:
