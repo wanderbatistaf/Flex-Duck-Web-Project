@@ -26,7 +26,7 @@ export class LoginComponent implements OnInit {
   ) {
     // Redirect to the home page if already logged in
     if (this.authenticationService.userValue) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/home']);
     }
   }
 
@@ -39,6 +39,10 @@ export class LoginComponent implements OnInit {
     this.authenticationService.user.subscribe((user) => {
       this.isActive = user?.active || false; // Assign the value of 'active' to the isActive property
       console.log('isActive:', this.isActive);
+
+      if (user) {
+        this.router.navigateByUrl('/home'); // Redirecionar para '/home'
+      }
     });
 
     this.checkDbConnection()
