@@ -6,7 +6,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from Controller.mysql_connector import get_db_connection
-from FlexDuck_Web_python_api.Controller import mysql_connector
+from Controller import mysql_connector
 
 # Inicializa o aplicativo Flask
 app = Flask(__name__)
