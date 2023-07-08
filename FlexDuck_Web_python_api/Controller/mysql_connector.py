@@ -7,7 +7,6 @@ db_config = {
     "user": "flexduck",
     "password": "lavemopato",
     "database": "flexduckdb",
-
 }
 
 # Criação do pool de conexões

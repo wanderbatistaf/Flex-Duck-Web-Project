@@ -127,3 +127,4 @@ def get_last_supplier_id():
         return response
     except Exception as e:
         return jsonify(error=str(e)), 500
+

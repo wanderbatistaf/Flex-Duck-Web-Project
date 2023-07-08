@@ -209,3 +209,5 @@ def atualizar_dados_atalho(id):
 #
 #     return jsonify({'mensagem': 'Quantidade decrementada com sucesso!'})
 
+
+

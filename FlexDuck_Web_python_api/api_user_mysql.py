@@ -150,3 +150,4 @@ def atualizar_login_access(user_id):
     db.commit()
     cursor.close()
     return jsonify({'mensagem': 'Dados atualizados com sucesso!'})
+

@@ -152,3 +152,5 @@ check_db_thread.start()
 # Executa o aplicativo Flask
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, threaded=True)
+
+

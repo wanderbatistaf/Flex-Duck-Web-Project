@@ -182,3 +182,4 @@ def excluir_dados_client(id):
     db.commit()
     cursor.close()
     return jsonify({'mensagem': 'Dados excluídos com sucesso!'})
+
