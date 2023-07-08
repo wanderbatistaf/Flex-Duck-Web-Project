@@ -1,7 +1,11 @@
 import json
+import time
+import mysql.connector
+
 from flask import Blueprint
 from flask import Flask, jsonify, request, abort, Response
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flaskext import mysql
 
 from Controller.mysql_connector import get_db_connection
 from Controller.mysql_connector import reconnect_db
@@ -19,12 +23,27 @@ def buscar_dados():
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
-    reconnect_db()
-    cursor = db.cursor()
-    cursor.execute('SELECT * FROM produtos_servicos where is_product = 1')
-    resultados = cursor.fetchall()
-    print(resultados)
-    cursor.close()
+
+    # Número máximo de tentativas
+    max_attempts = 3
+    current_attempt = 0
+
+    while current_attempt < max_attempts:
+        try:
+            reconnect_db()
+            cursor = db.cursor()
+            cursor.execute('SELECT * FROM produtos_servicos where is_product = 1')
+            resultados = cursor.fetchall()
+            cursor.close()
+            break  # Sai do loop se a consulta foi bem-sucedida
+        except mysql.connector.errors.OperationalError:
+            current_attempt += 1
+            if current_attempt == max_attempts:
+                print("Erro de conexão com o banco de dados após várias tentativas. Verifique a conexão e tente novamente mais tarde.")
+                return jsonify({'mensagem': 'Erro de conexão com o banco de dados.'}), 500
+            else:
+                time.sleep(2)  # Pausa de 2 segundos antes de tentar novamente
+
     items = []
     for row in resultados:
         item = {
@@ -60,13 +79,29 @@ def buscar_dados_produtos(id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
-    reconnect_db()
-    cursor = db.cursor()
-    sql = 'SELECT * FROM produtos_servicos WHERE id = %s'
-    val = (id,)
-    cursor.execute(sql, val)
-    result = cursor.fetchone()
-    cursor.close()
+
+    # Número máximo de tentativas
+    max_attempts = 3
+    current_attempt = 0
+
+    while current_attempt < max_attempts:
+        try:
+            reconnect_db()
+            cursor = db.cursor()
+            sql = 'SELECT * FROM produtos_servicos WHERE id = %s'
+            val = (id,)
+            cursor.execute(sql, val)
+            result = cursor.fetchone()
+            cursor.close()
+            break  # Sai do loop se a consulta foi bem-sucedida
+        except mysql.connector.errors.OperationalError:
+            current_attempt += 1
+            if current_attempt == max_attempts:
+                print("Erro de conexão com o banco de dados após várias tentativas. Verifique a conexão e tente novamente mais tarde.")
+                return jsonify({'mensagem': 'Erro de conexão com o banco de dados.'}), 500
+            else:
+                time.sleep(2)  # Pausa de 2 segundos antes de tentar novamente
+
     if result:
         return jsonify({'mensagem': 'Produto localizado com sucesso!', 'produto': result})
     else:

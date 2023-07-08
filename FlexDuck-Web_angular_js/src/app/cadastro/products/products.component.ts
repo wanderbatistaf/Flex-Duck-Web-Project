@@ -132,9 +132,9 @@ export class ProductsComponent implements OnInit {
     this.getProduct();
     this.filterProduct(this.searchText);
     this.getCurrentUser();
-    setTimeout(() => {
-      this.buscarFornecedores();
-    }, 1000);
+    // setTimeout(() => {
+    //   this.buscarFornecedores();
+    // }, 1000);
 
 
   }
