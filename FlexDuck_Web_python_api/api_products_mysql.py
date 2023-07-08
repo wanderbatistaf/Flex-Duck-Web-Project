@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request, abort, Response
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
 from Controller.mysql_connector import get_db_connection
+from Controller.mysql_connector import reconnect_db
 
 api_products = Blueprint('api_products', __name__)
 
@@ -18,6 +19,7 @@ def buscar_dados():
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     cursor.execute('SELECT * FROM produtos_servicos where is_product = 1')
     resultados = cursor.fetchall()
@@ -58,6 +60,7 @@ def buscar_dados_produtos(id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'SELECT * FROM produtos_servicos WHERE id = %s'
     val = (id,)
@@ -78,6 +81,7 @@ def inserir_dados():
         return abort(404)
     dados = request.json
     print(dados)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'INSERT INTO produtos_servicos (codigo, descricao, nome, categoria,marca,preco_venda, preco_custo, margem_lucro, quantidade, localizacao, estoque_minimo, estoque_maximo, alerta_reposicao, fornecedor_id, created_at, fornecedor_nome    ) VALUES (%s, %s, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s,%s, %s, %s, %s)'
     val = (dados['codigo'], dados['descricao'], dados['nome'], dados['categoria'],dados['marca'],dados['preco_venda'], dados['preco_custo'], dados['margem_lucro'], dados['quantidade'], dados['localizacao'], dados['estoque_minimo'], dados['estoque_maximo'], dados['alerta_reposicao'], dados['fornecedor_id'], dados['created_at'], dados['fornecedor_nome'])
@@ -96,6 +100,7 @@ def atualizar_dados(id):
         return abort(404)
     dados = request.json
     print(dados)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE produtos_servicos SET codigo = %s, descricao = %s, nome = %s, categoria = %s, marca = %s, preco_venda = %s, preco_custo = %s, margem_lucro = %s , quantidade = %s, localizacao = %s, estoque_minimo = %s, estoque_maximo = %s, alerta_reposicao = %s, fornecedor_id = %s, fornecedor_nome = %s WHERE id = %s'
     val = (dados['codigo'], dados['descricao'], dados['nome'], dados['categoria'], dados['marca'], dados['preco_venda'], dados['preco_custo'], dados['margem_lucro'], dados['quantidade'], dados['localizacao'], dados['estoque_minimo'], dados['estoque_maximo'], dados['alerta_reposicao'], dados['fornecedor_id'], dados['fornecedor_nome'], id)
@@ -111,6 +116,7 @@ def excluir_dados(id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'DELETE FROM produtos_servicos WHERE id = %s'
     val = (id,)
@@ -125,6 +131,7 @@ def buscar_dados_user(is_product):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'SELECT max(created_at) as created_at, id, codigo, is_product FROM produtos_servicos WHERE is_product = %s group by 2,3 ORDER BY 1 DESC LIMIT 1'
     val = (is_product,)
@@ -146,6 +153,7 @@ def atualizar_dados_atalho(id):
         return abort(404)
     dados = request.json
     print(dados)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE produtos_servicos SET quantidade = %s WHERE id = %s'
     val = (dados['quantidade'], id)

@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager, jwt_required, create_access_token, ge
 
 
 from Controller.mysql_connector import get_db_connection
+from Controller.mysql_connector import reconnect_db
 
 api_clients = Blueprint('api_clients', __name__)
 
@@ -29,6 +30,7 @@ def buscar_todos_dados_client():
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     cursor.execute('SELECT * FROM clients')
     resultados = cursor.fetchall()
@@ -75,6 +77,7 @@ def buscar_dados_cliente(client_id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'SELECT * FROM clients WHERE client_id = %s'
     val = (client_id,)
@@ -105,6 +108,7 @@ def inserir_dados_client():
         if not dados.get('business_name'):
             dados['business_name'] = f"{dados['firstname']} {dados['lastname']}"
         print(dados)
+        reconnect_db()
         cursor = db.cursor()
         sql = 'INSERT INTO clients (business_name, firstname, lastname, cnpj_cpf, telephone, email, blocked_since, cep,' \
               ' created_at, district, gender, inactive_since, natural_person, number, state, street, ' \
@@ -145,6 +149,7 @@ def atualizar_dados_client(id):
     if not current_user:
         return abort(404)
     dados = request.json
+    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE clients SET business_name = %s, firstname = %s, lastname = %s, cnpj_cpf = %s, telephone = %s, ' \
           'email = %s, blocked_since = %s, cep = %s, district = %s, gender = %s, inactive_since = %s, ' \
@@ -169,6 +174,7 @@ def excluir_dados_client(id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'DELETE FROM clients WHERE client_id = %s'
     val = (id,)

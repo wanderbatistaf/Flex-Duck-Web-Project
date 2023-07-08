@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request, abort
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
 from Controller.mysql_connector import get_db_connection
+from Controller.mysql_connector import reconnect_db
 
 
 api_suppliers = Blueprint('api_suppliers', __name__)
@@ -18,6 +19,7 @@ def buscar_dados():
     current_supplier = get_jwt_identity()
     if not current_supplier:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     cursor.execute('SELECT * FROM fornecedores')
     resultados = cursor.fetchall()
@@ -45,6 +47,7 @@ def buscar_dados_user(id):
     current_supplier = get_jwt_identity()
     if not current_supplier:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'SELECT * FROM fornecedores WHERE id = %s'
     val = (id,)
@@ -64,6 +67,7 @@ def inserir_dados():
     if not current_supplier:
         return abort(404)
     dados = request.json
+    reconnect_db()
     cursor = db.cursor()
     sql = 'INSERT INTO fornecedores (nome, contato, detalhes_pagamento, prazo_entrega) VALUES (%s, %s, %s, %s)'
     val = (dados['nome'], dados['contato'], dados['detalhes_pagamento'], dados['prazo_entrega'])
@@ -81,6 +85,7 @@ def atualizar_dados(id):
     if not current_supplier:
         return abort(404)
     dados = request.json
+    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE fornecedores SET id = %s, nome = %s, contato = %s, detalhes_pagamento = %s, prazo_entrega = %s'
     val = (dados['id'], dados['nome'], dados['contato'], dados['detalhes_pagamento'], dados['prazo_entrega'], id)
@@ -96,6 +101,7 @@ def excluir_dados(id):
     current_supplier = get_jwt_identity()
     if not current_supplier:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'DELETE FROM fornecedores WHERE id = %s'
     val = (id,)
@@ -112,6 +118,7 @@ def get_last_supplier_id():
         current_supplier = get_jwt_identity()
         if not current_supplier:
             return abort(404)
+        reconnect_db()
         cursor = db.cursor()
         cursor.execute('SELECT MAX(id) FROM fornecedores')
         last_user_id = cursor.fetchone()[0]

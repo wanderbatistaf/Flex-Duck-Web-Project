@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request, abort
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
 from Controller.mysql_connector import get_db_connection
+from Controller.mysql_connector import reconnect_db
 
 api_users = Blueprint('api_users', __name__)
 
@@ -17,6 +18,7 @@ def buscar_dados():
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     cursor.execute('SELECT * FROM usuarios')
     resultados = cursor.fetchall()
@@ -48,6 +50,7 @@ def buscar_dados_user(user_id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'SELECT * FROM usuarios WHERE user_id = %s'
     val = (user_id,)
@@ -68,6 +71,7 @@ def inserir_dados():
     if not current_user:
         return abort(404)
     dados = request.json
+    reconnect_db()
     cursor = db.cursor()
     sql = 'INSERT INTO usuarios (username, name, password, active, email, created_at, level) VALUES (%s, %s, %s, %s, %s, %s, %s)'
     val = (dados['username'], dados['name'], dados['password'], dados['active'], dados['email'], dados['created_at'], dados['level'])
@@ -85,6 +89,7 @@ def atualizar_dados(user_id):
     if not current_user:
         return abort(404)
     dados = request.json
+    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE usuarios SET username = %s, name = %s, password = %s, active = %s, email = %s, ' \
           'level = %s WHERE user_id = %s'
@@ -102,6 +107,7 @@ def excluir_dados(user_id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+    reconnect_db()
     cursor = db.cursor()
     sql = 'DELETE FROM usuarios WHERE user_id = %s'
     val = (user_id,)
@@ -118,6 +124,7 @@ def get_last_user_id():
         current_user = get_jwt_identity()
         if not current_user:
             return abort(404)
+        reconnect_db()
         cursor = db.cursor()
         cursor.execute('SELECT MAX(user_id) FROM usuarios')
         last_user_id = cursor.fetchone()[0]
@@ -135,6 +142,7 @@ def atualizar_login_access(user_id):
     if not current_user:
         return abort(404)
     dados = request.json
+    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE usuarios SET last_login = %s WHERE user_id = %s'
     val = (dados['last_login'], user_id)
