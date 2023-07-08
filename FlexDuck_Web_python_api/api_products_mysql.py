@@ -5,7 +5,6 @@ import mysql.connector
 from flask import Blueprint
 from flask import Flask, jsonify, request, abort, Response
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
-from flaskext import mysql
 
 from Controller.mysql_connector import get_db_connection
 from Controller.mysql_connector import reconnect_db
