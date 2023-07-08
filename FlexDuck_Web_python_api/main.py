@@ -42,6 +42,18 @@ app.register_blueprint(api_suppliers)
 from api_products_mysql import api_products
 app.register_blueprint(api_products)
 
+# Adiciona as rotas de contabil
+from api_contabil_mysql import api_contabilidade
+app.register_blueprint(api_contabilidade)
+
+# Adiciona as rotas de notas de entrada
+from api_notas_entrada_mysql import api_notas_entrada
+app.register_blueprint(api_notas_entrada)
+
+# Adiciona as rotas de notas de saida
+from api_notas_saida_mysql import api_notas_saida
+app.register_blueprint(api_notas_saida)
+
 @app.route('/server/status/check-connection', methods=['GET'])
 def check_connection():
     try:

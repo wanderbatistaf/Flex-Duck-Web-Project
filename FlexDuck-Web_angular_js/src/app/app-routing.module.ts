@@ -11,6 +11,9 @@ import { ProductsComponent } from "@app/cadastro/products/products.component";
 import { ClientsComponent } from "@app/cadastro/clients/clients.component";
 import {SuppliersComponent} from "@app/cadastro/suppliers/suppliers.component";
 import {QrscanComponent} from "@app/cadastro/products/qrscan/qrscan.component";
+import {ContabilidadeComponent} from "@app/contabilidade/contabilidade/contabilidade.component";
+import {NotasEntradaComponent} from "@app/contabilidade/notas-entrada/notas-entrada.component";
+import {NotasSaidaComponent} from "@app/contabilidade/notas-saida/notas-saida.component";
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -34,7 +37,10 @@ const routes: Routes = [
       },
       { path: 'products', component: ProductsComponent },
       { path: 'clients', component: ClientsComponent },
-      { path: 'suppliers', component: SuppliersComponent }
+      { path: 'suppliers', component: SuppliersComponent },
+      { path: 'contabil', component: ContabilidadeComponent },
+      { path: 'notas-entrada', component: NotasEntradaComponent },
+      { path: 'notas-saida', component: NotasSaidaComponent },
     ]
   },
   { path: 'products/qrscan/:codigo', component: QrscanComponent },

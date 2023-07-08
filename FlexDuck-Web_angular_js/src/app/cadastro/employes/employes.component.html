@@ -7,7 +7,7 @@
 <!-- Abas de Navegação -->
 <ul class="nav nav-tabs mb-4">
   <li class="nav-item" *ngIf="activeTab !== 'edicao_user'">
-    <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro')">Cadastro</a>
+    <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro'); getLastUserId()">Cadastro</a>
   </li>
   <li class="nav-item" *ngIf="activeTab !== 'edicao_user'">
     <a class="nav-link" [class.active]="isTabActive('consulta')" (click)="setActiveTab('consulta')">Funcionários</a>

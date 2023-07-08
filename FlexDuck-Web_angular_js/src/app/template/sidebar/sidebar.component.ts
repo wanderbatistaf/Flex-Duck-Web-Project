@@ -14,6 +14,7 @@ export class SidebarComponent {
   user?: User | null;
   isCadastroMenuOpen = true;
   isInterfaceMenuOpen = true;
+  isContabilidadeMenuOpen = true;
   isLevel: number = Level.Default; // Inicializando com um valor padrão
   userName?: string; // Variável para armazenar o nome do usuário
   userID?: number; // Variável para armazenar o id do usuário
@@ -37,6 +38,10 @@ export class SidebarComponent {
 
   toggleInterfaceMenu() {
     this.isInterfaceMenuOpen = !this.isInterfaceMenuOpen;
+  }
+
+  toggleContabilidadeMenu() {
+    this.isContabilidadeMenuOpen = !this.isContabilidadeMenuOpen;
   }
 
   logout() {

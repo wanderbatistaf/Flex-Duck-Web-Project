@@ -50,6 +50,29 @@
             Fornecedores
           </a>
         </div>
+        <div class="sb-sidenav-menu-heading"
+             (click)="toggleContabilidadeMenu()"
+             style="color: white"
+             onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'; this.style.backgroundColor='rgba(0,0,0,0.2)'"
+             onmouseout="this.style.boxShadow=''; this.style.backgroundColor=''">
+          <i class="fas fa-list"></i> Contabilidade
+        </div>
+        <div *ngIf="isContabilidadeMenuOpen">
+          <a class="nav-link collapsed" routerLink="/contabil" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 15"
+          ><div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
+            Contabil
+          </a>
+
+          <a class="nav-link collapsed" routerLink="/notas-entrada" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 10"
+          ><div class="sb-nav-link-icon"><i class="fa fa-file-invoice-dollar"></i></div>
+            NF Entrada
+          </a>
+
+          <a class="nav-link collapsed" routerLink="/notas-saida" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 10"
+          ><div class="sb-nav-link-icon"><i class="fas fa-file-invoice"></i></div>
+            NF Saida
+          </a>
+        </div>
       </div>
     </div>
 

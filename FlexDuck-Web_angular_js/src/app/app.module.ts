@@ -22,6 +22,9 @@ import { SuppliersComponent } from "@app/cadastro/suppliers/suppliers.component"
 import { ProductsComponent } from "@app/cadastro/products/products.component";
 import { AnQrcodeModule } from "an-qrcode";
 import { QrscanComponent } from "@app/cadastro/products/qrscan/qrscan.component";
+import { ContabilidadeComponent } from './contabilidade/contabilidade/contabilidade.component';
+import { NotasEntradaComponent } from './contabilidade/notas-entrada/notas-entrada.component';
+import { NotasSaidaComponent } from './contabilidade/notas-saida/notas-saida.component';
 
 
 @NgModule({
@@ -46,7 +49,10 @@ import { QrscanComponent } from "@app/cadastro/products/qrscan/qrscan.component"
     ClientsComponent,
     SuppliersComponent,
     ProductsComponent,
-    QrscanComponent
+    QrscanComponent,
+    ContabilidadeComponent,
+    NotasEntradaComponent,
+    NotasSaidaComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
