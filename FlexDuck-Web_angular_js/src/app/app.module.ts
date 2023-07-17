@@ -12,7 +12,7 @@ import { HomeComponent } from './home';
 import { LoginComponent } from './login';
 import { TemplateModule } from './template/template.module';
 import { LayoutComponent } from './layout/layout.component';
-import { PaymentsModule } from './payments/payments.module';
+import { SalesModule } from './sales/sales.module';
 import { JwtHelperService } from "@auth0/angular-jwt";
 import { EmployesComponent } from './cadastro/employes/employes.component';
 import { ClientsComponent } from "@app/cadastro/clients/clients.component";
@@ -25,6 +25,7 @@ import { QrscanComponent } from "@app/cadastro/products/qrscan/qrscan.component"
 import { ContabilidadeComponent } from './contabilidade/contabilidade/contabilidade.component';
 import { NotasEntradaComponent } from './contabilidade/notas-entrada/notas-entrada.component';
 import { NotasSaidaComponent } from './contabilidade/notas-saida/notas-saida.component';
+import { SalesComponent } from "@app/sales/sales.component";
 
 
 @NgModule({
@@ -34,7 +35,7 @@ import { NotasSaidaComponent } from './contabilidade/notas-saida/notas-saida.com
     HttpClientModule,
     AppRoutingModule,
     TemplateModule,
-    PaymentsModule,
+    SalesModule,
     FormsModule,
     TextMaskModule,
     NgOptimizedImage,
@@ -52,7 +53,8 @@ import { NotasSaidaComponent } from './contabilidade/notas-saida/notas-saida.com
     QrscanComponent,
     ContabilidadeComponent,
     NotasEntradaComponent,
-    NotasSaidaComponent
+    NotasSaidaComponent,
+    SalesComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

@@ -4,7 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home';
 import { LayoutComponent } from './layout/layout.component';
 import { LoginComponent } from './login';
-import { PaymentsListComponent } from './payments/payments-list/payments-list.component';
+import { SalesComponent } from './sales/sales.component';
 import { AuthGuard } from './_helpers';
 import { EmployesComponent } from "@app/cadastro/employes/employes.component";
 import { ProductsComponent } from "@app/cadastro/products/products.component";
@@ -24,7 +24,7 @@ const routes: Routes = [
     children: [
       { path: '', component: HomeComponent },
       { path: 'home', component: HomeComponent },
-      { path: 'payments', component: PaymentsListComponent },
+      { path: 'sales', component: SalesComponent },
       {
         path: 'employes',
         component: EmployesComponent,

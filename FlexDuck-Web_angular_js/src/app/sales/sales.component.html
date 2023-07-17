@@ -1,0 +1,217 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<h1 class="mt-4">FlexDuck</h1>
+<ol class="breadcrumb mb-4">
+  <li class="breadcrumb-item active">Vendas</li>
+</ol>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card bg-light pb-4" style="border-radius: 25px;">
+        <div class="card-body">
+          <h5 class="card-title">FlexDuck Vendas</h5>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="inputVendedor">Vendedor:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="inputVendedor">
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="inputCliente">Cliente:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="inputCliente">
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="inputCpf">CPF:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="inputCpf">
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="inputTelefone">Telefone:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="inputTelefone">
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="codigoProduto">Código:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="codigoProduto">
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="inputProduto">Produto:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="inputProduto">
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="inputQuantidade">Quantidade:</label>
+                <input type="number" class="form-control" id="inputQuantidade">
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <button class="btn btn-primary" id="btnAdicionar">Adicionar</button>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-body">
+                  <table class="table">
+                    <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>NOME</th>
+                      <th>PREÇO</th>
+                      <th>DESCONTO</th>
+                      <th>TOTAL</th>
+                    </tr>
+                    </thead>
+                    <tbody id="listaProdutos">
+                    <!-- Linhas da tabela serão adicionadas dinamicamente com JavaScript -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card bg-light pb-4" style="border-radius: 25px;">
+        <div class="card-body">
+          <h5 class="card-title">Total</h5>
+
+          <div class="form-row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="subtotal">Subtotal:</label>
+                <input type="text" class="form-control" id="subtotal" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="desconto">Desconto:</label>
+                <input type="text" class="form-control" id="desconto">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="total">Total:</label>
+                <input type="text" class="form-control" id="total" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="formaPagamento">Forma de Pagamento:</label>
+                <select class="form-control" id="formaPagamento">
+                  <option value="1">Dinheiro</option>
+                  <option value="2">Cartão de Crédito</option>
+                  <option value="3">Cartão de Débito</option>
+                  <option value="4">Pix</option>
+                  <option value="5">PicPay</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="bandeira">Bandeira:</label>
+                <select class="form-control" id="bandeira">
+                  <option value="">Selecione a bandeira</option>
+                  <option value="1">Visa</option>
+                  <option value="2">Mastercard</option>
+                  <option value="3">American Express</option>
+                  <option value="4">Elo</option>
+                  <option value="5">Hipercard</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="parcelamento">Parcelamento:</label>
+                <input type="number" class="form-control" id="parcelamento">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="col-md-12">
+              <button class="btn btn-success btn-block" id="btnFinalizar">Finalizar Venda</button>
+            </div>
+          </div>
+
+          <div class="form-row mt-2">
+            <div class="col-md-12">
+              <button class="btn btn-outline-danger btn-block" id="btnCencelar">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
