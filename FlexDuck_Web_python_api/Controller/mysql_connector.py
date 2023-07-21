@@ -11,20 +11,22 @@ db_config = {
 }
 
 # Criação do pool de conexões
-db_pool = pooling.MySQLConnectionPool(pool_name="fleduckdb_pool", pool_size=10, **db_config)
+db_pool = pooling.MySQLConnectionPool(pool_name="fleduckdb_pool", pool_size=20, **db_config)
 
 # Função para obter uma conexão do pool
 def get_db_connection():
-    return db_pool.get_connection()
+    try:
+        return db_pool.get_connection()
+    except pooling.errors.PoolError as e:
+        print("Erro ao obter conexão do pool: ", str(e))
+        return None
 
 # Função para reconectar ao banco de dados MySQL
-def reconnect_db():
+def reconnect_db(conn):
     try:
-        conn = get_db_connection()
         conn.ping(reconnect=True)
         print("Conexão estável com o banco de dados")
-        conn.close()
-    except mysql_connector.OperationalError:
+    except pooling.errors.OperationalError as e:
         print("Erro de conexão com o banco de dados. Tentando reconectar...")
         conn.reconnect()
         print("Reconexão bem-sucedida ao banco de dados")

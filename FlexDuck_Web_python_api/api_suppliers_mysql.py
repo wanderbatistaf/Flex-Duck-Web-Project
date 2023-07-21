@@ -14,6 +14,10 @@ api_suppliers = Blueprint('api_suppliers', __name__)
 # Configura a conexão com o banco de dados MySQL
 db = get_db_connection()
 
+# Função para reconectar ao banco de dados
+def reconnect_db():
+    db.ping(reconnect=True)
+
 # API SUPPLIERS #
 # Define a rota GET para buscar dados do banco de dados
 @api_suppliers.route('/suppliers', methods=['GET'])

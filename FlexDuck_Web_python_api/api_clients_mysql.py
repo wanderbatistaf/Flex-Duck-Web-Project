@@ -15,6 +15,10 @@ api_clients = Blueprint('api_clients', __name__)
 # Configura a conexão com o banco de dados MySQL
 db = get_db_connection()
 
+# Função para reconectar ao banco de dados
+def reconnect_db():
+    db.ping(reconnect=True)
+
 @api_clients.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')

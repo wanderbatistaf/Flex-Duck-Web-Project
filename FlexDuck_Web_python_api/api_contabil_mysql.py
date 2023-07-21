@@ -13,6 +13,10 @@ api_contabilidade = Blueprint('api_contabilidade', __name__)
 # Configura a conexão com o banco de dados MySQL
 db = get_db_connection()
 
+# Função para reconectar ao banco de dados
+def reconnect_db():
+    db.ping(reconnect=True)
+
 # API CONTABILIDADE #
 # Define a rota GET para buscar dados do banco de dados
 @api_contabilidade.route('/contabilidade', methods=['GET'])

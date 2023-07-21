@@ -1,12 +1,13 @@
 import sys
 import subprocess
-import time
 import threading
+import time
+from threading import Thread
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
-from Controller.mysql_connector import get_db_connection
-from Controller import mysql_connector
+from Controller.mysql_connector import get_db_connection, db_pool
+import mysql.connector
 
 # Inicializa o aplicativo Flask
 app = Flask(__name__)
@@ -14,14 +15,25 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = '4Ndr3w5077' # Chave secreta do JWT
 jwt = JWTManager(app)
 
+
+# Variável para armazenar a referência à thread de verificação de conexão
+check_db_thread = None
+
+# Variável global para controlar a execução da thread
+app_running = True
+
+# Função para encerrar a conexão com o banco de dados
+def fechar_conexao_db(exception=None):
+    global db_pool
+    db_pool.shutdown()
+
+
 # Função para reconectar ao banco de dados MySQL
-def reconnect_db():
+def reconnect_db(conn):
     try:
-        conn = get_db_connection()
         conn.ping(reconnect=True)
         print("Conexão estável com o banco de dados")
-        conn.close()
-    except mysql_connector.OperationalError:
+    except mysql.connector.errors.OperationalError:
         print("Erro de conexão com o banco de dados. Tentando reconectar...")
         conn.reconnect()
         print("Reconexão bem-sucedida ao banco de dados")
@@ -53,6 +65,18 @@ app.register_blueprint(api_notas_entrada)
 # Adiciona as rotas de notas de saida
 from api_notas_saida_mysql import api_notas_saida
 app.register_blueprint(api_notas_saida)
+
+# Adiciona as rotas de forma de pagamento
+from api_forma_pagamento_mysql import api_forma_pagamento
+app.register_blueprint(api_forma_pagamento)
+
+# Adiciona as rotas das bandeiras de cartão
+from api_bandeiras_card_mysql import api_bandeiras
+app.register_blueprint(api_bandeiras)
+
+# Adiciona as rotas de vendas
+from api_vendas_mysql import api_vendas
+app.register_blueprint(api_vendas)
 
 @app.route('/server/status/check-connection', methods=['GET'])
 def check_connection():
@@ -115,22 +139,36 @@ def get_user_level():
     else:
         return jsonify({'mensagem': 'Nível de acesso não encontrado'}), 404
 
+
+# Variável global para controlar a execução da thread
+app_running = True
+
 # Função para verificar a conexão a cada 5 minutos
 def check_db_connection():
-    while True:
-        try:
-            reconnect_db()
-        except Exception as e:
-            print("Erro ao verificar a conexão com o banco de dados:", str(e))
-            # Encerra o aplicativo Flask
-            encerrar_aplicativo()
-            # Reinicia o aplicativo em um novo processo
-            reiniciar_aplicativo()
-        time.sleep(35)  # Aguarda 35 segundos
+    global app_running
+    while app_running:
+        conn = get_db_connection()
+        if conn:
+            try:
+                reconnect_db(conn)
+                conn.close()
+            except Exception as e:
+                print("Erro ao verificar a conexão com o banco de dados:", str(e))
+                # Encerra o aplicativo Flask
+                app_running = False
+                encerrar_aplicativo()
+                # Reinicia o aplicativo em um novo processo
+                reiniciar_aplicativo()
+        time.sleep(300)  # Aguarda 5 minutos
+
 
 # Função para encerrar o aplicativo Flask
 def encerrar_aplicativo():
+    global check_db_thread
     print("Encerrando o aplicativo...")
+    app_running = False  # Define a variável de controle como False para encerrar a thread de verificação de conexão
+    if check_db_thread:
+        check_db_thread.join()  # Aguarda a thread de verificação de conexão encerrar
     func = request.environ.get('werkzeug.server.shutdown')
     if func is not None:
         func()
@@ -138,9 +176,15 @@ def encerrar_aplicativo():
 
 # Função para reiniciar o aplicativo em um novo processo
 def reiniciar_aplicativo():
+    global check_db_thread
     print("Reiniciando o aplicativo...")
+    if check_db_thread:
+        check_db_thread.join()  # Aguarde a thread de verificação de conexão encerrar completamente
+    check_db_thread = threading.Thread(target=check_db_connection)  # Inicie novamente a thread de verificação de conexão
+    check_db_thread.start()
     subprocess.Popen([sys.executable] + sys.argv)
     sys.exit()
+
 
 @app.route('/qrscan/<string:codigo>', methods=['GET'])
 def buscar_dados_do_produto_qrscan(codigo):
@@ -157,12 +201,16 @@ def buscar_dados_do_produto_qrscan(codigo):
     else:
         return jsonify({'mensagem': 'Produto não encontrado!'}), 404
 
-# Thread para executar a função de verificação de conexão
-check_db_thread = threading.Thread(target=check_db_connection)
+# Inicia a thread de verificação de conexão
+check_db_thread = Thread(target=check_db_connection)
 check_db_thread.start()
+
 
 # Executa o aplicativo Flask
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, threaded=True)
+    try:
+        app.run(host='0.0.0.0', port=5000, threaded=True)
+    finally:
+        app.teardown_appcontext(fechar_conexao_db)
 
 

@@ -115,6 +115,7 @@
                       <th>NOME</th>
                       <th>PREÇO</th>
                       <th>DESCONTO</th>
+                      <th>QUANTIDADE</th>
                       <th>TOTAL</th>
                     </tr>
                     </thead>
@@ -145,13 +146,30 @@
           </div>
 
           <div class="form-row">
-            <div class="col-md-12">
+            <div class="col-md-6">
               <div class="form-group">
-                <label for="desconto">Desconto:</label>
-                <input type="text" class="form-control" id="desconto">
+                <label for="descontoValor">Desconto R$:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="descontoValor" readonly>
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-key"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="descontoPercent">Desconto %:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="descontoPercent" readonly>
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-key"></i></span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
 
           <div class="form-row">
             <div class="col-md-12">
@@ -167,11 +185,7 @@
               <div class="form-group">
                 <label for="formaPagamento">Forma de Pagamento:</label>
                 <select class="form-control" id="formaPagamento">
-                  <option value="1">Dinheiro</option>
-                  <option value="2">Cartão de Crédito</option>
-                  <option value="3">Cartão de Débito</option>
-                  <option value="4">Pix</option>
-                  <option value="5">PicPay</option>
+                  <option *ngFor="let paytype of paytypes" [value]="paytype.id">{{ paytype.nome }}</option>
                 </select>
               </div>
             </div>
@@ -183,6 +197,7 @@
                 <label for="bandeira">Bandeira:</label>
                 <select class="form-control" id="bandeira">
                   <option value="">Selecione a bandeira</option>
+                  <option value="0">A Vista</option>
                   <option value="1">Visa</option>
                   <option value="2">Mastercard</option>
                   <option value="3">American Express</option>

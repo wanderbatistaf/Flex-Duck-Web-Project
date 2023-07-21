@@ -13,6 +13,10 @@ api_notas_entrada = Blueprint('api_notas_entrada', __name__)
 # Configura a conexão com o banco de dados MySQL
 db = get_db_connection()
 
+# Função para reconectar ao banco de dados
+def reconnect_db():
+    db.ping(reconnect=True)
+
 # API NOTAS ENTRADA #
 # Define a rota GET para buscar dados das notas de entrada
 @api_notas_entrada.route('/notas-entrada', methods=['GET'])
