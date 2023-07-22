@@ -2,3 +2,16 @@ td.editing {
     background-color: #f5f5f5;
     border: 1px solid #ddd;
   }
+
+.custom-modal .modal-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-modal .modal-backdrop {
+  display: none; /* Esconde o backdrop escuro */
+  max-width: 1200px; /* Ajuste o valor para o tamanho desejado */
+  width: 150%;
+}
+

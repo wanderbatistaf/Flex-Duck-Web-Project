@@ -1,0 +1,39 @@
+<div class="modal-header">
+  <h5 class="modal-title text-center">Clientes</h5>
+  <button type="button" class="close" aria-label="Fechar" (click)="closeModal()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <!-- Adicione a barra de pesquisa (searchbar) antes da tabela -->
+  <div class="input-group mb-3 justify-content-center">
+    <input type="text" class="form-control" placeholder="Pesquisar clientes" aria-label="Pesquisar clientes" aria-describedby="search-button">
+    <div class="spacer"></div> <!-- Espaço do botão -->
+    <div class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button" id="search-button">Pesquisar</button>
+    </div>
+  </div>
+
+  <!-- Adicione a tabela para exibir a lista de clientes carregados da API aqui -->
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th class="text-center">Nome</th>
+      <th class="text-center">CPF</th>
+      <th class="text-center">Telefone</th>
+      <th class="text-center">Selecionar</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Adicione os clientes aqui usando *ngFor ou carregue-os da API -->
+    <tr *ngFor="let cliente of clientes">
+      <td class="text-center">{{ cliente.business_name }}</td>
+      <td class="text-center">{{ cliente.cnpj_cpf }}</td>
+      <td class="text-center">{{ cliente.telephone }}</td>
+      <td class="text-center">
+        <button class="btn btn-primary">Selecionar</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>

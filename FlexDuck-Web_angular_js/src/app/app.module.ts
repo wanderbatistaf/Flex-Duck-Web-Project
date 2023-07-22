@@ -26,6 +26,10 @@ import { ContabilidadeComponent } from './contabilidade/contabilidade/contabilid
 import { NotasEntradaComponent } from './contabilidade/notas-entrada/notas-entrada.component';
 import { NotasSaidaComponent } from './contabilidade/notas-saida/notas-saida.component';
 import { SalesComponent } from "@app/sales/sales.component";
+import {NgbModalModule, NgbModule} from "@ng-bootstrap/ng-bootstrap";
+import { ClienteModalComponent } from './modals/cliente-modal/cliente-modal.component';
+import { VendedorModalComponent } from './modals/vendedor-modal/vendedor-modal.component';
+import { ProdutoModalComponent } from './modals/produto-modal/produto-modal.component';
 
 
 @NgModule({
@@ -39,7 +43,10 @@ import { SalesComponent } from "@app/sales/sales.component";
     FormsModule,
     TextMaskModule,
     NgOptimizedImage,
-    AnQrcodeModule
+    AnQrcodeModule,
+    NgbModule,
+    NgbModalModule,
+
   ],
   declarations: [
     AppComponent,
@@ -54,7 +61,10 @@ import { SalesComponent } from "@app/sales/sales.component";
     ContabilidadeComponent,
     NotasEntradaComponent,
     NotasSaidaComponent,
-    SalesComponent
+    SalesComponent,
+    ClienteModalComponent,
+    VendedorModalComponent,
+    ProdutoModalComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
