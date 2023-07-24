@@ -3,6 +3,7 @@ import { NgbActiveModal, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstra
 import { User } from "@app/_models";
 import {map} from "rxjs";
 import {UserService} from "@app/_services";
+import {SharedService} from "@app/_services/SharedService";
 
 // Crie uma interface para o tipo de dados que você precisa
 interface Vendor {
@@ -21,7 +22,8 @@ export class VendedorModalComponent implements OnInit {
   private currentUser?: number;
   constructor(private modalService: NgbModal,
               public activeModal: NgbActiveModal,
-              private usersService: UserService) { }
+              private usersService: UserService,
+              private sharedService: SharedService) { }
 
   ngOnInit(): void {
     this.getVendor()
@@ -70,6 +72,19 @@ export class VendedorModalComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  selecionarVendedor(vendedor: Vendor) {
+    // Atualiza os valores compartilhados do Id e do Vendedor
+    this.sharedService.selectedId = vendedor.user_id;
+    this.sharedService.selectedVendedor = vendedor.name;
+
+    // Fecha o modal
+    this.activeModal.close();
+
+    // Chama a função para atualizar os campos de input no SalesComponent
+    this.sharedService.updateFieldsVendor();
+
   }
 
 

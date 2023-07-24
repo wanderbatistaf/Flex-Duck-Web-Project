@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h5 class="modal-title text-center">Clientes</h5>
-  <button type="button" class="close" aria-label="Fechar" (click)="closeModal()">
+  <button type="button" class="close" aria-label="Fechar" (click)="activeModal.close()">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
@@ -31,7 +31,7 @@
       <td class="text-center">{{ cliente.cnpj_cpf }}</td>
       <td class="text-center">{{ cliente.telephone }}</td>
       <td class="text-center">
-        <button class="btn btn-primary">Selecionar</button>
+        <button class="btn btn-primary" (click)="selecionarClient(cliente)">Selecionar</button>
       </td>
     </tr>
     </tbody>

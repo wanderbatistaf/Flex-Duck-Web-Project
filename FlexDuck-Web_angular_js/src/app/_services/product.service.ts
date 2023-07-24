@@ -21,7 +21,7 @@ export class ProductService {
   }
 
   // Cria o método para requisitar um produto específico pelo ID
-  getProductById(id: number): Observable<Products> {
+  getProductById(id: string): Observable<Products> {
     return this.http.get<Products>(`${environment.apiUrl}/products/${id}`)
   }
 

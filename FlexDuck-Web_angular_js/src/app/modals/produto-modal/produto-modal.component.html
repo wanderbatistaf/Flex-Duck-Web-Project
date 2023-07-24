@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h5 class="modal-title text-center">Produtos</h5>
-  <button type="button" class="close" aria-label="Fechar" (click)="closeModal()">
+  <button type="button" class="close" aria-label="Fechar" (click)="activeModal.close()">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
@@ -37,7 +37,7 @@
       <td class="text-center">{{ produto.quantidade }}</td>
       <td class="text-center">{{ produto.preco_venda }}</td>
       <td class="text-center">
-        <button class="btn btn-primary">Selecionar</button>
+        <button class="btn btn-primary" (click)="selecionarProduto(produto)">Selecionar</button>
       </td>
     </tr>
     </tbody>

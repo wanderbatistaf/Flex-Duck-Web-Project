@@ -110,6 +110,43 @@ def buscar_dados_produtos(id):
     else:
         return jsonify({'mensagem': 'Produto não encontrado!'}), 404
 
+
+# Define a rota GET para buscar dados do banco de dados especifico
+@api_products.route('/products/<string:codigo>', methods=['GET'])
+@jwt_required() # Protege a rota com JWT
+def buscar_dados_produtos_codigo(codigo):
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+
+    # Número máximo de tentativas
+    max_attempts = 3
+    current_attempt = 0
+
+    while current_attempt < max_attempts:
+        try:
+            reconnect_db()
+            cursor = db.cursor()
+            sql = 'SELECT * FROM produtos_servicos WHERE codigo = %s'
+            val = (codigo,)
+            cursor.execute(sql, val)
+            result = cursor.fetchone()
+            cursor.close()
+            break  # Sai do loop se a consulta foi bem-sucedida
+        except mysql.connector.errors.OperationalError:
+            current_attempt += 1
+            if current_attempt == max_attempts:
+                print("Erro de conexão com o banco de dados após várias tentativas. Verifique a conexão e tente novamente mais tarde.")
+                return jsonify({'mensagem': 'Erro de conexão com o banco de dados.'}), 500
+            else:
+                time.sleep(2)  # Pausa de 2 segundos antes de tentar novamente
+
+    if result:
+        return jsonify({'mensagem': 'Produto localizado com sucesso!', 'produto': result})
+    else:
+        return jsonify({'mensagem': 'Produto não encontrado!'}), 404
+
+
 # Define a rota POST para inserir dados no banco de dados
 @api_products.route('/products/add', methods=['POST'])
 @jwt_required()

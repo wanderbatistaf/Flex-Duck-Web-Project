@@ -6,3 +6,4 @@ export * from './suppliers';
 export * from './products';
 export * from './sales';
 export * from './paytype'
+export * from './quick_client'

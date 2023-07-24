@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h5 class="modal-title text-center">Vendedores</h5>
-  <button type="button" class="close" aria-label="Fechar" (click)="closeModal()">
+  <button type="button" class="close" aria-label="Fechar" (click)="activeModal.close()">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
@@ -29,7 +29,7 @@
       <td class="text-center">{{ vendedor.user_id }}</td>
       <td class="text-center">{{ vendedor.name }}</td>
       <td class="text-center">
-        <button class="btn btn-primary">Selecionar</button>
+        <button class="btn btn-primary"  (click)="selecionarVendedor(vendedor)">Selecionar</button>
       </td>
     </tr>
     </tbody>

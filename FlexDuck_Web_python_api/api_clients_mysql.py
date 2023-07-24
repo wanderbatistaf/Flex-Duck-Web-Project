@@ -220,3 +220,47 @@ def excluir_dados_client(id):
     cursor.close()
     return jsonify({'mensagem': 'Dados excluídos com sucesso!'})
 
+
+# Define a rota GET para buscar dados do banco de dados de quick-clients
+@api_clients.route('/clients-vendas', methods=['GET'])
+@jwt_required() # Protege a rota com JWT
+def buscar_todos_dados_client_vendas():
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+
+    # Número máximo de tentativas
+    max_attempts = 3
+    current_attempt = 0
+
+    while current_attempt < max_attempts:
+        try:
+            reconnect_db()
+            cursor = db.cursor()
+            cursor.execute('SELECT * FROM combined_clients')
+            resultados = cursor.fetchall()
+            cursor.close()
+            break  # Sai do loop se a consulta foi bem-sucedida
+        except mysql.connector.errors.OperationalError:
+            current_attempt += 1
+            if current_attempt == max_attempts:
+                print("Erro de conexão com o banco de dados após várias tentativas. Verifique a conexão e tente novamente mais tarde.")
+                return jsonify({'mensagem': 'Erro de conexão com o banco de dados.'}), 500
+            else:
+                time.sleep(2)  # Pausa de 2 segundos antes de tentar novamente
+
+    items = []
+    for row in resultados:
+        item = {
+            "id": row[1],
+            "business_name": row[2],
+            "cnpj_cpf": row[3],
+            "telephone": row[4],
+        }
+        items.append(item)
+    response = {
+        "totalPage": 1,
+        "items": items
+    }
+    return jsonify(response)
+

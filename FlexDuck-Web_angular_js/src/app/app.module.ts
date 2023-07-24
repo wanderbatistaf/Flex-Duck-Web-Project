@@ -30,6 +30,7 @@ import {NgbModalModule, NgbModule} from "@ng-bootstrap/ng-bootstrap";
 import { ClienteModalComponent } from './modals/cliente-modal/cliente-modal.component';
 import { VendedorModalComponent } from './modals/vendedor-modal/vendedor-modal.component';
 import { ProdutoModalComponent } from './modals/produto-modal/produto-modal.component';
+import {SharedService} from "@app/_services/SharedService";
 
 
 @NgModule({
@@ -69,7 +70,8 @@ import { ProdutoModalComponent } from './modals/produto-modal/produto-modal.comp
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-    JwtHelperService
+    JwtHelperService,
+    SharedService
   ],
   bootstrap: [AppComponent]
 })

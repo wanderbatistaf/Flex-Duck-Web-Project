@@ -190,3 +190,57 @@ def atualizar_login_access(user_id):
     cursor.close()
     return jsonify({'mensagem': 'Dados atualizados com sucesso!'})
 
+
+# Define a rota GET para buscar dados do banco de dados especifico
+@api_users.route('/users/descount/<string:password>', methods=['GET'])
+@jwt_required() # Protege a rota com JWT
+def buscar_senha_user(password):
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM usuarios WHERE password=%s LIMIT 1", (password,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if result:
+            nivel_usuario = result.get('level')  # Obter o valor do campo 'nivel' do resultado
+            if not nivel_usuario or nivel_usuario <= 5:
+                return jsonify({'mensagem': 'Você não pode adicionar um desconto.'}), 403
+
+            return jsonify({'mensagem': 'Usuario localizado com sucesso!', 'user': result}), 200
+        else:
+            return jsonify({'mensagem': 'Usuario não encontrado!'}), 404
+
+    except mysql.connector.errors.OperationalError:
+        print("Erro de conexão com o banco de dados. Verifique a conexão e tente novamente mais tarde.")
+        return jsonify({'mensagem': 'Erro de conexão com o banco de dados.'}), 500
+
+
+# Cadastro Rapido de Clientes na Tela de Vendas
+@api_users.route('/users/quick-add', methods=['POST'])
+@jwt_required()
+def inserir_cliente_rapido():
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+    dados = request.json
+    reconnect_db()
+    cursor = db.cursor()
+    sql = 'INSERT INTO quick_clients (nome, cpf_cnpj, telefone) VALUES (%s, %s, %s)'
+    val = (dados['nome'], dados['cpf_cnpj'], dados['telefone'])
+    cursor.execute(sql, val)
+    db.commit()
+    print(cursor)
+    cursor.close()
+    return jsonify({'mensagem': 'Dados inseridos com sucesso!'})
+
+
+
+
+
+

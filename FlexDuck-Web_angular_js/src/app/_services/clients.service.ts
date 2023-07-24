@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { environment } from '@environments/environment';
-import { Clients } from "@app/_models";
+import {Clients, Quick_client} from "@app/_models";
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -33,6 +33,11 @@ export class ClientsService {
   // Cria o método para atualizar um cliente específico pelo ID
   updateClientById(id: number, updateClient: Clients): Observable<Clients> {
     return this.http.put<Clients>(`${environment.apiUrl}/clients/update/${id}`, updateClient)
+  }
+
+  // Cria o método para requisitar todos os clientes de Vendas
+  getAllVendas(): Observable<Quick_client[]> {
+    return this.http.get<Quick_client[]>(`${environment.apiUrl}/clients-vendas`);
   }
 
 

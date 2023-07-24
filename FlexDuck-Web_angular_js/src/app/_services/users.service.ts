@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { environment } from '@environments/environment';
-import { User } from '@app/_models';
-import { Observable, catchError, tap, throwError } from 'rxjs';
+import {Quick_client, User} from '@app/_models';
+import {Observable, catchError, tap, throwError, map} from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -55,4 +55,17 @@ export class UserService {
       })
     );
     }
+
+  // Cria o método para liberar desconto na tela de vendas
+  getUserLevelByPass(password: string): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/users/descount/${password}`).pipe(
+      map((response: any) => response.user as User)
+    );
+  }
+
+  // Cria o método para adicionar um cliente rapido
+  addQuickClient(quickClient: Quick_client): Observable<Quick_client> {
+    return this.http.post<Quick_client>(`${environment.apiUrl}/users/quick-add`, quickClient);
+  }
+
 }
