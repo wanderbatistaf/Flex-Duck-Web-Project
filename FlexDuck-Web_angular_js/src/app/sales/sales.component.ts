@@ -1,8 +1,8 @@
-import {Component, OnInit, ViewChild, HostListener, ElementRef} from '@angular/core';
+import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Bandeiras, Paytype, Products} from '@app/_models';
 import {FuncPaymentsService, ProductService, UserService} from '@app/_services';
 import {FormBuilder} from '@angular/forms';
-import { JwtHelperService } from "@auth0/angular-jwt";
+import {JwtHelperService} from "@auth0/angular-jwt";
 import {Router} from "@angular/router";
 import {HttpClient} from "@angular/common/http";
 import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
@@ -10,6 +10,7 @@ import {ClienteModalComponent} from "@app/modals/cliente-modal/cliente-modal.com
 import {VendedorModalComponent} from "@app/modals/vendedor-modal/vendedor-modal.component";
 import {ProdutoModalComponent} from "@app/modals/produto-modal/produto-modal.component";
 import {SharedService} from "@app/_services/SharedService";
+
 
 
 interface Produto {
@@ -70,6 +71,8 @@ export class SalesComponent implements OnInit {
   DescontoPercent: number = 0
   Parcelamento: number = 0
   CfiscalDataHora: string | undefined;
+  valorParcela: number = 0;
+  ClienteTelephone: string = '';
 
   constructor(private usersService: UserService,
               private fb: FormBuilder,
@@ -559,6 +562,14 @@ export class SalesComponent implements OnInit {
     let bandeiraElement = document.getElementById('bandeira') as HTMLSelectElement;
     this.bandeira = bandeiraElement.selectedOptions[0].text;
 
+    // Verificar se a forma de pagamento é parcelada
+    if (this.parcelamento !== 0) {
+      let parcelamento = this.Parcelamento;
+      let total = this.calcularTotal();
+      // Define o valor por parcela
+      this.valorParcela = total / parcelamento
+    }
+
     // Verificar se o desconto é zero e calcular com base no Subtotal e no Total
     if (this.DescontoPercent === 0) {
       let subtotal = this.calcularSubtotal();
@@ -585,19 +596,48 @@ export class SalesComponent implements OnInit {
   Cancelar() {
     // Redefina os valores das variáveis para limpar os campos
     this.selectedId = null;
-    this.selectedVendedor = '';
-    this.selectedClienteName = '';
-    this.selectedClienteCPF_CNPJ = '';
-    this.selectedClienteTelephone = '';
+    this.vendorName = '';
+    this.ClienteName = '';
+    this.ClienteCPF_CNPJ = '';
+    this.ClienteTelephone = '';
     this.descontoValor = 0;
     this.descontoPercent = 0;
     this.bandeira = 'select';
     this.parcelamento = 0;
-    // ...
 
     // Limpe a lista de produtos (se você tiver uma variável para isso)
     this.listaProdutos = [];
     this.atualizarListaProdutos();
+
+    // Limpar os campos de input no DOM
+    (document.getElementById('inputVendedorID') as HTMLInputElement).value = '';
+    (document.getElementById('inputVendedor') as HTMLInputElement).value = '';
+    (document.getElementById('inputCliente') as HTMLInputElement).value = '';
+    (document.getElementById('inputCpf') as HTMLInputElement).value = '';
+    (document.getElementById('inputTelefone') as HTMLInputElement).value = '';
+    (document.getElementById('descontoValor') as HTMLInputElement).value = '0';
+    (document.getElementById('descontoPercent') as HTMLInputElement).value = '0';
+    (document.getElementById('bandeira') as HTMLSelectElement).selectedIndex = 0;
+    (document.getElementById('parcelamento') as HTMLSelectElement).selectedIndex = 0;
+  }
+
+
+  imprimirCupom() {
+    const printContents = document.getElementById('cupom-fiscal')?.innerHTML;
+    const originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents!;
+    window.print();
+    document.body.innerHTML = originalContents;
+  }
+
+  gerarPDF() {
+    // const doc = new jsPDF();
+    // const element = document.getElementById('cupom-fiscal')!;
+    // doc.html(element, {
+    //   callback: function (pdf) {
+    //     pdf.save('cupom-fiscal.pdf');
+    //   },
+    // });
   }
 
 
@@ -607,4 +647,5 @@ export class SalesComponent implements OnInit {
 
 
 
-  }
+
+}

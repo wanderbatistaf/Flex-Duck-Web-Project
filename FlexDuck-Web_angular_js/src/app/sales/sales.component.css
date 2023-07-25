@@ -15,7 +15,8 @@ td.editing {
   width: 150%;
 }
 
-/* Estilos CSS para a nota fiscal */
+
+/* Estilos CSS para o cupom fiscal */
 .text-center {
   text-align: center;
 }
@@ -24,24 +25,31 @@ td.editing {
 }
 .printer-ticket {
   display: table !important;
+  margin: 0 auto; /* Adiciona margem automática para centralizar horizontalmente */
   width: 100%;
-  max-width: 500px;
+  max-width: 400px; /* Altere o valor do max-width para ajustar o tamanho do cupom */
   font-weight: lighter;
   line-height: 1.3em;
+  background-color: #fbfdd1; /* Adicione o background amarelo aqui */
 }
 .printer-ticket,
 .printer-ticket * {
   font-family: Tahoma, Geneva, sans-serif;
   font-size: 10px;
 }
+.printer-ticket th:nth-child(1),
+.printer-ticket td:nth-child(1) {
+  width: 120px;
+}
 .printer-ticket th:nth-child(2),
 .printer-ticket td:nth-child(2) {
   width: 50px;
+  text-align: center; /* Altera o alinhamento para centralizar a coluna "Qtd" */
 }
 .printer-ticket th:nth-child(3),
 .printer-ticket td:nth-child(3) {
   width: 90px;
-  text-align: right;
+  text-align: right; /* Altera o alinhamento para a direita na coluna "Total-1" */
 }
 .printer-ticket th {
   font-weight: inherit;
@@ -70,6 +78,15 @@ td.editing {
 .printer-ticket .last td {
   padding-bottom: 10px;
 }
+
+/* Adicione a classe para mover a coluna "Total" para a direita */
+.printer-ticket td.total {
+  text-align: right;
+}
+
+
+
+
 
 
 
