@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { environment } from '@environments/environment';
-import { Paytype } from "@app/_models";
+import {Bandeiras, Paytype} from "@app/_models";
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -13,6 +13,10 @@ export class FuncPaymentsService {
   // Cria o método para requisitar todas as formas de pagamento
   getAllPayTypes(): Observable<Paytype[]> {
     return this.http.get<Paytype[]>(`${environment.apiUrl}/forma_pagamento`);
+  }
+
+  getAllBandsTypes(): Observable<Bandeiras[]> {
+    return this.http.get<Bandeiras[]>(`${environment.apiUrl}/bandeiras`);
   }
 
   // Cria o método para adicionar uma forma de pagamento

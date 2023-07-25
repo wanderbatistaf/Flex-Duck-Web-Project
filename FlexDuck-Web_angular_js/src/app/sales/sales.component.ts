@@ -1,5 +1,5 @@
-import {Component, OnInit, ViewChild, HostListener} from '@angular/core';
-import {Paytype, Products, Quick_client} from '@app/_models';
+import {Component, OnInit, ViewChild, HostListener, ElementRef} from '@angular/core';
+import {Bandeiras, Paytype, Products} from '@app/_models';
 import {FuncPaymentsService, ProductService, UserService} from '@app/_services';
 import {FormBuilder} from '@angular/forms';
 import { JwtHelperService } from "@auth0/angular-jwt";
@@ -21,6 +21,9 @@ interface Produto {
   total: number;
 }
 
+// Add the jQuery declaration
+declare var $: any;
+
 @Component({
   selector: 'app-sales',
   templateUrl: './sales.component.html',
@@ -31,14 +34,16 @@ interface Produto {
 
 export class SalesComponent implements OnInit {
   @ViewChild('clienteModal') clienteModal: any;
+  @ViewChild('notaFiscalContentElement', { static: true }) notaFiscalContentElement!: ElementRef;
   jwtHelper: JwtHelperService = new JwtHelperService();
   level?: string;
   loading = false;
   qrcode: string = ''
   products: Products[] = [];
   paytypes: any[] = [];
+  bandtypes: any[] = [];
   private modalRef: NgbModalRef | undefined;
-  selectedId: number | undefined;
+  selectedId: number | null | undefined;
   selectedVendedor: string | undefined;
   selectedClienteName: string | undefined;
   selectedClienteCPF_CNPJ!: string;
@@ -55,7 +60,16 @@ export class SalesComponent implements OnInit {
   nome: string = '';
   cpfCnpj: string = '';
   telefone: string = '';
-
+  cupomFiscalModalAberto: boolean = false;
+  vendorName = ''
+  ClienteName = ''
+  ClienteCPF_CNPJ = ''
+  SubTotal: number = 0
+  Total: number = 0
+  DescontoValor: number = 0
+  DescontoPercent: number = 0
+  Parcelamento: number = 0
+  CfiscalDataHora: string | undefined;
 
   constructor(private usersService: UserService,
               private fb: FormBuilder,
@@ -75,9 +89,12 @@ export class SalesComponent implements OnInit {
     const decodedToken = token ? this.jwtHelper.decodeToken(token) : null;
     this.level = decodedToken?.level;
     this.buscarPaytypes();
+    this.buscarBandTypes();
     // Acesse os valores do Id e do Vendedor compartilhados pelo serviço
     this.selectedId = this.sharedService.selectedId;
     this.selectedVendedor = this.sharedService.selectedVendedor;
+    this.onFormaPagamentoDinheiro();
+    this.Cancelar()
 
   }
 
@@ -99,6 +116,18 @@ export class SalesComponent implements OnInit {
         console.log('Ocorreu um erro ao solicitar os tipos de pagamento.');
       }
     );
+  }
+
+  buscarBandTypes(){
+    this.paytypeService.getAllBandsTypes().subscribe(
+      (bandtypes: Bandeiras[]) => {
+        this.bandtypes = bandtypes.map((bandtype: Bandeiras) => ({id: bandtype.bandeira_id, nome:bandtype.descricao}));
+        this.loading = false;
+      },
+      (error) => {
+        console.log('Ocorreu um erro ao solicitar os tipos de bandeiras.');
+      }
+    )
   }
 
   openSearchClientModal() {
@@ -346,6 +375,7 @@ export class SalesComponent implements OnInit {
     } else {
       this.bandeiraReadonly = false;
       this.parcelamentoReadonly = false;
+      this.bandeira = 'select'
     }
   }
 
@@ -432,15 +462,13 @@ export class SalesComponent implements OnInit {
   }
 
   cadastrar() {
-    // Aqui você pode fazer a chamada para a API para cadastrar os dados no banco de dados
-    // Por exemplo:
     const dadosCadastro = {
       nome: this.nome,
       cpf_cnpj: this.cpfCnpj,
       telefone: this.telefone
     };
 
-    // Fazer a chamada para a API e cadastrar os dados no banco de dados
+    // API e cadastrar os dados no banco de dados
     this.userService.addQuickClient(dadosCadastro).subscribe(
       (data: any) => {
         console.log('Cadastro realizado com sucesso:', data);
@@ -457,9 +485,126 @@ export class SalesComponent implements OnInit {
     );
   }
 
+  validarCamposVenda() {
+    let formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
+    let bandeira = (document.getElementById('bandeira') as HTMLSelectElement).value;
+    let vendorID = (document.getElementById('inputVendedorID') as HTMLSelectElement).value;
+    let vendorName = (document.getElementById('inputVendedor') as HTMLSelectElement).value;
+    let ClienteName = (document.getElementById('inputCliente') as HTMLSelectElement).value;
+    let ClienteCPF_CNPJ = (document.getElementById('inputCpf') as HTMLSelectElement).value;
+    let ClienteTelephone = (document.getElementById('inputTelefone') as HTMLSelectElement).value;
+    let SubTotal = (document.getElementById('subtotal') as HTMLSelectElement).value;
+    let Total = (document.getElementById('total') as HTMLSelectElement).value;
+    let DescontoValor = (document.getElementById('descontoValor') as HTMLSelectElement).value;
+    let DescontoPercent = (document.getElementById('descontoPercent') as HTMLSelectElement).value;
+
+    // Verificar se todos os campos estão preenchidos
+    if (
+      vendorID &&
+      vendorName &&
+      ClienteName &&
+      ClienteCPF_CNPJ &&
+      ClienteTelephone &&
+      this.listaProdutos.length > 0 &&
+      formaPagamento !== '' && formaPagamento !== 'select' &&
+      bandeira !== 'select' && bandeira !== ''
+    ) {
+      // Todos os campos estão preenchidos, exibir alerta de confirmação
+      if (confirm('Deseja finalizar a venda?')) {
+        this.gerarCupomFiscal();
+        console.log('Rodou!')
+      }
+    } else {
+      // Alguns campos não estão preenchidos, exibir alerta de erro
+      alert('Por favor, preencha todos os campos antes de finalizar a venda.');
+    }
+  }
+
+  abrirCupomFiscalModal() {
+    this.cupomFiscalModalAberto = true;
+  }
+
+  fecharCupomFiscalModal() {
+    this.cupomFiscalModalAberto = false;
+  }
+
+
+
+  gerarCupomFiscal() {
+    let formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
+    let dataAtual = new Date();
+    dataAtual.setUTCHours(dataAtual.getUTCHours() - 3);
+
+    // Formatar a data e hora no formato (DD/MM/AAAA - HH:mm:ss)
+    let dataHoraFormatada = `${dataAtual.getUTCDate().toString().padStart(2, '0')}/${
+      (dataAtual.getUTCMonth() + 1).toString().padStart(2, '0')}/${
+      dataAtual.getUTCFullYear()} - ${
+      dataAtual.getUTCHours().toString().padStart(2, '0')}:${
+      dataAtual.getUTCMinutes().toString().padStart(2, '0')}:${
+      dataAtual.getUTCSeconds().toString().padStart(2, '0')}`;
+
+    this.CfiscalDataHora = dataHoraFormatada;
+
+    // Atualizar os valores das variáveis
+    this.Total = parseFloat((document.getElementById('total') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+    this.DescontoValor = parseFloat((document.getElementById('descontoValor') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+    this.DescontoPercent = parseFloat((document.getElementById('descontoPercent') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+    this.Parcelamento = parseInt((document.getElementById('parcelamento') as HTMLSelectElement).value, 10);
+
+    this.ClienteName = (document.getElementById('inputCliente') as HTMLSelectElement).value;
+    this.ClienteCPF_CNPJ = (document.getElementById('inputCpf') as HTMLSelectElement).value;
+    this.vendorName = (document.getElementById('inputVendedor') as HTMLSelectElement).value;
+    this.SubTotal = parseFloat((document.getElementById('subtotal') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+
+    let bandeiraElement = document.getElementById('bandeira') as HTMLSelectElement;
+    this.bandeira = bandeiraElement.selectedOptions[0].text;
+
+    // Verificar se o desconto é zero e calcular com base no Subtotal e no Total
+    if (this.DescontoPercent === 0) {
+      let subtotal = this.calcularSubtotal();
+      let total = this.calcularTotal();
+      let descontoValor = subtotal - total;
+
+      // Define o valor do desconto em R$ e em percentual
+      this.DescontoValor = descontoValor;
+      this.DescontoPercent = ((descontoValor / subtotal) * 100);
+    }
+
+    // Adicionar asterisco ao nome do produto se o desconto for maior que zero
+    this.listaProdutos.forEach(produto => {
+      produto.nome = produto.desconto > 0 ? produto.nome + ' *' : produto.nome;
+    });
+
+    // Show the modal
+    this.abrirCupomFiscalModal();
+  }
+
+
+
+
+  Cancelar() {
+    // Redefina os valores das variáveis para limpar os campos
+    this.selectedId = null;
+    this.selectedVendedor = '';
+    this.selectedClienteName = '';
+    this.selectedClienteCPF_CNPJ = '';
+    this.selectedClienteTelephone = '';
+    this.descontoValor = 0;
+    this.descontoPercent = 0;
+    this.bandeira = 'select';
+    this.parcelamento = 0;
+    // ...
+
+    // Limpe a lista de produtos (se você tiver uma variável para isso)
+    this.listaProdutos = [];
+    this.atualizarListaProdutos();
+  }
 
 
 
 
 
-}
+
+
+
+  }
