@@ -30,7 +30,7 @@ td.editing {
   max-width: 400px; /* Altere o valor do max-width para ajustar o tamanho do cupom */
   font-weight: lighter;
   line-height: 1.3em;
-  background-color: #fbfdd1; /* Adicione o background amarelo aqui */
+  /*background-color: #fbfdd1; !* Adicione o background amarelo aqui *!*/
 }
 .printer-ticket,
 .printer-ticket * {
@@ -52,7 +52,6 @@ td.editing {
   text-align: right; /* Altera o alinhamento para a direita na coluna "Total-1" */
 }
 .printer-ticket th {
-  font-weight: inherit;
   padding: 10px 0;
   text-align: center;
   border-bottom: 1px dashed #bcbcbc;
@@ -82,6 +81,58 @@ td.editing {
 /* Adicione a classe para mover a coluna "Total" para a direita */
 .printer-ticket td.total {
   text-align: right;
+}
+
+/* Estilos CSS para o cupom fiscal gerado em PDF */
+.printer-ticket {
+  width: 100%;
+  font-family: Tahoma, Geneva, sans-serif;
+  font-size: 10px;
+  text-align: center;
+}
+
+.printer-ticket th {
+  font-weight: inherit;
+  padding: 5px 0;
+  border-bottom: 1px dashed #bcbcbc;
+}
+
+.printer-ticket td {
+  padding: 5px 0;
+}
+
+/* Centraliza a coluna "Qtd" */
+.printer-ticket td:nth-child(2) {
+  text-align: center;
+}
+
+/* Centraliza a coluna "Total" */
+.printer-ticket td.total {
+  text-align: right;
+}
+
+.printer-ticket tfoot .sup td {
+  padding: 5px 0;
+  border-top: 1px dashed #bcbcbc;
+}
+
+.printer-ticket .title {
+  font-size: 1.5em;
+  padding: 10px 0;
+  font-style: inherit;
+}
+
+.printer-ticket .top td {
+  padding: 5px 0;
+}
+
+.printer-ticket .sup p {
+  margin: 0;
+  font-style: italic;
+}
+
+.printer-ticket .last td {
+  padding-bottom: 10px;
 }
 
 

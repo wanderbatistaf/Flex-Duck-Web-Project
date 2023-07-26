@@ -78,6 +78,10 @@ app.register_blueprint(api_bandeiras)
 from api_vendas_mysql import api_vendas
 app.register_blueprint(api_vendas)
 
+# Adiciona as rotas de relatorios-pdf
+from api_gerar_report import reports
+app.register_blueprint(reports)
+
 @app.route('/server/status/check-connection', methods=['GET'])
 def check_connection():
     try:

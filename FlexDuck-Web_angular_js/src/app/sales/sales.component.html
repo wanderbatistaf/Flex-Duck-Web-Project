@@ -300,7 +300,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <table id="cupom-fiscal" class="printer-ticket">
+        <table id="cupom-fiscal" class="printer-ticket" bgcolor="#fbfdd1">
           <thead>
           <tr>
             <th class="title" colspan="3">--- FlexDuck ---</th>
@@ -377,7 +377,7 @@
           </tr>
           <tr class="ttu">
             <td colspan="2" style="text-align: left;">Total pago</td>
-            <td class="total" align="right">R$({{ valorParcela }} x{{ parcelamento }}) {{ Total }}</td>
+            <td class="total" align="right">R$({{ valorParcela.toFixed(2) }} x{{ parcelamento }}) {{ Total.toFixed(2) }}</td>
           </tr>
           <tr class="sup">
             <td colspan="3" align="center" style="font-style: italic;">
@@ -389,7 +389,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" (click)="imprimirCupom(); fecharCupomFiscalModal(); Cancelar()">Imprimir</button>
-        <button type="button" class="btn btn-primary" (click)="gerarPDF(); fecharCupomFiscalModal(); Cancelar()" >Gerar PDF</button>
+        <button type="button" class="btn btn-primary" (click)="gerarPdf(); fecharCupomFiscalModal(); Cancelar()" >Gerar PDF</button>
         <button type="button" class="btn btn-secondary" (click)="fecharCupomFiscalModal(); Cancelar()">Fechar</button>
       </div>
     </div>

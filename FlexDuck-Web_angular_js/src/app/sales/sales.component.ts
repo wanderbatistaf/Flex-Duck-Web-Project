@@ -1,15 +1,22 @@
+// @ts-ignore
+// @ts-ignore
+
 import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Bandeiras, Paytype, Products} from '@app/_models';
 import {FuncPaymentsService, ProductService, UserService} from '@app/_services';
 import {FormBuilder} from '@angular/forms';
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {Router} from "@angular/router";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
 import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 import {ClienteModalComponent} from "@app/modals/cliente-modal/cliente-modal.component";
 import {VendedorModalComponent} from "@app/modals/vendedor-modal/vendedor-modal.component";
 import {ProdutoModalComponent} from "@app/modals/produto-modal/produto-modal.component";
 import {SharedService} from "@app/_services/SharedService";
+import 'jspdf-autotable';
+// @ts-ignore
+import jsPDF from "jspdf";
+import {auto} from "@popperjs/core";
 
 
 
@@ -22,8 +29,14 @@ interface Produto {
   total: number;
 }
 
-// Add the jQuery declaration
-declare var $: any;
+// Add the autotable declaration
+// @ts-ignore
+declare module "jspdf" {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
+
 
 @Component({
   selector: 'app-sales',
@@ -73,6 +86,7 @@ export class SalesComponent implements OnInit {
   CfiscalDataHora: string | undefined;
   valorParcela: number = 0;
   ClienteTelephone: string = '';
+  private cupomFiscalData: any;
 
   constructor(private usersService: UserService,
               private fb: FormBuilder,
@@ -559,8 +573,8 @@ export class SalesComponent implements OnInit {
     this.vendorName = (document.getElementById('inputVendedor') as HTMLSelectElement).value;
     this.SubTotal = parseFloat((document.getElementById('subtotal') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
 
-    let bandeiraElement = document.getElementById('bandeira') as HTMLSelectElement;
-    this.bandeira = bandeiraElement.selectedOptions[0].text;
+    // let bandeiraElement = document.getElementById('bandeira') as HTMLSelectElement;
+    //   this.bandeira = bandeiraElement.selectedOptions[0].text;
 
     // Verificar se a forma de pagamento é parcelada
     if (this.parcelamento !== 0) {
@@ -630,16 +644,55 @@ export class SalesComponent implements OnInit {
     document.body.innerHTML = originalContents;
   }
 
-  gerarPDF() {
-    // const doc = new jsPDF();
-    // const element = document.getElementById('cupom-fiscal')!;
-    // doc.html(element, {
-    //   callback: function (pdf) {
-    //     pdf.save('cupom-fiscal.pdf');
-    //   },
-    // });
-  }
 
+  gerarPdf() {
+    // Montar o JSON com as informações do cupom fiscal
+    const cupomFiscalData = {
+      cupomFiscal: {
+        CfiscalDataHora: this.CfiscalDataHora,
+        vendorName: this.vendorName,
+        ClienteName: this.ClienteName,
+        ClienteCPF_CNPJ: this.ClienteCPF_CNPJ,
+        listaProdutos: this.listaProdutos.map(produto => ({
+          nome: produto.nome,
+          qtd: produto.quantidade,
+          preco: produto.preco,
+          desconto: produto.desconto,
+          total: produto.total,
+        })),
+        SubTotal: this.SubTotal,
+        DescontoValor: this.DescontoValor,
+        DescontoPercent: this.DescontoPercent,
+        Total: this.Total,
+        bandeira: this.bandeira,
+        parcelamento: this.Parcelamento,
+        valorParcela: this.valorParcela,
+      }
+    };
+
+    this.paytypeService.gerarPdf(cupomFiscalData).subscribe(
+      (data) => {
+        // Cria um blob com os dados recebidos do backend
+        const blob = new Blob([data], { type: 'application/pdf' });
+
+        // Cria um objeto URL para o blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Cria um link temporário para fazer o download do PDF
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'cupom-fiscal.pdf';
+        link.click();
+
+        // Libera o objeto URL e o link temporário
+        window.URL.revokeObjectURL(url);
+        link.remove();
+      },
+      (error) => {
+        console.error('Erro ao gerar o PDF:', error);
+      }
+    );
+  }
 
 
 

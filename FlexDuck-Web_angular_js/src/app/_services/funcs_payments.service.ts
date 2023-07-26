@@ -44,5 +44,9 @@ export class FuncPaymentsService {
   //   return this.http.get<Products>(`${environment.apiUrl}/forma_pagamento/lastCode/${isProduct}`);
   // }
 
+  gerarPdf(cupomFiscalData: any) {
+    return this.http.post(`${environment.apiUrl}/reports/cupom-fiscal`, cupomFiscalData, { responseType: 'arraybuffer' });
+  }
+
 
 }
