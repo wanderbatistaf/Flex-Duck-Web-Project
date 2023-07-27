@@ -42,7 +42,7 @@ def buscar_todas_vendas():
                 "valor_em_aberto": float(row[13]),
                 "quantidade_itens": row[14],
                 "lucro": float(row[15]),
-                "numero_nota_fiscal": row[16],
+                "numero_cupom_fiscal": row[16],
                 "imposto_estadual": float(row[17]),
                 "imposto_federal": float(row[18]),
                 "cnpj": row[19],
@@ -97,7 +97,7 @@ def buscar_venda(venda_id):
                 "valor_em_aberto": float(row[13]),
                 "quantidade_itens": row[14],
                 "lucro": float(row[15]),
-                "numero_nota_fiscal": row[16],
+                "numero_cupom_fiscal": row[16],
                 "imposto_estadual": float(row[17]),
                 "imposto_federal": float(row[18]),
                 "cnpj": row[19],
@@ -135,7 +135,7 @@ def inserir_venda():
                 cliente_id, data_venda, vendedor, cliente, cpf, telefone, forma_pagamento_id,
                 bandeira_id, parcelamento, subtotal, desconto, valor_total,
                 valor_total_pago, valor_em_aberto, quantidade_itens, lucro,
-                numero_nota_fiscal, imposto_estadual, imposto_federal, cnpj
+                numero_cupom_fiscal, imposto_estadual, imposto_federal, cnpj
             ) VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
             )
@@ -145,7 +145,7 @@ def inserir_venda():
             dados['telefone'], dados['forma_pagamento_id'], dados['bandeira_id'],
             dados['parcelamento'], dados['subtotal'], dados['desconto'], dados['valor_total'],
             dados['valor_total_pago'], dados['valor_em_aberto'], dados['quantidade_itens'],
-            dados['lucro'], dados['numero_nota_fiscal'], dados['imposto_estadual'],
+            dados['lucro'], dados['numero_cupom_fiscal'], dados['imposto_estadual'],
             dados['imposto_federal'], dados['cnpj']
         )
         cursor.execute(sql, val)
@@ -158,6 +158,45 @@ def inserir_venda():
         conn.rollback()
         print(str(e))
         return jsonify({'erro': str(e)}), 500
+
+
+@api_vendas.route('/vendas/cfn', methods=['GET'])
+@jwt_required()  # Protege a rota com JWT
+def buscar_numero_cupom_vendas():
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT max(id), numero_cupom_fiscal FROM vendas group by 2 order by 2 desc limit 1')
+        resultados = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        vendas = []
+        for row in resultados:
+            venda = {
+                "id": row[0],
+                "numero_cupom_fiscal": row[1],
+            }
+            vendas.append(venda)
+
+        return jsonify({
+            "table": "vendas",
+            "rows": vendas
+        })
+
+        return jsonify(vendas)
+
+    except Exception as e:
+        print("Erro ao buscar vendas:", str(e))
+        return jsonify({'mensagem': 'Erro ao buscar vendas.'}), 500
+
+
+
+
 
 
 # # API para atualizar dados de uma venda

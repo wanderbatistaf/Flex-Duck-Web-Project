@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { environment } from '@environments/environment';
-import {Clients, Products} from "@app/_models";
+import {Clients, Products, Sales} from "@app/_models";
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +23,11 @@ export class SalesService {
   // Cria o método para requisitar um produto específico pelo ID
   getProductById(id: number): Observable<Products> {
     return this.http.get<Products>(`${environment.apiUrl}/vendas/${id}`)
+  }
+
+  // Cria o método para requisitar o ultimo numero de CF
+  getCFN(): Observable<Sales[]> {
+    return this.http.get<Sales[]>(`${environment.apiUrl}/vendas/cfn`)
   }
 
   // Cria o método para deletar um produto específico pelo ID

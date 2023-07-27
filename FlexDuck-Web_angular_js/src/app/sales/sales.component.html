@@ -116,7 +116,7 @@
               <div class="form-group">
                 <label for="codigoProduto">Código:</label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="codigoProduto">
+                  <input type="text" class="form-control" id="codigoProduto" (keydown.enter)="onCodigoProdutoEnter($event)">
                   <div class="input-group-append">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                   </div>
@@ -171,8 +171,8 @@
                     <tr *ngFor="let produto of listaProdutos">
                       <td class="text-center">{{ produto.codigo }}</td>
                       <td class="text-center">{{ produto.nome }}</td>
-                      <td class="text-center">R$ {{ produto.preco }}</td>
-                      <td class="text-center">R$ {{ produto.desconto }}</td>
+                      <td class="text-center">R$ {{ produto.preco.toFixed(2) }}</td>
+                      <td class="text-center">R$ {{ produto.desconto.toFixed(2) }}</td>
                       <td class="text-center">
                         <button class="btn btn-sm btn-danger" (click)="removerProduto(produto.codigo)">-</button>
                         {{ produto.quantidade }}
@@ -273,7 +273,7 @@
 
           <div class="form-row">
             <div class="col-md-12">
-              <button class="btn btn-success btn-block" id="btnFinalizar" (click)="validarCamposVenda()">Finalizar Venda</button>
+              <button class="btn btn-success btn-block" id="btnFinalizar" (click)="validarCamposVenda(); buscarUltimoNumeroCF();">Finalizar Venda</button>
             </div>
           </div>
 
@@ -321,7 +321,7 @@
           </tr>
           <tr>
             <th class="ttu" colspan="3">
-              <b>Cupom Fiscal</b>
+              <b>Cupom Fiscal - {{ proximoNumeroCF }}</b>
             </th>
           </tr>
           </thead>

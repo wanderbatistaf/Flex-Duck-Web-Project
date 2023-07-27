@@ -2,8 +2,8 @@
 // @ts-ignore
 
 import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
-import {Bandeiras, Paytype, Products} from '@app/_models';
-import {FuncPaymentsService, ProductService, UserService} from '@app/_services';
+import {Bandeiras, Paytype, Products, Sales} from '@app/_models';
+import {FuncPaymentsService, ProductService, SalesService, UserService} from '@app/_services';
 import {FormBuilder} from '@angular/forms';
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {Router} from "@angular/router";
@@ -86,7 +86,8 @@ export class SalesComponent implements OnInit {
   CfiscalDataHora: string | undefined;
   valorParcela: number = 0;
   ClienteTelephone: string = '';
-  private cupomFiscalData: any;
+  ultimoNumeroCF: number = 0;
+  proximoNumeroCF: string = '000000000';
 
   constructor(private usersService: UserService,
               private fb: FormBuilder,
@@ -97,7 +98,8 @@ export class SalesComponent implements OnInit {
               private formBuilder: FormBuilder,
               private modalService: NgbModal,
               private sharedService: SharedService,
-              private userService: UserService) {
+              private userService: UserService,
+              private salesService: SalesService) {
   }
 
 // Executa ao inicializar o componente
@@ -111,7 +113,8 @@ export class SalesComponent implements OnInit {
     this.selectedId = this.sharedService.selectedId;
     this.selectedVendedor = this.sharedService.selectedVendedor;
     this.onFormaPagamentoDinheiro();
-    this.Cancelar()
+    this.Cancelar();
+    this.buscarUltimoNumeroCF();
 
   }
 
@@ -552,6 +555,9 @@ export class SalesComponent implements OnInit {
     let dataAtual = new Date();
     dataAtual.setUTCHours(dataAtual.getUTCHours() - 3);
 
+    // Chama o método para buscar e gerar o próximo número do CF
+    this.gerarProximoNumeroCF();
+
     // Formatar a data e hora no formato (DD/MM/AAAA - HH:mm:ss)
     let dataHoraFormatada = `${dataAtual.getUTCDate().toString().padStart(2, '0')}/${
       (dataAtual.getUTCMonth() + 1).toString().padStart(2, '0')}/${
@@ -649,6 +655,7 @@ export class SalesComponent implements OnInit {
     // Montar o JSON com as informações do cupom fiscal
     const cupomFiscalData = {
       cupomFiscal: {
+        numeroNF: '0000001',
         CfiscalDataHora: this.CfiscalDataHora,
         vendorName: this.vendorName,
         ClienteName: this.ClienteName,
@@ -694,11 +701,89 @@ export class SalesComponent implements OnInit {
     );
   }
 
+  // Método para inserir o produto na tabela
+  inserirProdutoNaTabela(produto: any, quantidade: number) {
+    if (produto) {
+      const produtoExistente = this.listaProdutos.find((item) => item.codigo === produto[1]);
 
+      if (produtoExistente) {
+        produtoExistente.quantidade += quantidade;
+        produtoExistente.total =
+          (produto[6] - produto[9]) * produtoExistente.quantidade;
+      } else {
+        const desconto = produto[9] !== null && produto[9] !== undefined ? produto[9] : 0;
+        const precoComDesconto = produto[6] - desconto;
+        const totalProduto = precoComDesconto * quantidade;
 
+        const produtoAdicionado: Produto = {
+          codigo: produto[1],
+          nome: produto[3],
+          preco: produto[6],
+          desconto: desconto,
+          quantidade: quantidade,
+          total: totalProduto,
+        };
 
+        this.listaProdutos.push(produtoAdicionado);
+      }
 
+      // Atualiza a lista de produtos no HTML
+      this.atualizarListaProdutos();
 
+      // Exibir o produto no console para verificar se os valores estão corretos
+      console.log(this.listaProdutos);
+    }
+  }
 
+  onCodigoProdutoEnter(event: any) {
+    const codigoProduto = event.target.value;
+    const quantidadeProduto = 1; // Defina a quantidade como 1, você pode ajustar conforme necessário
+
+    if (codigoProduto) {
+      this.productService.getProductById(codigoProduto).subscribe(
+        (response: any) => {
+          if (response && response.produto) {
+            this.inserirProdutoNaTabela(response.produto, quantidadeProduto);
+          } else {
+            console.log('Produto não encontrado');
+          }
+        },
+        (error) => {
+          console.log('Houve um erro ao buscar as informações do produto');
+        }
+      );
+    }
+  }
+
+  buscarUltimoNumeroCF() {
+    this.salesService.getCFN().subscribe(
+      (response: any) => {
+        // Verifica se a resposta possui a propriedade "rows" e se o array "rows" não está vazio
+        if (response && response.rows && response.rows.length > 0) {
+          // Obtém o primeiro número do cupom fiscal do array "rows"
+          this.ultimoNumeroCF = response.rows[0].numero_cupom_fiscal;
+          console.log(this.ultimoNumeroCF);
+        } else {
+          console.log('Não foi possível obter o número do cupom fiscal.');
+        }
+      },
+      (error) => {
+        console.log('Ocorreu um erro ao solicitar os tipos de pagamento.');
+      }
+    );
+  }
+
+  gerarProximoNumeroCF() {
+    if (this.ultimoNumeroCF) {
+      // Incrementa o número do cupom fiscal e formata para 6 dígitos (000000001 a 999999999)
+      this.ultimoNumeroCF++;
+      this.atualizarProximoNumeroCF(); // Chama o método para atualizar o próximo número do cupom fiscal
+    }
+  }
+
+  atualizarProximoNumeroCF() {
+    // Formata o próximo número do cupom fiscal para ter 9 dígitos (padLeft com '0')
+    this.proximoNumeroCF = String(this.ultimoNumeroCF).padStart(9, '0');
+  }
 
 }
