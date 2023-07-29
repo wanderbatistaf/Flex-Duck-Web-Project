@@ -23,6 +23,9 @@ td.editing {
 .ttu {
   text-transform: uppercase;
 }
+.ttn{
+  text-transform: initial;
+}
 .printer-ticket {
   display: table !important;
   margin: 0 auto; /* Adiciona margem automática para centralizar horizontalmente */

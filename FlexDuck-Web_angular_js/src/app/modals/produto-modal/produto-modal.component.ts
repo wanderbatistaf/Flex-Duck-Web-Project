@@ -16,6 +16,7 @@ import {SharedService} from "@app/_services/SharedService";
 export class ProdutoModalComponent implements OnInit {
   private modalRef?: NgbModalRef;
   produtos: Products[] = [];
+  loading: boolean = true;
 
   constructor(private router: Router,
               private productService: ProductService,
@@ -39,6 +40,7 @@ export class ProdutoModalComponent implements OnInit {
   }
 
   getProduct() {
+    this.loading = true;
     // Recupera todos os pagamentos do servidor
     this.productService.getAllProducts()
       .pipe(
@@ -49,6 +51,7 @@ export class ProdutoModalComponent implements OnInit {
         (produtos: Products[]) => {
           // Define os pagamentos recuperados na propriedade da classe
           this.produtos = produtos;
+          this.loading = false;
           console.log(produtos);
         },
         // Quando ocorrer um erro na resposta

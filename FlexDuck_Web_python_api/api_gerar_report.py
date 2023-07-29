@@ -95,8 +95,12 @@ def gerar_pdf():
     valor_parcela = total_com_desconto / parcelas
 
     # Adicione a seção de Pagamentos
-    elements.append(Paragraph(f'Parcelamento em {cupom_fiscal_data.get("parcelamento", 0)}x', body_style))
+    elements.append(Paragraph(f'Parcelamento em {cupom_fiscal_data.get("parcelamento", 0)}x - {cupom_fiscal_data.get("bandeira", 0)}', body_style))
     elements.append(Paragraph(f'Parcela R$ {valor_parcela:.2f}', body_style))
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph(f'Valor Pago R$ {cupom_fiscal_data.get("valorPago", 0):.2f}', body_style))
+    elements.append(Paragraph(f'Troco R$ {cupom_fiscal_data.get("troco", 0):.2f}', body_style))
+
     elements.append(Paragraph(f'<b>TOTAL PAGO R$ {total_com_desconto:.2f}</b>', body_style))
 
     # Adicione a nota de rodapé centralizada

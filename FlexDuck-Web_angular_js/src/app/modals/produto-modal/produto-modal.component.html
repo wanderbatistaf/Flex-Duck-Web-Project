@@ -5,6 +5,15 @@
   </button>
 </div>
 <div class="modal-body">
+  <!-- Adicione o skeleton loading antes da tabela -->
+  <div *ngIf="loading" class="skeleton-loading">
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+  </div>
   <!-- Adicione a barra de pesquisa (searchbar) antes da tabela -->
   <div class="input-group mb-3 justify-content-center">
     <input type="text" class="form-control" placeholder="Pesquisar produtos" aria-label="Pesquisar clientes" aria-describedby="search-button">

@@ -20,6 +20,7 @@ interface Client {
 export class ClienteModalComponent implements OnInit {
   private modalRef?: NgbModalRef;
   clientes: Clients[] = [];
+  loading: boolean = true;
   private selectedClienteName!: string;
   private selectedClienteCPF_CNPJ!: string;
   private selectedClienteTelephone!: string;
@@ -48,6 +49,7 @@ export class ClienteModalComponent implements OnInit {
 
 
   getClientsVendas() {
+    this.loading = true;
     // Recupera todos os pagamentos do servidor
     this.clientsService.getAllVendas()
       .pipe(
@@ -58,6 +60,7 @@ export class ClienteModalComponent implements OnInit {
         (clientes: Clients[]) => {
           // Define os pagamentos recuperados na propriedade da classe
           this.clientes = clientes;
+          this.loading = false;
           // Renderiza os pagamentos
           console.log(clientes);
         },

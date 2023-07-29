@@ -20,6 +20,7 @@ export class VendedorModalComponent implements OnInit {
   private modalRef?: NgbModalRef;
   vendedores: Vendor[] = [];
   private currentUser?: number;
+  loading: boolean = true;
   constructor(private modalService: NgbModal,
               public activeModal: NgbActiveModal,
               private usersService: UserService,
@@ -34,6 +35,7 @@ export class VendedorModalComponent implements OnInit {
   }
 
   getVendor() {
+    this.loading = true;
     // Retrieve all users from the server
     this.usersService.getAll().subscribe(
       (response: any) => {
@@ -51,6 +53,7 @@ export class VendedorModalComponent implements OnInit {
 
         // Set the retrieved vendedores to the class property
         this.vendedores = vendedores;
+        this.loading = false;
       },
       (error) => {
         console.log('An error occurred while requesting users.');

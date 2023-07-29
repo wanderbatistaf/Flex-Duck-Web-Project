@@ -1,7 +1,7 @@
 // @ts-ignore
 // @ts-ignore
 
-import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
+import {AfterContentChecked, Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Bandeiras, Paytype, Products, Sales} from '@app/_models';
 import {FuncPaymentsService, ProductService, SalesService, UserService} from '@app/_services';
 import {FormBuilder} from '@angular/forms';
@@ -46,7 +46,7 @@ declare module "jspdf" {
 })
 
 
-export class SalesComponent implements OnInit {
+export class SalesComponent implements OnInit, AfterContentChecked {
   @ViewChild('clienteModal') clienteModal: any;
   @ViewChild('notaFiscalContentElement', { static: true }) notaFiscalContentElement!: ElementRef;
   jwtHelper: JwtHelperService = new JwtHelperService();
@@ -88,6 +88,9 @@ export class SalesComponent implements OnInit {
   ClienteTelephone: string = '';
   ultimoNumeroCF: number = 0;
   proximoNumeroCF: string = '000000000';
+  valorPago: number = 0;
+  totalCompra: number = 0;
+  troco: number = 0;
 
   constructor(private usersService: UserService,
               private fb: FormBuilder,
@@ -116,6 +119,21 @@ export class SalesComponent implements OnInit {
     this.Cancelar();
     this.buscarUltimoNumeroCF();
 
+  }
+
+  ngAfterContentChecked(): void {
+    // Atualizações nas variáveis vinculadas
+    this.calcularTroco();
+    // Outras atualizações, se houver
+  }
+
+  checkValorPago(): void {
+    let formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
+    if (formaPagamento === 'Dinheiro') {
+      if (this.valorPago === null || isNaN(this.valorPago)) {
+        this.valorPago = 0;
+      }
+    }
   }
 
   @HostListener('document:click', ['$event'])
@@ -518,27 +536,50 @@ export class SalesComponent implements OnInit {
     let DescontoValor = (document.getElementById('descontoValor') as HTMLSelectElement).value;
     let DescontoPercent = (document.getElementById('descontoPercent') as HTMLSelectElement).value;
 
-    // Verificar se todos os campos estão preenchidos
-    if (
-      vendorID &&
-      vendorName &&
-      ClienteName &&
-      ClienteCPF_CNPJ &&
-      ClienteTelephone &&
-      this.listaProdutos.length > 0 &&
-      formaPagamento !== '' && formaPagamento !== 'select' &&
-      bandeira !== 'select' && bandeira !== ''
-    ) {
-      // Todos os campos estão preenchidos, exibir alerta de confirmação
+    console.log(formaPagamento);
+
+    // Lista de campos obrigatórios que precisam estar preenchidos
+    let camposObrigatorios = [];
+    if (!vendorID) camposObrigatorios.push('ID do vendedor');
+    if (!vendorName) camposObrigatorios.push('Nome do vendedor');
+    if (!ClienteName) camposObrigatorios.push('Nome do cliente');
+    if (!ClienteCPF_CNPJ) camposObrigatorios.push('CPF/CNPJ do cliente');
+    if (!ClienteTelephone) camposObrigatorios.push('Telefone do cliente');
+    if (this.listaProdutos.length === 0) camposObrigatorios.push('Pelo menos um produto na lista');
+    if (formaPagamento === '' || formaPagamento === 'select') camposObrigatorios.push('Forma de pagamento');
+    if (bandeira === '' || bandeira === 'select') camposObrigatorios.push('Bandeira do cartão');
+
+    // Verificar se todos os campos obrigatórios estão preenchidos
+    if (camposObrigatorios.length === 0) {
+      // Verificar o valor pago se a forma de pagamento for "Dinheiro"
+      if (formaPagamento === '1') {
+        let valorPagoElement = document.getElementById('valorPago') as HTMLInputElement;
+        let valorPago = valorPagoElement ? parseFloat(valorPagoElement.value) : NaN;
+
+        if (isNaN(valorPago) || valorPago <= 0) {
+          // O campo "Valor Pago" não foi preenchido corretamente, exibir alerta de erro
+          alert('Por favor, informe um valor válido maior que zero no campo "Valor Pago" antes de finalizar a venda.');
+          return; // Retorna sem finalizar a venda
+        }
+        this.valorPago = valorPago;
+      } else {
+        this.valorPago = this.total;
+      }
+
+      // Se chegou até aqui, todos os campos estão preenchidos corretamente
+      // Exibir alerta de confirmação
       if (confirm('Deseja finalizar a venda?')) {
         this.gerarCupomFiscal();
-        console.log('Rodou!')
+        console.log('Rodou!');
       }
     } else {
-      // Alguns campos não estão preenchidos, exibir alerta de erro
-      alert('Por favor, preencha todos os campos antes de finalizar a venda.');
+      // Alguns campos não estão preenchidos, exibir alerta de erro com os campos obrigatórios faltantes
+      let mensagemErro = 'Por favor, preencha os seguintes campos antes de finalizar a venda:\n\n';
+      mensagemErro += camposObrigatorios.join('\n');
+      alert(mensagemErro);
     }
   }
+
 
   abrirCupomFiscalModal() {
     this.cupomFiscalModalAberto = true;
@@ -579,8 +620,8 @@ export class SalesComponent implements OnInit {
     this.vendorName = (document.getElementById('inputVendedor') as HTMLSelectElement).value;
     this.SubTotal = parseFloat((document.getElementById('subtotal') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
 
-    // let bandeiraElement = document.getElementById('bandeira') as HTMLSelectElement;
-    //   this.bandeira = bandeiraElement.selectedOptions[0].text;
+    let bandeiraElement = document.getElementById('bandeira') as HTMLSelectElement;
+      this.bandeira = bandeiraElement.selectedOptions[0].text;
 
     // Verificar se a forma de pagamento é parcelada
     if (this.parcelamento !== 0) {
@@ -624,6 +665,8 @@ export class SalesComponent implements OnInit {
     this.descontoPercent = 0;
     this.bandeira = 'select';
     this.parcelamento = 0;
+    this.valorPago = 0;
+    this.total = 0;
 
     // Limpe a lista de produtos (se você tiver uma variável para isso)
     this.listaProdutos = [];
@@ -639,7 +682,9 @@ export class SalesComponent implements OnInit {
     (document.getElementById('descontoPercent') as HTMLInputElement).value = '0';
     (document.getElementById('bandeira') as HTMLSelectElement).selectedIndex = 0;
     (document.getElementById('parcelamento') as HTMLSelectElement).selectedIndex = 0;
+
   }
+
 
 
   imprimirCupom() {
@@ -655,7 +700,7 @@ export class SalesComponent implements OnInit {
     // Montar o JSON com as informações do cupom fiscal
     const cupomFiscalData = {
       cupomFiscal: {
-        numeroNF: '0000001',
+        numeroNF: this.proximoNumeroCF,
         CfiscalDataHora: this.CfiscalDataHora,
         vendorName: this.vendorName,
         ClienteName: this.ClienteName,
@@ -674,6 +719,8 @@ export class SalesComponent implements OnInit {
         bandeira: this.bandeira,
         parcelamento: this.Parcelamento,
         valorParcela: this.valorParcela,
+        valorPago: this.valorPago,
+        troco: this.troco
       }
     };
 
@@ -785,5 +832,16 @@ export class SalesComponent implements OnInit {
     // Formata o próximo número do cupom fiscal para ter 9 dígitos (padLeft com '0')
     this.proximoNumeroCF = String(this.ultimoNumeroCF).padStart(9, '0');
   }
+
+  calcularTroco(): number {
+    this.Total = parseFloat((document.getElementById('total') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+    if (this.valorPago >= this.Total) {
+      this.troco = this.valorPago - this.Total;
+    } else {
+      this.troco = 0; // Caso o valor pago seja menor que o total da compra, o troco será zero
+    }
+    return this.troco;
+  }
+
 
 }
