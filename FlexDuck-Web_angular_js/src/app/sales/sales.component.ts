@@ -671,7 +671,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     this.descontoValor = 0;
     this.descontoPercent = 0;
     this.bandeira = 'select';
-    this.parcelamento = 0;
+    this.parcelamento = 1;
     this.valorPago = 0;
     this.total = 0;
 
