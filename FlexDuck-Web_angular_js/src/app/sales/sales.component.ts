@@ -84,7 +84,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   Parcelamento: number = 0
   CfiscalDataHora: string | undefined;
   formaPagamento: string = '0';
-  valorParcela: number = 0;
+  valorParcela: number = 1;
   ClienteTelephone: string = '';
   ultimoNumeroCF: number = 0;
   proximoNumeroCF: string = '000000000';

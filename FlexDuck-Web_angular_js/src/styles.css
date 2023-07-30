@@ -4326,7 +4326,10 @@ input[type=button].btn-block {
 .navbar-dark .navbar-text a:hover, .navbar-dark .navbar-text a:focus {
   color: #fff;
 }
-
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
 .card {
   position: relative;
   display: flex;
