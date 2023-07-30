@@ -5,23 +5,11 @@
   </button>
 </div>
 <div class="modal-body">
-  <!-- Adicione o skeleton loading antes da tabela -->
-  <div *ngIf="loading" class="skeleton-loading">
-    <div class="skeleton-line"></div>
-    <div class="skeleton-line"></div>
-    <div class="skeleton-line"></div>
+  <div class="text-center" *ngIf="isLoading">
+    <div class="spinner-border spinner-border-sm"></div>
   </div>
-  <!-- Adicione a barra de pesquisa (searchbar) antes da tabela -->
-  <div class="input-group mb-3 justify-content-center">
-    <input type="text" class="form-control" placeholder="Pesquisar clientes" aria-label="Pesquisar clientes" aria-describedby="search-button">
-    <div class="spacer"></div> <!-- Espaço do botão -->
-    <div class="input-group-append">
-      <button class="btn btn-outline-secondary" type="button" id="search-button">Pesquisar</button>
-    </div>
-  </div>
-
   <!-- Adicione a tabela para exibir a lista de clientes carregados da API aqui -->
-  <table class="table table-hover">
+  <table class="table table-hover" [ngClass]="{ 'loading': isLoading }">
     <thead>
     <tr>
       <th class="text-center">Nome</th>

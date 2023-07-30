@@ -23,6 +23,7 @@ export class Clients {
   complement?: string;
   gender?: string;
   filtered?: boolean;
+  id?: string;
 }
 
 

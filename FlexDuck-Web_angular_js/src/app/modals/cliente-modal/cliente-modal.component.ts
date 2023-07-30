@@ -9,6 +9,7 @@ interface Client {
   business_name: string;
   cnpj_cpf: string;
   telephone: string;
+  id: string;
 }
 
 
@@ -20,10 +21,11 @@ interface Client {
 export class ClienteModalComponent implements OnInit {
   private modalRef?: NgbModalRef;
   clientes: Clients[] = [];
-  loading: boolean = true;
+  isLoading: boolean = true;
   private selectedClienteName!: string;
   private selectedClienteCPF_CNPJ!: string;
   private selectedClienteTelephone!: string;
+  private SelectedClienteId!:string;
 
 
   constructor(private modalService: NgbModal,
@@ -32,6 +34,9 @@ export class ClienteModalComponent implements OnInit {
               public sharedService: SharedService) { }
 
   ngOnInit() {
+    setTimeout(() => {
+      this.isLoading = false; // Após o carregamento dos dados, definimos loading como false
+    }, 2000);
     this.getClientsVendas();
   }
 
@@ -49,7 +54,7 @@ export class ClienteModalComponent implements OnInit {
 
 
   getClientsVendas() {
-    this.loading = true;
+    this.isLoading = true;
     // Recupera todos os pagamentos do servidor
     this.clientsService.getAllVendas()
       .pipe(
@@ -60,7 +65,7 @@ export class ClienteModalComponent implements OnInit {
         (clientes: Clients[]) => {
           // Define os pagamentos recuperados na propriedade da classe
           this.clientes = clientes;
-          this.loading = false;
+          this.isLoading = false;
           // Renderiza os pagamentos
           console.log(clientes);
         },
@@ -69,6 +74,7 @@ export class ClienteModalComponent implements OnInit {
           console.log('Houve um erro ao requisitar os clientes.');
         }
       );
+    console.log(this.clientes);
   }
 
   selecionarClient(cliente: Clients) {
@@ -83,10 +89,12 @@ export class ClienteModalComponent implements OnInit {
     }
     this.sharedService.selectedCliente.cnpj_cpf = String(cliente.cnpj_cpf?.toString());
     this.sharedService.selectedCliente.telephone = String(cliente.telephone?.toString());
+    this.sharedService.selectedCliente.id = String(cliente.id?.toString());
 
     console.log(cliente.business_name);
     console.log(cliente.cnpj_cpf);
     console.log(cliente.telephone);
+    console.log(cliente.id);
 
     // Fecha o modal
     this.activeModal.close();
@@ -96,10 +104,12 @@ export class ClienteModalComponent implements OnInit {
     this.updateFields()
   }
 
+
   updateFields() {
     this.selectedClienteName = this.sharedService.selectedCliente.business_name;
     this.selectedClienteCPF_CNPJ = this.sharedService.selectedCliente.cnpj_cpf;
     this.selectedClienteTelephone = this.sharedService.selectedCliente.telephone;
+    this.SelectedClienteId = this.sharedService.selectedCliente.id;
   }
 
 

@@ -2,12 +2,12 @@
 // @ts-ignore
 
 import {AfterContentChecked, Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
-import {Bandeiras, Paytype, Products, Sales} from '@app/_models';
+import {Bandeiras, Paytype, Products} from '@app/_models';
 import {FuncPaymentsService, ProductService, SalesService, UserService} from '@app/_services';
 import {FormBuilder} from '@angular/forms';
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {Router} from "@angular/router";
-import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 import {ClienteModalComponent} from "@app/modals/cliente-modal/cliente-modal.component";
 import {VendedorModalComponent} from "@app/modals/vendedor-modal/vendedor-modal.component";
@@ -16,8 +16,6 @@ import {SharedService} from "@app/_services/SharedService";
 import 'jspdf-autotable';
 // @ts-ignore
 import jsPDF from "jspdf";
-import {auto} from "@popperjs/core";
-
 
 
 interface Produto {
@@ -62,6 +60,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   selectedClienteName: string | undefined;
   selectedClienteCPF_CNPJ!: string;
   selectedClienteTelephone!: string;
+  SelectedClienteId!: string;
   listaProdutos: Produto[] = [];
   bandeiraReadonly = false;
   parcelamentoReadonly = false;
@@ -84,13 +83,44 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   DescontoPercent: number = 0
   Parcelamento: number = 0
   CfiscalDataHora: string | undefined;
+  formaPagamento: string = '0';
   valorParcela: number = 0;
   ClienteTelephone: string = '';
   ultimoNumeroCF: number = 0;
   proximoNumeroCF: string = '000000000';
   valorPago: number = 0;
-  totalCompra: number = 0;
   troco: number = 0;
+
+  dadosDaVenda = {
+    cliente_id: this.SelectedClienteId,
+    vendedor: this.vendorName,
+    cliente: this.ClienteName,
+    cpf_cnpj: this.ClienteCPF_CNPJ,
+    telefone: this.telefone,
+    forma_pagamento_id: this.formaPagamento,
+    bandeira_id: this.bandeira,
+    parcelamento: this.parcelamento,
+    subtotal: this.SubTotal,
+    desconto: this.DescontoValor,
+    valor_total: this.Total,
+    valor_total_pago: this.valorPago,
+    troco: (this.valorPago-this.total).toFixed(2),
+    quantidade_itens: this.listaProdutos.length,
+    numero_cupom_fiscal: this.proximoNumeroCF,
+    imposto_estadual: 6, // Insira o valor do imposto estadual, caso possua
+    imposto_federal: 10, // Insira o valor do imposto federal, caso possua
+    itens_vendidos: this.listaProdutos.map(produto => ({
+      produto: produto.nome,
+      codigo_produto: produto.codigo,
+      quantidade: produto.quantidade,
+      preco_unitario: produto.preco,
+      subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2))
+    })),
+  };
+
+  senha!: string;
+  modalSenhaVisivel_val!: boolean;
+  modalSenhaVisivel_perc!: boolean;
 
   constructor(private usersService: UserService,
               private fb: FormBuilder,
@@ -116,8 +146,8 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     this.selectedId = this.sharedService.selectedId;
     this.selectedVendedor = this.sharedService.selectedVendedor;
     this.onFormaPagamentoDinheiro();
-    this.Cancelar();
     this.buscarUltimoNumeroCF();
+    this.Cancelar();
 
   }
 
@@ -146,7 +176,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   buscarPaytypes() {
     this.paytypeService.getAllPayTypes().subscribe(
       (paytypes: Paytype[]) => {
-        this.paytypes = paytypes.map((paytype: Paytype) => ({ id: paytype.forma_pagamento_id, nome: paytype.descricao }));
+        this.paytypes = paytypes.map((paytype: Paytype) => ({ id: paytype.forma_pagamento_id, nome: paytype.descricao }))
         this.loading = false;
         console.log(this.paytypes);
       },
@@ -408,64 +438,12 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     if (formaPagamento === '1') { // 1 representa a forma de pagamento "Dinheiro"
       this.bandeiraReadonly = true;
       this.parcelamentoReadonly = true;
-      this.bandeira = '0'; // "0" representa "À vista"
+      this.bandeira = '6'; // "6" representa "À vista"
       this.parcelamento = 1;
     } else {
       this.bandeiraReadonly = false;
       this.parcelamentoReadonly = false;
       this.bandeira = 'select'
-    }
-  }
-
-  solicitarSenhaPercent() {
-    const senha = prompt('Digite sua senha:');
-    if (senha) {
-      this.userService.getUserLevelByPass(senha).subscribe(
-        (user) => {
-          // Verificar o nível de usuário aqui
-          if (user.level >= 6) {
-            const descontoPercentElement = document.getElementById('descontoPercent') as HTMLInputElement;
-            if (descontoPercentElement) {
-              descontoPercentElement.readOnly = false;
-            }
-          } else {
-            const descontoPercentElement = document.getElementById('descontoPercent') as HTMLInputElement;
-            if (descontoPercentElement) {
-              alert('Você não pode adicionar um desconto.');
-            }
-          }
-        },
-        (error) => {
-          // Tratar erros aqui, como senha incorreta ou erro de conexão
-          alert('Erro ao verificar a senha. Por favor, tente novamente.');
-        }
-      );
-    }
-  }
-
-  solicitarSenhaValor() {
-    const senha = prompt('Digite sua senha:');
-    if (senha) {
-      this.userService.getUserLevelByPass(senha).subscribe(
-        (user) => {
-          // Verificar o nível de usuário aqui
-          if (user.level >= 6) {
-            const descontoPercentElement = document.getElementById('descontoValor') as HTMLInputElement;
-            if (descontoPercentElement) {
-              descontoPercentElement.readOnly = false;
-            }
-          } else {
-            const descontoPercentElement = document.getElementById('descontoValor') as HTMLInputElement;
-            if (descontoPercentElement) {
-              alert('Você não pode adicionar um desconto.');
-            }
-          }
-        },
-        (error) => {
-          // Tratar erros aqui, como senha incorreta ou erro de conexão
-          alert('Erro ao verificar a senha. Por favor, tente novamente.');
-        }
-      );
     }
   }
 
@@ -531,10 +509,11 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     let ClienteName = (document.getElementById('inputCliente') as HTMLSelectElement).value;
     let ClienteCPF_CNPJ = (document.getElementById('inputCpf') as HTMLSelectElement).value;
     let ClienteTelephone = (document.getElementById('inputTelefone') as HTMLSelectElement).value;
-    let SubTotal = (document.getElementById('subtotal') as HTMLSelectElement).value;
-    let Total = (document.getElementById('total') as HTMLSelectElement).value;
+    let SubTotal = parseFloat((document.getElementById('subtotal') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+    let Total = parseFloat((document.getElementById('total') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
     let DescontoValor = (document.getElementById('descontoValor') as HTMLSelectElement).value;
     let DescontoPercent = (document.getElementById('descontoPercent') as HTMLSelectElement).value;
+    let clienteID = (document.getElementById('inputClienteID') as HTMLSelectElement).value;
 
     console.log(formaPagamento);
 
@@ -566,11 +545,43 @@ export class SalesComponent implements OnInit, AfterContentChecked {
         this.valorPago = this.total;
       }
 
+      // Chama o método para buscar e gerar o próximo número do CF
+      this.gerarProximoNumeroCF();
+
+      // Preencher os dados da venda antes de finalizar
+      this.dadosDaVenda = {
+        cliente_id: clienteID,
+        vendedor: vendorName,
+        cliente: ClienteName,
+        cpf_cnpj: ClienteCPF_CNPJ,
+        telefone: ClienteTelephone,
+        forma_pagamento_id: formaPagamento,
+        bandeira_id: bandeira,
+        parcelamento: this.parcelamento,
+        subtotal: Number(SubTotal),
+        desconto: Number(DescontoValor),
+        valor_total: Number(Total),
+        valor_total_pago: this.valorPago,
+        troco: (this.valorPago - this.total).toFixed(2),
+        quantidade_itens: this.listaProdutos.length,
+        numero_cupom_fiscal: this.proximoNumeroCF,
+        imposto_estadual: 6, // Insira o valor do imposto estadual, caso possua
+        imposto_federal: 10, // Insira o valor do imposto federal, caso possua
+        itens_vendidos: this.listaProdutos.map(produto => ({
+          produto: produto.nome.toString(),
+          codigo_produto: produto.codigo,
+          quantidade: produto.quantidade,
+          preco_unitario: produto.preco,
+          subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2))
+        })),
+      };
+
       // Se chegou até aqui, todos os campos estão preenchidos corretamente
       // Exibir alerta de confirmação
       if (confirm('Deseja finalizar a venda?')) {
-        this.gerarCupomFiscal();
-        console.log('Rodou!');
+        console.log(this.dadosDaVenda);
+        this.finalizarVenda();
+        // this.gerarCupomFiscal();
       }
     } else {
       // Alguns campos não estão preenchidos, exibir alerta de erro com os campos obrigatórios faltantes
@@ -592,22 +603,18 @@ export class SalesComponent implements OnInit, AfterContentChecked {
 
 
   gerarCupomFiscal() {
-    let formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
+    this.formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
     let dataAtual = new Date();
     dataAtual.setUTCHours(dataAtual.getUTCHours() - 3);
 
-    // Chama o método para buscar e gerar o próximo número do CF
-    this.gerarProximoNumeroCF();
 
     // Formatar a data e hora no formato (DD/MM/AAAA - HH:mm:ss)
-    let dataHoraFormatada = `${dataAtual.getUTCDate().toString().padStart(2, '0')}/${
+    this.CfiscalDataHora = `${dataAtual.getUTCDate().toString().padStart(2, '0')}/${
       (dataAtual.getUTCMonth() + 1).toString().padStart(2, '0')}/${
       dataAtual.getUTCFullYear()} - ${
       dataAtual.getUTCHours().toString().padStart(2, '0')}:${
       dataAtual.getUTCMinutes().toString().padStart(2, '0')}:${
       dataAtual.getUTCSeconds().toString().padStart(2, '0')}`;
-
-    this.CfiscalDataHora = dataHoraFormatada;
 
     // Atualizar os valores das variáveis
     this.Total = parseFloat((document.getElementById('total') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
@@ -621,7 +628,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     this.SubTotal = parseFloat((document.getElementById('subtotal') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
 
     let bandeiraElement = document.getElementById('bandeira') as HTMLSelectElement;
-      this.bandeira = bandeiraElement.selectedOptions[0].text;
+    this.bandeira = (document.getElementById('bandeira') as HTMLSelectElement).selectedOptions[0].text;
 
     // Verificar se a forma de pagamento é parcelada
     if (this.parcelamento !== 0) {
@@ -681,7 +688,13 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     (document.getElementById('descontoValor') as HTMLInputElement).value = '0';
     (document.getElementById('descontoPercent') as HTMLInputElement).value = '0';
     (document.getElementById('bandeira') as HTMLSelectElement).selectedIndex = 0;
+    (document.getElementById('formaPagamento') as HTMLSelectElement).selectedIndex = 0;
     (document.getElementById('parcelamento') as HTMLSelectElement).selectedIndex = 0;
+    (document.getElementById('inputQuantidade') as HTMLInputElement).value = '';
+    (document.getElementById('inputProduto') as HTMLInputElement).value = '';
+    (document.getElementById('codigoProduto') as HTMLInputElement).value = '';
+    (document.getElementById('descontoPercent') as HTMLInputElement).readOnly = true;
+    (document.getElementById('descontoValor') as HTMLInputElement).readOnly = true;
 
   }
 
@@ -809,7 +822,6 @@ export class SalesComponent implements OnInit, AfterContentChecked {
         if (response && response.rows && response.rows.length > 0) {
           // Obtém o primeiro número do cupom fiscal do array "rows"
           this.ultimoNumeroCF = response.rows[0].numero_cupom_fiscal;
-          console.log(this.ultimoNumeroCF);
         } else {
           console.log('Não foi possível obter o número do cupom fiscal.');
         }
@@ -842,6 +854,100 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     }
     return this.troco;
   }
+
+  finalizarVenda(): void {
+    this.salesService.addVenda(this.dadosDaVenda).subscribe(
+      (res) => {
+        // Manipular a resposta do backend, se necessário
+        console.log('Venda finalizada com sucesso:', res);
+
+        // Exibir o modal com o cupom fiscal
+        this.gerarCupomFiscal();
+        console.log('Rodou!');
+      },
+      (err) => {
+        console.error('Erro ao finalizar venda:', err);
+      }
+    );
+  }
+
+  abrirModalSenha_valor() {
+    // Abre o modal de senha
+    this.modalSenhaVisivel_val = true;
+  }
+
+  abrirModalSenha_percent() {
+    // Abre o modal de senha
+    this.modalSenhaVisivel_perc = true;
+  }
+
+  fecharModalSenha() {
+    // Fecha o modal de senha e limpa o campo de senha
+    this.modalSenhaVisivel_val = false;
+    this.modalSenhaVisivel_perc = false;
+    this.senha = '';
+  }
+
+  verificarSenha_valor() {
+    // Realize a verificação da senha aqui, usando a API ou lógica necessária
+    // Por exemplo, chame this.userService.getUserLevelByPass(this.senha) para verificar a senha
+
+    this.userService.getUserLevelByPass(this.senha).subscribe(
+      (user) => {
+        // Verifique o nível de usuário aqui
+        if (user.level >= 6) {
+          const descontoPercentElement = document.getElementById('descontoValor') as HTMLInputElement;
+          if (descontoPercentElement) {
+            descontoPercentElement.readOnly = false;
+          }
+        } else {
+          // Faça algo se a senha estiver incorreta ou o nível do usuário for menor que 6
+          alert('Você não pode adicionar um desconto.');
+        }
+
+        // Fecha o modal após verificar a senha
+        this.fecharModalSenha();
+      },
+      (error) => {
+        // Trate erros aqui, como senha incorreta ou erro de conexão
+        alert('Erro ao verificar a senha. Por favor, tente novamente.');
+        // Fecha o modal após verificar a senha, mesmo em caso de erro
+        this.fecharModalSenha();
+      }
+    );
+  }
+
+  verificarSenha_percent() {
+    // Realize a verificação da senha aqui, usando a API ou lógica necessária
+    // Por exemplo, chame this.userService.getUserLevelByPass(this.senha) para verificar a senha
+
+    this.userService.getUserLevelByPass(this.senha).subscribe(
+      (user) => {
+        // Verifique o nível de usuário aqui
+        if (user.level >= 6) {
+          // Faça algo se a senha estiver correta e o nível do usuário for maior ou igual a 6
+          // Por exemplo, desbloquear o campo de desconto:
+          const descontoPercentElement = document.getElementById('descontoPercent') as HTMLInputElement;
+          if (descontoPercentElement) {
+            descontoPercentElement.readOnly = false;
+          }
+        } else {
+          // Faça algo se a senha estiver incorreta ou o nível do usuário for menor que 6
+          alert('Você não pode adicionar um desconto.');
+        }
+
+        // Fecha o modal após verificar a senha
+        this.fecharModalSenha();
+      },
+      (error) => {
+        // Trate erros aqui, como senha incorreta ou erro de conexão
+        alert('Erro ao verificar a senha. Por favor, tente novamente.');
+        // Fecha o modal após verificar a senha, mesmo em caso de erro
+        this.fecharModalSenha();
+      }
+    );
+  }
+
 
 
 }

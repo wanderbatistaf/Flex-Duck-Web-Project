@@ -70,11 +70,13 @@
 
 
           <div class="row">
+
             <div class="col-md-6">
               <div class="form-group">
                 <label for="inputCliente">Cliente:</label>
                 <div class="input-group">
                   <input type="text" class="form-control" id="inputCliente" [(ngModel)]="selectedClienteName" (dblclick)="openSearchClientModal()">
+                  <input type="hidden" id="inputClienteID" [(ngModel)]="SelectedClienteId">
                   <div class="input-group-append">
                     <span class="input-group-text" (click)="openSearchClientModal()"><i class="fas fa-search"></i></span>
                     <span class="input-group-text" style="cursor: pointer" (click)="abrirModal()"><i class="fas fa-plus"></i></span>
@@ -211,7 +213,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="descontoValor" [(ngModel)]="descontoValor" (keyup)="atualizarDescontoValor()" readonly>
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="solicitarSenhaValor()"><i class="fas fa-key"></i></span>
+                    <span class="input-group-text" (click)="abrirModalSenha_valor()"><i class="fas fa-key"></i></span>
                   </div>
                 </div>
               </div>
@@ -222,7 +224,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="descontoPercent" [(ngModel)]="descontoPercent" (input)="atualizarDescontoPercent()" readonly>
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="solicitarSenhaPercent()"><i class="fas fa-key"></i></span>
+                    <span class="input-group-text" (click)="abrirModalSenha_percent()"><i class="fas fa-key"></i></span>
                   </div>
                 </div>
               </div>
@@ -257,7 +259,6 @@
                 <label for="bandeira">Bandeira:</label>
                 <select class="form-control" id="bandeira" [(ngModel)]="bandeira" [disabled]="bandeiraReadonly" (change)="onFormaPagamentoDinheiro()">
                   <option value="select">Selecione a bandeira:</option>
-                  <option value="0">A Vista</option>
                   <option *ngFor="let bandtype of bandtypes" [value]="bandtype.id">{{ bandtype.nome }}</option>
                 </select>
               </div>
@@ -270,7 +271,7 @@
             </div>
           </div>
 
-          <div class="form-row" *ngIf="bandeira === '0'">
+          <div class="form-row" *ngIf="bandeira === '6'">
             <div class="col-md-6">
               <div class="form-group">
                 <label for="valorPago">Valor Pago:</label>
@@ -419,3 +420,45 @@
   </div>
 </div>
     <!-- Fim do Modal -->
+
+<!-- Modal de senha Valor -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalSenhaVisivel_val}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Digite sua senha:</h5>
+        <button type="button" class="close" aria-label="Close" (click)="fecharModalSenha()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="password" class="form-control" [(ngModel)]="senha">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModalSenha()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="verificarSenha_valor()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de senha Percent -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalSenhaVisivel_perc}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Digite sua senha:</h5>
+        <button type="button" class="close" aria-label="Close" (click)="fecharModalSenha()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="password" class="form-control" [(ngModel)]="senha">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModalSenha()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="verificarSenha_percent()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -117,7 +117,6 @@ def buscar_venda(venda_id):
         return jsonify({'mensagem': 'Erro ao buscar vendas.'}), 500
 
 
-# API para inserir uma nova venda
 @api_vendas.route('/vendas/add', methods=['POST'])
 @jwt_required()  # Protege a rota com JWT
 def inserir_venda():
@@ -127,37 +126,83 @@ def inserir_venda():
 
     try:
         dados = request.json
-        dados['data_venda'] = datetime.now()
+        data_venda = datetime.now()
+
+        # Dados da venda
+        cliente_id = dados['cliente_id']
+        vendedor = dados['vendedor']
+        cliente = dados['cliente']
+        cpf_cnpj = dados['cpf_cnpj']
+        telefone = dados['telefone']
+        forma_pagamento_id = dados['forma_pagamento_id']
+        bandeira_id = dados['bandeira_id']
+        parcelamento = dados['parcelamento']
+        subtotal = dados['subtotal']
+        desconto = dados['desconto']
+        valor_total = dados['valor_total']
+        valor_total_pago = dados['valor_total_pago']
+        troco = dados['troco']
+        quantidade_itens = dados['quantidade_itens']
+        numero_cupom_fiscal = dados['numero_cupom_fiscal']
+        imposto_estadual = dados['imposto_estadual']
+        imposto_federal = dados['imposto_federal']
+
+        # Itens vendidos
+        itens_vendidos = dados['itens_vendidos']
+
         conn = get_db_connection()
         cursor = conn.cursor()
-        sql = '''
+
+        # Inserir a venda na tabela vendas
+        sql_venda = '''
             INSERT INTO vendas (
-                cliente_id, data_venda, vendedor, cliente, cpf, telefone, forma_pagamento_id,
+                cliente_id, data_venda, vendedor, cliente, cpf_cnpj, telefone, forma_pagamento_id,
                 bandeira_id, parcelamento, subtotal, desconto, valor_total,
-                valor_total_pago, valor_em_aberto, quantidade_itens, lucro,
-                numero_cupom_fiscal, imposto_estadual, imposto_federal, cnpj
+                valor_total_pago, troco, quantidade_itens,
+                numero_cupom_fiscal, imposto_estadual, imposto_federal
             ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
             )
         '''
-        val = (
-            dados['cliente_id'], dados['data_venda'], dados['vendedor'], dados['cliente'], dados['cpf'],
-            dados['telefone'], dados['forma_pagamento_id'], dados['bandeira_id'],
-            dados['parcelamento'], dados['subtotal'], dados['desconto'], dados['valor_total'],
-            dados['valor_total_pago'], dados['valor_em_aberto'], dados['quantidade_itens'],
-            dados['lucro'], dados['numero_cupom_fiscal'], dados['imposto_estadual'],
-            dados['imposto_federal'], dados['cnpj']
+        val_venda = (
+            cliente_id, data_venda, vendedor, cliente, cpf_cnpj,
+            telefone, forma_pagamento_id, bandeira_id,
+            parcelamento, subtotal, desconto, valor_total,
+            valor_total_pago, troco, quantidade_itens,
+            numero_cupom_fiscal, imposto_estadual,
+            imposto_federal
         )
-        cursor.execute(sql, val)
+        cursor.execute(sql_venda, val_venda)
+
+        # Obter o ID da venda recém-inserida
+        venda_id = cursor.lastrowid
+
+        # Inserir os itens vendidos na tabela itens_venda
+        sql_itens_vendas = '''
+            INSERT INTO itens_vendas (venda_id, produto, codigo_produto, quantidade, preco_unitario, subtotal_item)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        '''
+
+        for item in itens_vendidos:
+            produto = item['produto']
+            codigo_produto = item['codigo_produto']
+            quantidade = item['quantidade']
+            preco_unitario = item['preco_unitario']
+            subtotal_item = item['subtotal_item']
+            val_item_vendido = (venda_id, produto, codigo_produto, quantidade, preco_unitario, subtotal_item)
+            cursor.execute(sql_itens_vendas, val_item_vendido)
+
         conn.commit()
         cursor.close()
         conn.close()
-        return jsonify({'mensagem': 'Venda inserida com sucesso!'})
+
+        return jsonify({'mensagem': 'Venda e itens vendidos inseridos com sucesso!'})
 
     except Exception as e:
         conn.rollback()
         print(str(e))
         return jsonify({'erro': str(e)}), 500
+
 
 
 @api_vendas.route('/vendas/cfn', methods=['GET'])

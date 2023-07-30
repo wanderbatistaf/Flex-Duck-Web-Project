@@ -88,11 +88,11 @@ def gerar_pdf():
     # Calcular o valor do desconto em reais
     desconto_reais = cupom_fiscal_data.get('DescontoValor', 0)
     # Calcular o total a pagar após o desconto
-    total_com_desconto = cupom_fiscal_data.get('Total', 0) - desconto_reais
+    total_ = cupom_fiscal_data.get('Total', 0)
     # Obter o número de parcelas
     parcelas = cupom_fiscal_data.get('parcelamento', 1)
     # Calcular o valor de cada parcela
-    valor_parcela = total_com_desconto / parcelas
+    valor_parcela = cupom_fiscal_data.get('Total', 0) / parcelas
 
     # Adicione a seção de Pagamentos
     elements.append(Paragraph(f'Parcelamento em {cupom_fiscal_data.get("parcelamento", 0)}x - {cupom_fiscal_data.get("bandeira", 0)}', body_style))
@@ -101,7 +101,7 @@ def gerar_pdf():
     elements.append(Paragraph(f'Valor Pago R$ {cupom_fiscal_data.get("valorPago", 0):.2f}', body_style))
     elements.append(Paragraph(f'Troco R$ {cupom_fiscal_data.get("troco", 0):.2f}', body_style))
 
-    elements.append(Paragraph(f'<b>TOTAL PAGO R$ {total_com_desconto:.2f}</b>', body_style))
+    elements.append(Paragraph(f'<b>TOTAL PAGO R$ {total_:.2f}</b>', body_style))
 
     # Adicione a nota de rodapé centralizada
     nota_rodape_style = ParagraphStyle('NotaRodapeStyle', parent=body_style, alignment=1)
@@ -116,5 +116,5 @@ def gerar_pdf():
     pdf_bytes = buffer.getvalue()
     response = make_response(pdf_bytes)
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'inline; filename=cupom-fiscal.pdf'
+    response.headers['Content-Disposition'] = f'inline; filename=FlexDuckCF{numero_nf}.pdf'
     return response

@@ -52,5 +52,27 @@
   border: 1px solid #000000;
 }
 
+/* Adicione esta classe CSS para estilizar as linhas de carregamento */
+.loading tr::before {
+  content: "";
+  display: block;
+  background-color: #f0f0f0; /* Cor de fundo das linhas de carregamento */
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100%;
+  z-index: -1;
+}
+
+.loading td,
+.loading th {
+  position: relative;
+  z-index: 1;
+}
+
+
+
+
+
 
 

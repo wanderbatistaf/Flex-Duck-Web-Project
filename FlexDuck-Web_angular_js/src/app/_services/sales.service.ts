@@ -16,7 +16,7 @@ export class SalesService {
   }
 
   // Cria o método para adicionar um novo produto
-  addProduct(newProduct: Products): Observable<Products> {
+  addVenda(newProduct: Products): Observable<Products> {
     return this.http.post<Products>(`${environment.apiUrl}/vendas/add`, newProduct);
   }
 

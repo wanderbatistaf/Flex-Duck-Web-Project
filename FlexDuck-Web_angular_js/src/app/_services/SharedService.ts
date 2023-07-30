@@ -1,8 +1,10 @@
 // shared.service.ts
 import { Injectable } from '@angular/core';
+import { Clients } from "@app/_models";
 import { Products } from "@app/_models";
 
 interface Client {
+  id: string;
   business_name: string;
   cnpj_cpf: string;
   telephone: string;
@@ -37,10 +39,12 @@ export class SharedService {
     const inputClienteNome = document.getElementById('inputCliente') as HTMLInputElement;
     const inputClienteCpf_Cnpj = document.getElementById('inputCpf') as HTMLInputElement;
     const inputClienteTelefone = document.getElementById('inputTelefone') as HTMLInputElement;
-    if (inputClienteNome && inputClienteCpf_Cnpj && inputClienteTelefone) {
+    const inputClienteID = document.getElementById('inputClienteID') as HTMLInputElement;
+    if (inputClienteNome && inputClienteCpf_Cnpj && inputClienteTelefone && inputClienteID) {
       inputClienteNome.value = this.selectedCliente.business_name || '';
       inputClienteCpf_Cnpj.value = this.selectedCliente.cnpj_cpf || '';
       inputClienteTelefone.value = this.selectedCliente.telephone || '';
+      inputClienteID.value = this.selectedCliente.id || '';
     }
 
   }
@@ -48,11 +52,12 @@ export class SharedService {
   updateFieldsProduto() {
     const inputProdutoCodigo = document.getElementById('codigoProduto') as HTMLInputElement;
     const inputProdutoNome = document.getElementById('inputProduto') as HTMLInputElement;
+    (document.getElementById('inputQuantidade') as HTMLInputElement).value = '1';
     if (inputProdutoCodigo && inputProdutoNome) {
       inputProdutoCodigo.value = this.selectedProduto?.codigo || '';
       inputProdutoNome.value = this.selectedProduto?.nome || '';
-      (document.getElementById('inputQuantidade') as HTMLInputElement).value = '1';
     }
 
   }
+
 }
