@@ -2,6 +2,7 @@
 {
     "compileOnSave": false,
     "compilerOptions": {
+        "types": ["jquery", "popper.js"],
         "baseUrl": "./",
         "outDir": "./dist/out-tsc",
         "forceConsistentCasingInFileNames": true,

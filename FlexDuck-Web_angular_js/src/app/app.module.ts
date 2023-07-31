@@ -31,6 +31,7 @@ import { ClienteModalComponent } from './modals/cliente-modal/cliente-modal.comp
 import { VendedorModalComponent } from './modals/vendedor-modal/vendedor-modal.component';
 import { ProdutoModalComponent } from './modals/produto-modal/produto-modal.component';
 import {SharedService} from "@app/_services/SharedService";
+import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/mesas.component';
 
 
 @NgModule({
@@ -65,7 +66,9 @@ import {SharedService} from "@app/_services/SharedService";
     SalesComponent,
     ClienteModalComponent,
     VendedorModalComponent,
-    ProdutoModalComponent
+    ProdutoModalComponent,
+    MesasComponent,
+    FilterPipe
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

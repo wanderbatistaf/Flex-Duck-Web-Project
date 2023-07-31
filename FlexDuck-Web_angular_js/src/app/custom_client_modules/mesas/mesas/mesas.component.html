@@ -1,0 +1,297 @@
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalItensConsumidosVisivel}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Produtos Consumidos</h5>
+        <button type="button" class="close" aria-label="Close" (click)="fecharModalProdutosConsumidos()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <ul>
+          <li *ngFor="let produto of mesaSelecionada?.produtosConsumidos">
+            {{ produto.nome }} - R$ {{ produto.preco.toFixed(2) }} ({{produto.quantidade}}x)
+          </li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModalProdutosConsumidos()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Finalizar Mesa -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalFinalizarMesaVisivel}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Finalizar Mesa</h5>
+        <button type="button" class="close" aria-label="Close" (click)="fecharModalFinalizarMesa()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="descontoValor">Desconto R$:</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="descontoValor" [(ngModel)]="descontoValor" (keyup)="atualizarDescontoValor()" readonly>
+                <div class="input-group-append">
+                  <span class="input-group-text" (click)="abrirModalSenhaValor()"><i class="fas fa-key"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="descontoPercent">Desconto %:</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="descontoPercent" [(ngModel)]="descontoPercent" (input)="atualizarDescontoPercent()" readonly>
+                <div class="input-group-append">
+                  <span class="input-group-text" (click)="abrirModalSenhaPercent()"><i class="fas fa-key"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="total">Total:</label>
+              <input type="text" class="form-control" id="total" [(ngModel)]="total" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="formaPagamento">Forma de Pagamento:</label>
+              <select class="form-control" id="formaPagamento" (change)="onFormaPagamentoDinheiro()">
+                <option value="">Selecione a forma de pagamento:</option>
+                <option *ngFor="let paytype of paytypes" [value]="paytype.id">{{ paytype.nome }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="bandeira">Bandeira:</label>
+              <select class="form-control" id="bandeira" [(ngModel)]="bandeira" [disabled]="bandeiraReadonly" (change)="onFormaPagamentoDinheiro()">
+                <option value="select">Selecione a bandeira:</option>
+                <option *ngFor="let bandtype of bandtypes" [value]="bandtype.id">{{ bandtype.nome }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="parcelamento">Parcelamento:</label>
+              <input type="number" class="form-control" id="parcelamento" min="1" max="12" value="1" [(ngModel)]="parcelamento" [disabled]="parcelamentoReadonly">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="bandeira === '6'">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="valorPago">Valor Pago:</label>
+              <input type="number" class="form-control" id="valorPago" [(ngModel)]="valorPago" (change)="checkValorPago()">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="troco">Troco:</label>
+              <input type="number" class="form-control" id="troco" [value]="calcularTroco().toFixed(2)" [readonly]="true">
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModalFinalizarMesa()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="validarCamposVenda(); buscarUltimoNumeroCF();">Finalizar Venda</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalNovaMesaVisivel}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Abrir Nova Mesa</h5>
+        <button type="button" class="close" aria-label="Close" (click)="fecharModalNovaMesa()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="nomeCliente">Nome do Cliente:</label>
+          <input type="text" class="form-control" id="nomeCliente" [(ngModel)]="novoCliente.nome">
+        </div>
+        <div class="form-group">
+          <label for="telefoneCliente">Telefone do Cliente:</label>
+          <input type="text" class="form-control" id="telefoneCliente" [(ngModel)]="novoCliente.telefone">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModalNovaMesa()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="criarNovaMesa()">Abrir Mesa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div fxLayout="column" fxLayout.gt-sm="row">
+  <h1 class="mt-4" xmlns="http://www.w3.org/1999/html">Mesas</h1>
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">Gestão de Mesas</li>
+  </ol>
+
+  <nav class="navbar navbar-light justify-content-between">
+    <button type="button" class="btn btn-primary mb-3" (click)="abrirNovaMesa()">Abrir Nova Mesa</button>
+  </nav>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-4" *ngFor="let mesa of mesasAbertas">
+        <div class="card">
+          <div class="card-header" style="cursor: pointer" (click)="abrirModalProdutosConsumidos(mesa)">
+            Mesa {{ mesa.numero }} - {{ mesa.nome }}
+          </div>
+          <div class="card-body" style="cursor: pointer" (click)="abrirModalProdutosConsumidos(mesa)">
+            <p>Telefone do Responsável: {{ mesa.telefoneResponsavel }}</p>
+            <p>Total a Pagar: R$ {{ mesa.totalAPagar.toFixed(2) }}</p>
+          </div>
+          <div class="card-footer">
+            <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-primary btn-sm" (click)="finalizarMesaSelecionada(mesa, true)">Finalizar Mesa</button>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="abrirModalAdicionarProduto(mesa)">Adicionar Produto</button>
+          </div>
+          </div>
+        </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- Modal de senha percent -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalSenhaVisivel_perc}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Digite sua senha:</h5>
+        <button type="button" class="close" aria-label="Close" (click)="fecharModalSenha()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="password" class="form-control" [(ngModel)]="senha">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModalSenha()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="verificarSenha_percent()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Modal de senha Valor -->
+  <div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalSenhaVisivel_val}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Digite sua senha:</h5>
+          <button type="button" class="close" aria-label="Close" (click)="fecharModalSenha()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="password" class="form-control" [(ngModel)]="senha">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="fecharModalSenha()">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="verificarSenha_valor()">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Modal de adicionar produto -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalAdicionarProdutoVisivel}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Adicionar Produto</h5>
+        <button type="button" class="close" aria-label="Close" (click)="fecharModalAdicionarProduto()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Adicione a barra de pesquisa (searchbar) antes da tabela -->
+        <div class="input-group mb-3 justify-content-center">
+          <input type="text" class="form-control" placeholder="Pesquisar produtos" [(ngModel)]="pesquisaProduto" aria-label="Pesquisar produtos">
+          <div class="spacer"></div> <!-- Espaço do botão -->
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" id="search-button">Pesquisar</button>
+          </div>
+        </div>
+
+        <!-- Adicione a tabela para exibir a lista de produtos carregados da API aqui -->
+        <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+          <tr>
+            <th class="text-center">Produto</th>
+            <th class="text-center">Estoque</th>
+            <th class="text-center">Preço</th>
+            <th class="text-center">Selecionar</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let produto of produtos | filter: pesquisaProduto">
+            <td class="text-center">{{ produto.nome }}</td>
+            <td class="text-center">{{ produto.quantidade }}</td>
+            <td class="text-center">{{ produto.preco_venda }}</td>
+            <td class="text-center">
+              <button class="btn btn-primary" (click)="perguntarQuantidade(produto)">Selecionar</button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModalAdicionarProduto()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="adicionarProdutoConsumido()">Adicionar Produto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para perguntar a quantidade -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': produtoSelecionado}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Informe a quantidade do produto</h5>
+      </div>
+      <div class="modal-body">
+        <input type="number" class="form-control" [(ngModel)]="quantidadeProdutoAdicionar">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="adicionarProdutoConsumido()">Adicionar</button>
+        <button type="button" class="btn btn-secondary" (click)="produtoSelecionado = null">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
