@@ -8,6 +8,13 @@
   <div class="text-center" *ngIf="isLoading">
     <div class="spinner-border spinner-border-sm"></div>
   </div>
+  <!-- Adicione a barra de pesquisa (searchbar) antes da tabela -->
+  <div class="input-group mb-3 justify-content-center">
+    <input type="text" class="form-control" placeholder="Pesquisar produtos" [(ngModel)]="pesquisaProduto" aria-label="Pesquisar produtos">
+    <div class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button" id="search-button">Pesquisar</button>
+    </div>
+  </div>
   <!-- Adicione a tabela para exibir a lista de clientes carregados da API aqui -->
   <table class="table table-hover" [ngClass]="{ 'loading': isLoading }">
     <thead>
@@ -20,7 +27,7 @@
     </thead>
     <tbody>
     <!-- Adicione os clientes aqui usando *ngFor ou carregue-os da API -->
-    <tr *ngFor="let cliente of clientes">
+    <tr *ngFor="let cliente of clientes | filter: pesquisaProduto">
       <td class="text-center">{{ cliente.business_name }}</td>
       <td class="text-center">{{ cliente.cnpj_cpf }}</td>
       <td class="text-center">{{ cliente.telephone }}</td>

@@ -27,9 +27,9 @@ import { NotasEntradaComponent } from './contabilidade/notas-entrada/notas-entra
 import { NotasSaidaComponent } from './contabilidade/notas-saida/notas-saida.component';
 import { SalesComponent } from "@app/sales/sales.component";
 import {NgbModalModule, NgbModule} from "@ng-bootstrap/ng-bootstrap";
-import { ClienteModalComponent } from './modals/cliente-modal/cliente-modal.component';
-import { VendedorModalComponent } from './modals/vendedor-modal/vendedor-modal.component';
-import { ProdutoModalComponent } from './modals/produto-modal/produto-modal.component';
+import { FilterPipeC, ClienteModalComponent } from './modals/cliente-modal/cliente-modal.component';
+import { FilterPipeV, VendedorModalComponent } from './modals/vendedor-modal/vendedor-modal.component';
+import { FilterPipeP, ProdutoModalComponent } from './modals/produto-modal/produto-modal.component';
 import {SharedService} from "@app/_services/SharedService";
 import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/mesas.component';
 
@@ -68,7 +68,10 @@ import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/me
     VendedorModalComponent,
     ProdutoModalComponent,
     MesasComponent,
-    FilterPipe
+    FilterPipe,
+    FilterPipeP,
+    FilterPipeV,
+    FilterPipeC
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

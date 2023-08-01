@@ -7,10 +7,10 @@
 <!-- Abas de Navegação -->
 <ul class="nav nav-tabs mb-4">
   <li class="nav-item" *ngIf="activeTab !== 'edicao_user'">
-    <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro'); getLastUserId()">Cadastro</a>
+    <a class="nav-link" [class.active]="isTabActive('cadastro')" style="cursor: pointer" (click)="setActiveTab('cadastro'); getLastUserId()">Cadastro</a>
   </li>
   <li class="nav-item" *ngIf="activeTab !== 'edicao_user'">
-    <a class="nav-link" [class.active]="isTabActive('consulta')" (click)="setActiveTab('consulta')">Funcionários</a>
+    <a class="nav-link" [class.active]="isTabActive('consulta')" style="cursor: pointer" (click)="setActiveTab('consulta')">Funcionários</a>
   </li>
   <li class="nav-item" *ngIf="activeTab !== 'edicao_user' && activeTab === 'edicao'">
     <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('edicao')">Edição</a>
@@ -127,7 +127,7 @@
               <!-- LEVEL -->
               <div class="form-group col-md-2">
                 <label class="form-control-label" for="level_eu">Level <em>*</em></label>
-                <select class="form-control custom-select" formControlName="level" id="level_eu" name="level">
+                <select class="form-control custom-select" formControlName="level" id="level_eu" name="level" readonly>
                   <option *ngFor="let level of levels" [ngValue]="level.value">{{ level.name }}</option>
                 </select>
               </div>

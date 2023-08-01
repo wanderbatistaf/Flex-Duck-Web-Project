@@ -4,11 +4,7 @@ import {Bandeiras, Paytype, Products} from "@app/_models";
 import {FuncPaymentsService, ProductService, SalesService, UserService} from "@app/_services";
 import { Pipe, PipeTransform } from '@angular/core';
 import {JwtHelperService} from "@auth0/angular-jwt";
-import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
-import {FormBuilder} from "@angular/forms";
-import {Router} from "@angular/router";
-import {HttpClient} from "@angular/common/http";
-import {SharedService} from "@app/_services/SharedService";
+import {NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 
 interface Produto {
   codigo: string;
@@ -69,6 +65,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   senha = '';
   novoCliente: Cliente = { nome: '', telefone: '' };
   modalFinalizarMesaVisivel = false;
+  cupomFiscalModalAberto = false;
   subtotal = 0;
   descontoValor = 0;
   descontoPercent = 0;
@@ -92,18 +89,10 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   paytypes: any[] = [];
   bandtypes: any[] = [];
   private modalRef: NgbModalRef | undefined;
-  selectedId: number | null | undefined;
-  selectedVendedor: string | undefined;
-  selectedClienteName: string | undefined;
-  selectedClienteCPF_CNPJ!: string;
-  selectedClienteTelephone!: string;
   SelectedClienteId!: string;
   listaProdutos: Produto[] = [];
-  modalAberto = false;
   nome: string = '';
-  cpfCnpj: string = '';
   telefone: string = '';
-  cupomFiscalModalAberto: boolean = false;
   vendorName = ''
   ClienteName = ''
   ClienteCPF_CNPJ = ''
@@ -115,7 +104,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   CfiscalDataHora: string | undefined;
   formaPagamento: string = '0';
   valorParcela: number = 1;
-  ClienteTelephone: string = '';
   ultimoNumeroCF: number = 0;
   proximoNumeroCF: string = '000000000';
   valorPago: number = 0;
@@ -153,14 +141,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   constructor(private productService: ProductService,
               private userService: UserService,
               private paytypeService: FuncPaymentsService,
-              private salesService: SalesService,
-              private usersService: UserService,
-              private fb: FormBuilder,
-              private router: Router,
-              private http: HttpClient,
-              private formBuilder: FormBuilder,
-              private modalService: NgbModal,
-              private sharedService: SharedService) { }
+              private salesService: SalesService) { }
 
   ngOnInit(): void {
     this.getProduct();
@@ -238,7 +219,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     });
 
     total -= this.descontoValor; // Subtrair o valor do desconto em R$ do total final
-    return total;
+    return Number(total);
   }
 
 
@@ -380,6 +361,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
 
   fecharModalFinalizarMesa(): void {
     this.modalFinalizarMesaVisivel = false;
+    this.cupomFiscalModalAberto = false;
     this.subtotal = 0;
     this.descontoValor = 0;
     this.descontoPercent = 0;
@@ -450,6 +432,10 @@ export class MesasComponent implements OnInit, AfterContentChecked {
 
   abrirModalFinalizarMesa(): void {
     this.modalFinalizarMesaVisivel = true;
+    this.cupomFiscalModalAberto = true;
+
+    this.gerarCupomFiscal();
+
     // Remova a chamada para calcularSubtotal e aplicarDesconto aqui, pois já foram feitas no finalizarMesaSelecionada
   }
 
@@ -556,93 +542,94 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   validarCamposVenda() {
-    let formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
-    let bandeira = (document.getElementById('bandeira') as HTMLSelectElement).value;
-    let vendorID = (document.getElementById('inputVendedorID') as HTMLSelectElement).value;
-    let vendorName = (document.getElementById('inputVendedor') as HTMLSelectElement).value;
-    let ClienteName = (document.getElementById('inputCliente') as HTMLSelectElement).value;
-    let ClienteCPF_CNPJ = (document.getElementById('inputCpf') as HTMLSelectElement).value;
-    let ClienteTelephone = (document.getElementById('inputTelefone') as HTMLSelectElement).value;
-    let SubTotal = parseFloat((document.getElementById('subtotal') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
-    let Total = parseFloat((document.getElementById('total') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
-    let DescontoValor = (document.getElementById('descontoValor') as HTMLSelectElement).value;
-    let DescontoPercent = (document.getElementById('descontoPercent') as HTMLSelectElement).value;
-    let clienteID = (document.getElementById('inputClienteID') as HTMLSelectElement).value;
-
-    console.log(formaPagamento);
-
-    // Lista de campos obrigatórios que precisam estar preenchidos
-    let camposObrigatorios = [];
-    if (!vendorID) camposObrigatorios.push('ID do vendedor');
-    if (!vendorName) camposObrigatorios.push('Nome do vendedor');
-    if (!ClienteName) camposObrigatorios.push('Nome do cliente');
-    if (!ClienteCPF_CNPJ) camposObrigatorios.push('CPF/CNPJ do cliente');
-    if (!ClienteTelephone) camposObrigatorios.push('Telefone do cliente');
-    if (this.listaProdutos.length === 0) camposObrigatorios.push('Pelo menos um produto na lista');
-    if (formaPagamento === '' || formaPagamento === 'select') camposObrigatorios.push('Forma de pagamento');
-    if (bandeira === '' || bandeira === 'select') camposObrigatorios.push('Bandeira do cartão');
-
-    // Verificar se todos os campos obrigatórios estão preenchidos
-    if (camposObrigatorios.length === 0) {
-      // Verificar o valor pago se a forma de pagamento for "Dinheiro"
-      if (formaPagamento === '1') {
-        let valorPagoElement = document.getElementById('valorPago') as HTMLInputElement;
-        let valorPago = valorPagoElement ? parseFloat(valorPagoElement.value) : NaN;
-
-        if (isNaN(valorPago) || valorPago <= 0) {
-          // O campo "Valor Pago" não foi preenchido corretamente, exibir alerta de erro
-          alert('Por favor, informe um valor válido maior que zero no campo "Valor Pago" antes de finalizar a venda.');
-          return; // Retorna sem finalizar a venda
-        }
-        this.valorPago = valorPago;
-      } else {
-        this.valorPago = this.total;
-      }
-
-      // Chama o método para buscar e gerar o próximo número do CF
-      this.gerarProximoNumeroCF();
-
-      // Preencher os dados da venda antes de finalizar
-      this.dadosDaVenda = {
-        cliente_id: clienteID,
-        vendedor: vendorName,
-        cliente: ClienteName,
-        cpf_cnpj: ClienteCPF_CNPJ,
-        telefone: ClienteTelephone,
-        forma_pagamento_id: formaPagamento,
-        bandeira_id: bandeira,
-        parcelamento: this.parcelamento,
-        subtotal: Number(SubTotal),
-        desconto: Number(DescontoValor),
-        valor_total: Number(Total),
-        valor_total_pago: this.valorPago,
-        troco: (this.valorPago - this.total).toFixed(2),
-        quantidade_itens: this.listaProdutos.length,
-        numero_cupom_fiscal: this.proximoNumeroCF,
-        imposto_estadual: 6, // Insira o valor do imposto estadual, caso possua
-        imposto_federal: 10, // Insira o valor do imposto federal, caso possua
-        itens_vendidos: this.listaProdutos.map(produto => ({
-          produto: produto.nome.toString(),
-          codigo_produto: produto.codigo,
-          quantidade: produto.quantidade,
-          preco_unitario: produto.preco,
-          subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2))
-        })),
-      };
-
-      // Se chegou até aqui, todos os campos estão preenchidos corretamente
-      // Exibir alerta de confirmação
-      if (confirm('Deseja finalizar a venda?')) {
-        console.log(this.dadosDaVenda);
-        this.finalizarVenda();
-        // this.gerarCupomFiscal();
-      }
-    } else {
-      // Alguns campos não estão preenchidos, exibir alerta de erro com os campos obrigatórios faltantes
-      let mensagemErro = 'Por favor, preencha os seguintes campos antes de finalizar a venda:\n\n';
-      mensagemErro += camposObrigatorios.join('\n');
-      alert(mensagemErro);
+    if (this.mesaSelecionada) {
+      this.removerMesaFinalizada(this.mesaSelecionada);
     }
+    this.modalFinalizarMesaVisivel = false;
+    // let formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
+    // let bandeira = (document.getElementById('bandeira') as HTMLSelectElement).value;
+    // let vendorID = (document.getElementById('inputVendedorID') as HTMLSelectElement).value;
+    // let vendorName = (document.getElementById('inputVendedor') as HTMLSelectElement).value;
+    // let ClienteName = (document.getElementById('inputCliente') as HTMLSelectElement).value;
+    // let ClienteCPF_CNPJ = (document.getElementById('inputCpf') as HTMLSelectElement).value;
+    // let ClienteTelephone = (document.getElementById('inputTelefone') as HTMLSelectElement).value;
+    // let SubTotal = parseFloat((document.getElementById('subtotal') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+    // let Total = parseFloat((document.getElementById('total') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+    // let DescontoValor = (document.getElementById('descontoValor') as HTMLSelectElement).value;
+    // let DescontoPercent = (document.getElementById('descontoPercent') as HTMLSelectElement).value;
+    // let clienteID = (document.getElementById('inputClienteID') as HTMLSelectElement).value;
+    //
+    // console.log(formaPagamento);
+    //
+    // // Lista de campos obrigatórios que precisam estar preenchidos
+    // let camposObrigatorios = [];
+    // if (this.listaProdutos.length === 0) camposObrigatorios.push('Pelo menos um produto na lista');
+    // if (formaPagamento === '' || formaPagamento === 'select') camposObrigatorios.push('Forma de pagamento');
+    // if (bandeira === '' || bandeira === 'select') camposObrigatorios.push('Bandeira do cartão');
+    //
+    // // Verificar se todos os campos obrigatórios estão preenchidos
+    // if (camposObrigatorios.length === 0) {
+    //   // Verificar o valor pago se a forma de pagamento for "Dinheiro"
+    //   if (formaPagamento === '1') {
+    //     let valorPagoElement = document.getElementById('valorPago') as HTMLInputElement;
+    //     let valorPago = valorPagoElement ? parseFloat(valorPagoElement.value) : NaN;
+    //
+    //     if (isNaN(valorPago) || valorPago <= 0) {
+    //       // O campo "Valor Pago" não foi preenchido corretamente, exibir alerta de erro
+    //       alert('Por favor, informe um valor válido maior que zero no campo "Valor Pago" antes de finalizar a venda.');
+    //       return; // Retorna sem finalizar a venda
+    //     }
+    //     this.valorPago = valorPago;
+    //   } else {
+    //     this.valorPago = this.total;
+    //   }
+    //
+    //   // Preencher os dados da venda antes de finalizar
+    //   // this.dadosDaVenda = {
+    //   //   cliente_id: clienteID,
+    //   //   vendedor: vendorName,
+    //   //   cliente: ClienteName,
+    //   //   cpf_cnpj: ClienteCPF_CNPJ,
+    //   //   telefone: ClienteTelephone,
+    //   //   forma_pagamento_id: formaPagamento,
+    //   //   bandeira_id: bandeira,
+    //   //   parcelamento: this.parcelamento,
+    //   //   subtotal: Number(SubTotal),
+    //   //   desconto: Number(DescontoValor),
+    //   //   valor_total: Number(Total),
+    //   //   valor_total_pago: this.valorPago,
+    //   //   troco: (this.valorPago - this.total).toFixed(2),
+    //   //   quantidade_itens: this.listaProdutos.length,
+    //   //   numero_cupom_fiscal: this.proximoNumeroCF,
+    //   //   imposto_estadual: 6, // Insira o valor do imposto estadual, caso possua
+    //   //   imposto_federal: 10, // Insira o valor do imposto federal, caso possua
+    //   //   itens_vendidos: this.listaProdutos.map(produto => ({
+    //   //     produto: produto.nome.toString(),
+    //   //     codigo_produto: produto.codigo,
+    //   //     quantidade: produto.quantidade,
+    //   //     preco_unitario: produto.preco,
+    //   //     subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2))
+    //   //   })),
+    //   // };
+    //
+    //   // Se chegou até aqui, todos os campos estão preenchidos corretamente
+    //   // Exibir alerta de confirmação
+    //   if (confirm('Deseja finalizar a venda?')) {
+    //     // Após finalizar a venda com sucesso, remover a mesa selecionada da lista de mesas abertas
+    //     if (this.mesaSelecionada) {
+    //       this.removerMesaFinalizada(this.mesaSelecionada);
+    //     }
+    //     this.modalFinalizarMesaVisivel = false;
+    //     // console.log(this.dadosDaVenda);
+    //     // this.finalizarVenda();
+    //     // this.gerarCupomFiscal();
+    //   }
+    // } else {
+    //   // Alguns campos não estão preenchidos, exibir alerta de erro com os campos obrigatórios faltantes
+    //   let mensagemErro = 'Por favor, preencha os seguintes campos antes de finalizar a venda:\n\n';
+    //   mensagemErro += camposObrigatorios.join('\n');
+    //   alert(mensagemErro);
+    // }
   }
 
   buscarUltimoNumeroCF() {
@@ -739,7 +726,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     };
 
     // Show the modal
-    this.abrirCupomFiscalModal();
+    // this.abrirCupomFiscalModal();
   }
 
   abrirCupomFiscalModal() {
@@ -757,6 +744,18 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       }
     )
   }
+
+  fecharCupomFiscalModal() {
+    this.cupomFiscalModalAberto = false;
+  }
+
+  removerMesaFinalizada(mesa: Mesa): void {
+    const index = this.mesasAbertas.indexOf(mesa);
+    if (index !== -1) {
+      this.mesasAbertas.splice(index, 1);
+    }
+  }
+
 
 
 

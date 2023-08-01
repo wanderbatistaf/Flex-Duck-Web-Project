@@ -13,7 +13,7 @@
   </div>
   <!-- Adicione a barra de pesquisa (searchbar) antes da tabela -->
   <div class="input-group mb-3 justify-content-center">
-    <input type="text" class="form-control" placeholder="Pesquisar vendedores" aria-label="Pesquisar clientes" aria-describedby="search-button">
+    <input type="text" class="form-control" placeholder="Pesquisar produtos" [(ngModel)]="pesquisaProduto" aria-label="Pesquisar produtos">
     <div class="spacer"></div> <!-- Espaço do botão -->
     <div class="input-group-append">
       <button class="btn btn-outline-secondary" type="button" id="search-button">Pesquisar</button>
@@ -31,7 +31,7 @@
     </thead>
     <tbody>
     <!-- Adicione os clientes aqui usando *ngFor ou carregue-os da API -->
-    <tr *ngFor="let vendedor of vendedores">
+    <tr *ngFor="let vendedor of vendedores | filter: pesquisaProduto">
       <td class="text-center">{{ vendedor.user_id }}</td>
       <td class="text-center">{{ vendedor.name }}</td>
       <td class="text-center">

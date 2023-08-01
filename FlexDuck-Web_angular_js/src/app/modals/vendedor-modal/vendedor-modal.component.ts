@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, Pipe, PipeTransform} from '@angular/core';
 import { NgbActiveModal, NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
 import { User } from "@app/_models";
-import {map} from "rxjs";
 import {UserService} from "@app/_services";
 import {SharedService} from "@app/_services/SharedService";
 
@@ -9,6 +8,24 @@ import {SharedService} from "@app/_services/SharedService";
 interface Vendor {
   user_id: number;
   name: string;
+}
+
+@Pipe({
+  name: 'filter'
+})
+export class FilterPipeV implements PipeTransform {
+  transform(items: any[], searchText: string): any[] {
+    if (!items || !searchText || !searchText.trim()) {
+      return items;
+    }
+
+    searchText = searchText.toLowerCase();
+
+    return items.filter((item) => {
+      const keys = Object.keys(item);
+      return keys.some((key) => item[key] && item[key].toString().toLowerCase().includes(searchText));
+    });
+  }
 }
 
 @Component({
@@ -21,6 +38,7 @@ export class VendedorModalComponent implements OnInit {
   vendedores: Vendor[] = [];
   private currentUser?: number;
   loading: boolean = true;
+  pesquisaProduto: string = '';
   constructor(private modalService: NgbModal,
               public activeModal: NgbActiveModal,
               private usersService: UserService,

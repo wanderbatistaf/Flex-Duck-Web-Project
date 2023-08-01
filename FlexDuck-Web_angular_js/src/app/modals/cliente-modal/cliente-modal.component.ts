@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, Pipe, PipeTransform} from '@angular/core';
 import {NgbActiveModal, NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { Clients } from "@app/_models";
 import {map} from "rxjs/operators";
@@ -10,6 +10,24 @@ interface Client {
   cnpj_cpf: string;
   telephone: string;
   id: string;
+}
+
+@Pipe({
+  name: 'filter'
+})
+export class FilterPipeC implements PipeTransform {
+  transform(items: any[], searchText: string): any[] {
+    if (!items || !searchText || !searchText.trim()) {
+      return items;
+    }
+
+    searchText = searchText.toLowerCase();
+
+    return items.filter((item) => {
+      const keys = Object.keys(item);
+      return keys.some((key) => item[key] && item[key].toString().toLowerCase().includes(searchText));
+    });
+  }
 }
 
 
@@ -26,6 +44,7 @@ export class ClienteModalComponent implements OnInit {
   private selectedClienteCPF_CNPJ!: string;
   private selectedClienteTelephone!: string;
   private SelectedClienteId!:string;
+  pesquisaProduto: string = '';
 
 
   constructor(private modalService: NgbModal,

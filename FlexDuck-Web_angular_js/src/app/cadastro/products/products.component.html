@@ -9,10 +9,10 @@
 <!-- Abas de Navegação -->
 <ul class="nav nav-tabs mb-4">
   <li class="nav-item">
-    <a class="nav-link" [class.active]="isTabActive('cadastro')" (click)="setActiveTab('cadastro'); getLastProductCode(); buscarFornecedores()">Cadastro</a>
+    <a class="nav-link" [class.active]="isTabActive('cadastro')" style="cursor: pointer" (click)="setActiveTab('cadastro'); getLastProductCode(); buscarFornecedores()">Cadastro</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" [class.active]="isTabActive('consulta')" (click)="setActiveTab('consulta')">Produtos</a>
+    <a class="nav-link" [class.active]="isTabActive('consulta')" style="cursor: pointer" (click)="setActiveTab('consulta')">Produtos</a>
   </li>
   <li class="nav-item" [hidden]="true">
     <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('edicao')">Edição</a>
@@ -574,7 +574,7 @@
             </div>
 
             <!-- QR CODE -->
-            <div style="border: 1px solid #ccc; padding: 5px;">
+            <div class="form-group col-md-6">
               <qrcode [level]="2" [qrvalue]="generateQRCodeValue()" id="qrcode_c"></qrcode>
               <input type="hidden" formControlName="qrcode">
             </div>

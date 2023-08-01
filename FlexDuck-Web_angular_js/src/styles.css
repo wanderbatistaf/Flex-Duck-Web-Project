@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @charset "UTF-8";
+
+/* Importações de estilos */
+@import "bootstrap/dist/css/bootstrap.css";
 /*!
 * Start Bootstrap - SB Admin v6.0.0 (https://startbootstrap.com/templates/sb-admin)
 * Copyright 2013-2020 Start Bootstrap

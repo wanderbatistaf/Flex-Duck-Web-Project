@@ -87,10 +87,19 @@
       </a>
     </div>
 
-    <a class="nav-link collapsed" routerLink="/" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"
-    ><div class="sb-nav-link-icon" (click)="logout()">
-      Logout</div>
-    </a>
+    <div class="sb-sidenav-menu-heading"
+         (click)="logout()"
+         style="color: white; cursor: pointer"
+         routerLink="/"
+         onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'; this.style.backgroundColor='rgba(0,0,0,0.2)'"
+         onmouseout="this.style.boxShadow=''; this.style.backgroundColor=''">
+      <i class="fas fa-door-open"></i> Logout
+    </div>
+
+<!--    <a class="nav-link collapsed" routerLink="/" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"-->
+<!--    ><div class="sb-nav-link-icon" (click)="logout()">-->
+<!--      Logout</div>-->
+<!--    </a>-->
   </nav>
 </div>
 

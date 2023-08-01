@@ -66,6 +66,7 @@ export class SuppliersComponent implements OnInit {
     this.level = decodedToken?.level;
     this.getSupplier();
     this.filterSupplier(this.searchText);
+
   }
 
   // Method to format the "created_at" field
