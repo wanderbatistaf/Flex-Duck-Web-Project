@@ -17,7 +17,8 @@ db_config = {
 }
 
 # Criação do pool de conexões
-db_pool = pooling.MySQLConnectionPool(pool_name="fleduckdb_pool", pool_size=5, **db_config)
+# Atualmente o pool_size minimo é de 10 conexões
+db_pool = pooling.MySQLConnectionPool(pool_name="fleduckdb_pool", pool_size=10, **db_config)
 
 # Função para obter uma conexão do pool
 def get_db_connection():
