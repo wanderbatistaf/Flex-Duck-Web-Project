@@ -64,16 +64,6 @@
               </div>
 
 
-              <div class="form-group col-md-4">
-                <label class="form-control-label">Ativo? <em>*</em></label>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" formControlName="active" id="active_eu">
-                  <label class="form-check-label" for="active_eu">
-                    Ativo
-                  </label>
-                </div>
-              </div>
-
             </div>
 
             <div class="row">
@@ -124,13 +114,6 @@
                        readonly>
               </div>
 
-              <!-- LEVEL -->
-              <div class="form-group col-md-2">
-                <label class="form-control-label" for="level_eu">Level <em>*</em></label>
-                <select class="form-control custom-select" formControlName="level" id="level_eu" name="level" readonly>
-                  <option *ngFor="let level of levels" [ngValue]="level.value">{{ level.name }}</option>
-                </select>
-              </div>
               <div>
                 <br>
                 <button type="button" class="btn btn-secondary mr-2" (click)="redirectToHome()">Cancelar</button>
