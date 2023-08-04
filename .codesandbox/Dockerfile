@@ -13,5 +13,6 @@ RUN pip install -r requirements.txt
 # Exponha a porta do aplicativo
 EXPOSE 5000
 
-# Execute o aplicativo com uWSGI
-CMD ["uwsgi", "app.ini"]
+# Adicione o comando para executar o aplicativo com uWSGI e o watchdog
+CMD ["uwsgi", "--http", "0.0.0.0:5000", "--wsgi-file", "app.py", "--callable", "app", "--processes", "4", "--threads", "2", "--stats", "0.0.0.0:9191", "--py-autoreload", "1"]
+

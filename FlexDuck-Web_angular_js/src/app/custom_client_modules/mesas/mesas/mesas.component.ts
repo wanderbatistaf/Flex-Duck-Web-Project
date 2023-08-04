@@ -26,6 +26,8 @@ interface Mesa {
   telefoneResponsavel: string;
   produtosConsumidos: Produto[];
   totalAPagar: number;
+  abertura: Date;
+  tempoAberta: Date;
 }
 
 interface Cliente {
@@ -108,6 +110,11 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   proximoNumeroCF: string = '000000000';
   valorPago: number = 0;
   troco: number = 0;
+  numerosMesasDisponiveis!: number[];
+  novoNumeroMesa!: number;
+  tempoAberturaMesa!: number;
+  intervaloCronometro: any;
+
 
   dadosDaVenda = {
     cliente_id: this.SelectedClienteId,
@@ -137,7 +144,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   };
 
 
-
   constructor(private productService: ProductService,
               private userService: UserService,
               private paytypeService: FuncPaymentsService,
@@ -149,6 +155,11 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     this.buscarBandTypes();
     this.onFormaPagamentoDinheiro();
     this.buscarUltimoNumeroCF();
+    this.atualizarNumerosMesasDisponiveis();
+    // Atualizar o cronômetro a cada segundo
+    setInterval(() => {
+      this.calcularTempoDecorrido();
+    }, 1000);
 
   }
 
@@ -160,6 +171,10 @@ export class MesasComponent implements OnInit, AfterContentChecked {
 
 
   abrirNovaMesa(): void {
+    const numerosMesasAbertas = this.mesasAbertas.map(mesa => mesa.numero);
+    const numerosTodasMesas = Array.from({ length: 30 }, (_, i) => i + 1);
+    this.numerosMesasDisponiveis = numerosTodasMesas.filter(numero => !numerosMesasAbertas.includes(numero));
+    this.atualizarNumerosMesasDisponiveis();
     // Exibir o modal para abrir uma nova mesa
     this.modalNovaMesaVisivel = true;
   }
@@ -178,13 +193,20 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       nome: this.novoCliente.nome,
       telefoneResponsavel: this.novoCliente.telefone,
       produtosConsumidos: [],
-      totalAPagar: 0
+      totalAPagar: 0,
+      abertura: new Date(),
+      tempoAberta: new Date()
     };
     this.mesasAbertas.push(novaMesa);
 
     // Fechar o modal após criar a nova mesa
     this.fecharModalNovaMesa();
   }
+
+  isMesaAberta(numeroMesa: number): boolean {
+    return this.mesasAbertas.some(mesa => mesa.numero === numeroMesa);
+  }
+
 
   finalizarMesaSelecionada(mesa: Mesa, abrirModal: boolean): void {
     this.mesaSelecionada = mesa;
@@ -299,26 +321,12 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     this.modalSenhaVisivel_perc = true;
   }
 
-  adicionarDescontoPercent(mesa: Mesa, descontoPercent: number): void {
-    // Lógica para adicionar desconto em percentual ao total a pagar da mesa
-    const descontoValor = (descontoPercent / 100) * mesa.totalAPagar;
-    mesa.totalAPagar -= descontoValor;
-
-    // Certifique-se de chamar a função calcularTotalAPagar() para aplicar o desconto corretamente
-    this.calcularTotalAPagar(mesa);
-
-    this.fecharModalSenhaPercent();
-  }
 
   fecharModalSenhaPercent(): void {
     // Lógica para fechar o modal de senha para desconto em percentual (ao cancelar ou confirmar)
     // Implemente essa lógica de acordo com o seu modal de senha para percentual
   }
 
-  selecionarMesa(mesa: Mesa): void {
-    this.mesaSelecionada = mesa;
-    this.subtotal = this.calcularSubtotal(mesa); // Atualizar o subtotal quando a mesa é selecionada
-  }
 
   adicionarProdutoConsumido(): void {
     // Lógica para adicionar um produto consumido à mesa selecionada
@@ -346,9 +354,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       console.log('Produto adicionado com sucesso à mesa selecionada!');
     }
   }
-
-
-
 
 
   removerProdutoConsumido(index: number): void {
@@ -389,10 +394,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
 
 
 
-
-
-
-
   finalizarMesa(): void {
     if (this.mesaSelecionada) {
       // Implemente a lógica para finalizar a mesa aqui, como adicionar os produtos consumidos
@@ -427,9 +428,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
 
-
-
-
   abrirModalFinalizarMesa(): void {
     this.modalFinalizarMesaVisivel = true;
     this.cupomFiscalModalAberto = true;
@@ -445,6 +443,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   abrirModalProdutosConsumidos(mesa: Mesa): void {
+    this.atualizarTempoAberturaMesa();
     this.mesaSelecionada = mesa;
     this.modalItensConsumidosVisivel = true;
   }
@@ -485,9 +484,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       );
   }
 
-  selecionarProduto(produto: Produto): void {
-    this.produtoSelecionado = produto;
-  }
 
   perguntarQuantidade(produto: Produto): void {
     this.produtoSelecionado = produto;
@@ -649,18 +645,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     );
   }
 
-  gerarProximoNumeroCF() {
-    if (this.ultimoNumeroCF) {
-      // Incrementa o número do cupom fiscal e formata para 6 dígitos (000000001 a 999999999)
-      this.ultimoNumeroCF++;
-      this.atualizarProximoNumeroCF(); // Chama o método para atualizar o próximo número do cupom fiscal
-    }
-  }
-
-  atualizarProximoNumeroCF() {
-    // Formata o próximo número do cupom fiscal para ter 9 dígitos (padLeft com '0')
-    this.proximoNumeroCF = String(this.ultimoNumeroCF).padStart(9, '0');
-  }
 
   finalizarVenda(): void {
     this.salesService.addVenda(this.dadosDaVenda).subscribe(
@@ -729,9 +713,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     // this.abrirCupomFiscalModal();
   }
 
-  abrirCupomFiscalModal() {
-    this.cupomFiscalModalAberto = true;
-  }
 
   buscarBandTypes(){
     this.paytypeService.getAllBandsTypes().subscribe(
@@ -755,6 +736,45 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       this.mesasAbertas.splice(index, 1);
     }
   }
+
+  formatarTelefone(telefone: string): string {
+    // Remove todos os caracteres não numéricos
+    const numeros = telefone.replace(/\D/g, '');
+
+    // Formatação do telefone (XX) XXXXX-XXXX
+    return numeros.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  }
+
+  atualizarNumerosMesasDisponiveis() {
+    // Limpar a lista antes de atualizar
+    this.numerosMesasDisponiveis = [];
+
+    // Preencher a lista de números de mesa disponíveis
+    const numeroMaximoMesas = 30;
+    for (let i = 1; i <= numeroMaximoMesas; i++) {
+      if (!this.isMesaAberta(i)) {
+        this.numerosMesasDisponiveis.push(i);
+      }
+    }
+  }
+
+  // Função para calcular o tempo decorrido desde a abertura da mesa
+  calcularTempoDecorrido(): void {
+    const agora = new Date();
+    for (const mesa of this.mesasAbertas) {
+      const tempoDecorrido = agora.getTime() - mesa.abertura.getTime();
+      mesa.tempoAberta = new Date(tempoDecorrido);
+    }
+  }
+
+  atualizarTempoAberturaMesa(): void {
+    const agora = new Date();
+    for (const mesa of this.mesasAbertas) {
+      const tempoDecorrido = agora.getTime() - mesa.abertura.getTime();
+      mesa.tempoAberta = new Date(tempoDecorrido);
+    }
+  }
+
 
 
 
