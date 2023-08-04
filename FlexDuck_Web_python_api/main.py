@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 import threading
@@ -8,6 +9,8 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from Controller.mysql_connector import get_db_connection, db_pool
 import mysql.connector
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 # Inicializa o aplicativo Flask
 app = Flask(__name__)
@@ -37,6 +40,14 @@ def reconnect_db(conn):
         print("Erro de conexão com o banco de dados. Tentando reconectar...")
         conn.reconnect()
         print("Reconexão bem-sucedida ao banco de dados")
+
+
+# Classe para manipular eventos de alteração de arquivo
+class FileModifiedEventHandler(FileSystemEventHandler):
+    def on_modified(self, event):
+        if event.src_path.endswith('.py'):
+            # Reinicia o aplicativo em um novo processo
+            reiniciar_aplicativo()
 
 # Adiciona as rotas de usuários
 from api_user_mysql import api_users
@@ -208,13 +219,24 @@ def buscar_dados_do_produto_qrscan(codigo):
 # Inicia a thread de verificação de conexão
 check_db_thread = Thread(target=check_db_connection)
 check_db_thread.start()
+# Obtém o caminho absoluto para o diretório atual onde main.py está sendo executado
+current_dir = os.path.abspath(os.getcwd())
 
 
 # Executa o aplicativo Flask
 if __name__ == '__main__':
+    observer = Observer()
+    event_handler = FileModifiedEventHandler()
+    dir_path = os.path.join(current_dir, '.')
+    observer.schedule(event_handler, dir_path, recursive=True)
+    observer.start()
+    print(f"Monitorando alterações no diretório: {dir_path}")
+
     try:
         app.run(host='0.0.0.0', port=5000, threaded=True)
     finally:
+        observer.stop()
+        observer.join()
         app.teardown_appcontext(fechar_conexao_db)
 
 
