@@ -13,6 +13,6 @@ RUN pip install -r requirements.txt
 # Exponha a porta do aplicativo
 EXPOSE 5000
 
-# Adicione o comando para executar o aplicativo com uWSGI e o watchdog
-CMD ["uwsgi", "--http", "0.0.0.0:5000", "--wsgi-file", "main.py", "--callable", "app", "--processes", "4", "--threads", "2", "--stats", "0.0.0.0:9191", "--py-autoreload", "1"]
+# Configurar o comando de entrada para executar o aplicativo com Gunicorn e Watchdog
+CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:5000", "--workers", "6", "--threads", "4"]
 

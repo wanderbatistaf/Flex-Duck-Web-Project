@@ -11,9 +11,12 @@ from Controller.mysql_connector import get_db_connection, db_pool
 import mysql.connector
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from custom_logger import setup_logger
 
 # Inicializa o aplicativo Flask
 app = Flask(__name__)
+# Configurar o logger personalizado
+setup_logger(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = '4Ndr3w5077' # Chave secreta do JWT
 jwt = JWTManager(app)
