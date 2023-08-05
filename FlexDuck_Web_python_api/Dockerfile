@@ -14,5 +14,5 @@ RUN pip install -r requirements.txt
 EXPOSE 5000
 
 # Configurar o comando de entrada para executar o aplicativo com Gunicorn e Watchdog
-CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:5000", "--workers", "4", "--threads", "2"]
+CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:5000", "--workers", "4", "--threads", "2", "--log-level", "debug"]
 
