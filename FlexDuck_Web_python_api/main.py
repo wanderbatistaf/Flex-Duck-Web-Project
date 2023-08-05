@@ -163,21 +163,17 @@ app_running = True
 
 # Função para verificar a conexão a cada 5 minutos
 def check_db_connection():
-    global app_running
-    while app_running:
-        conn = get_db_connection()
-        if conn:
-            try:
-                reconnect_db(conn)
-                conn.close()
-            except Exception as e:
-                print("Erro ao verificar a conexão com o banco de dados:", str(e))
-                # Encerra o aplicativo Flask
-                app_running = False
-                encerrar_aplicativo()
-                # Reinicia o aplicativo em um novo processo
-                reiniciar_aplicativo()
-        time.sleep(300)  # Aguarda 5 minutos
+    conn = get_db_connection()
+    if conn:
+        try:
+            reconnect_db(conn)
+            conn.close()
+        except Exception as e:
+            print("Erro ao verificar a conexão com o banco de dados:", str(e))
+            # Encerra o aplicativo Flask
+            encerrar_aplicativo()
+            # Reinicia o aplicativo em um novo processo
+            reiniciar_aplicativo()
 
 
 # Função para encerrar o aplicativo Flask
