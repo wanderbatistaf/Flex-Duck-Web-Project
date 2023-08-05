@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://15.229.79.164:5000',
+    apiUrl: 'https://ykthsd-5000.csb.app',
     webUrl: 'https://flex-duck-web-project.vercel.app'
 };
