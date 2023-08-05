@@ -1,5 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
+from concurrent.futures import ThreadPoolExecutor
 
 class CustomLogFormatter(logging.Formatter):
     def format(self, record):
@@ -11,3 +12,9 @@ def setup_logger(app):
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.DEBUG)
+
+def async_log(record):
+    with ThreadPoolExecutor() as executor:
+        future = executor.submit(logging.getLogger().handle, record)
+        future.result()
+
