@@ -11,14 +11,6 @@ from Controller.db_connection import get_db_connection
 api_clients = Blueprint('api_clients', __name__)
 
 
-@api_clients.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
-
-
 # API CLIENTS #
 # Define a rota GET para buscar dados do banco de dados
 @api_clients.route('/clients', methods=['GET'])

@@ -36,8 +36,6 @@ db_config = {
 # Criação do pool de conexões
 db_pool = pooling.MySQLConnectionPool(pool_name="flexduckdb_pool", pool_size=10, **db_config)
 
-
-
 # Função para reconectar ao banco de dados MySQL
 def reconnect_db(conn):
     try:

@@ -69,57 +69,46 @@ class FileModifiedEventHandler(FileSystemEventHandler):
 
 # Adiciona as rotas de usuários
 from api_user_mysql import api_users
-
 app.register_blueprint(api_users)
 
 # Adiciona as rotas de clientes
 from api_clients_mysql import api_clients
-
 app.register_blueprint(api_clients)
 
 # Adiciona as rotas de fornecedores
 from api_suppliers_mysql import api_suppliers
-
 app.register_blueprint(api_suppliers)
 
 # Adiciona as rotas de produtos
 from api_products_mysql import api_products
-
 app.register_blueprint(api_products)
 
 # Adiciona as rotas de contabil
 from api_contabil_mysql import api_contabilidade
-
 app.register_blueprint(api_contabilidade)
 
 # Adiciona as rotas de notas de entrada
 from api_notas_entrada_mysql import api_notas_entrada
-
 app.register_blueprint(api_notas_entrada)
 
 # Adiciona as rotas de notas de saida
 from api_notas_saida_mysql import api_notas_saida
-
 app.register_blueprint(api_notas_saida)
 
 # Adiciona as rotas de forma de pagamento
 from api_forma_pagamento_mysql import api_forma_pagamento
-
 app.register_blueprint(api_forma_pagamento)
 
 # Adiciona as rotas das bandeiras de cartão
 from api_bandeiras_card_mysql import api_bandeiras
-
 app.register_blueprint(api_bandeiras)
 
 # Adiciona as rotas de vendas
 from api_vendas_mysql import api_vendas
-
 app.register_blueprint(api_vendas)
 
 # Adiciona as rotas de relatorios-pdf
 from api_gerar_report import reports
-
 app.register_blueprint(reports)
 
 
