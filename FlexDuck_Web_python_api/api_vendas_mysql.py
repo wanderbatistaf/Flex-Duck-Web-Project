@@ -15,8 +15,13 @@ def buscar_todas_vendas():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    conn = get_db_connection(subdomain)
+
     try:
-        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM vendas')
         resultados = cursor.fetchall()
@@ -70,8 +75,13 @@ def buscar_venda(venda_id):
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    conn = get_db_connection(subdomain)
+
     try:
-        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM vendas')
         resultados = cursor.fetchall()
@@ -124,6 +134,12 @@ def inserir_venda():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    conn = get_db_connection(subdomain)
+
     try:
         dados = request.json
         data_venda = datetime.now()
@@ -150,7 +166,7 @@ def inserir_venda():
         # Itens vendidos
         itens_vendidos = dados['itens_vendidos']
 
-        conn = get_db_connection()
+        conn = conn
         cursor = conn.cursor()
 
         # Inserir a venda na tabela vendas
@@ -212,8 +228,13 @@ def buscar_numero_cupom_vendas():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    conn = get_db_connection(subdomain)
+
     try:
-        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('SELECT max(id), numero_cupom_fiscal FROM vendas group by 2 order by 2 desc limit 1')
         resultados = cursor.fetchall()
