@@ -1,4 +1,4 @@
-from FlexDuck_Web_python_api.Controller.mysql_utils import get_db_name_from_subdomain, db_pool
+from Controller.mysql_utils import get_db_name_from_subdomain, db_pool
 from mysql.connector import pooling, errors
 from flask import request
 

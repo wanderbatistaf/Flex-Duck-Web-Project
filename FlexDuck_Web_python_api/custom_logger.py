@@ -3,7 +3,7 @@ import os
 from logging.handlers import RotatingFileHandler
 from flask import request
 
-from FlexDuck_Web_python_api.Controller.mysql_utils import get_db_name_from_subdomain
+from Controller.mysql_utils import get_db_name_from_subdomain
 
 
 def setup_logger(app):
