@@ -112,8 +112,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   troco: number = 0;
   numerosMesasDisponiveis!: number[];
   novoNumeroMesa!: number;
-  tempoAberturaMesa!: number;
-  intervaloCronometro: any;
+  hover: boolean = false;
 
 
   dadosDaVenda = {
@@ -186,10 +185,18 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   criarNovaMesa(): void {
-    // Criar a nova mesa com as informações fornecidas pelo cliente
-    const numeroNovaMesa = this.mesasAbertas.length + 1;
+    if (!this.novoNumeroMesa || this.novoNumeroMesa <= 0) {
+      alert('Selecione um número de mesa válido.');
+      return;
+    }
+
+    if (this.mesasAbertas.some(mesa => mesa.numero === this.novoNumeroMesa)) {
+      alert('Essa mesa já está aberta.');
+      return;
+    }
+
     const novaMesa: Mesa = {
-      numero: numeroNovaMesa,
+      numero: this.novoNumeroMesa,
       nome: this.novoCliente.nome,
       telefoneResponsavel: this.novoCliente.telefone,
       produtosConsumidos: [],
@@ -199,7 +206,11 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     };
     this.mesasAbertas.push(novaMesa);
 
-    // Fechar o modal após criar a nova mesa
+    const index = this.numerosMesasDisponiveis.indexOf(this.novoNumeroMesa);
+    if (index !== -1) {
+      this.numerosMesasDisponiveis.splice(index, 1);
+    }
+
     this.fecharModalNovaMesa();
   }
 

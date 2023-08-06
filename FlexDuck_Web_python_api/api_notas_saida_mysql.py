@@ -4,17 +4,10 @@ import mysql.connector
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from Controller.mysql_connector import get_db_connection
-from Controller.mysql_connector import reconnect_db
+from Controller.db_connection import get_db_connection
 
 api_notas_saida = Blueprint('api_notas_saida', __name__)
 
-# Configura a conexão com o banco de dados MySQL
-db = get_db_connection()
-
-# Função para reconectar ao banco de dados
-def reconnect_db():
-    db.ping(reconnect=True)
 
 # API NOTAS ENTRADA #
 # Define a rota GET para buscar dados das notas de saída
@@ -25,13 +18,18 @@ def buscar_notas_saida():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     # Número máximo de tentativas
     max_attempts = 3
     current_attempt = 0
 
     while current_attempt < max_attempts:
         try:
-            reconnect_db()
             cursor = db.cursor()
             cursor.execute('SELECT * FROM notas_saida')
             resultados = cursor.fetchall()
@@ -68,9 +66,14 @@ def inserir_notas_saida():
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
     dados = request.json
     print(dados)
-    reconnect_db()
     cursor = db.cursor()
     sql = 'INSERT INTO notas_saida (contabilidade_id, data, valor, descricao) VALUES (%s, %s, %s, %s)'
     val = (dados['contabilidade_id'], dados['data'], dados['valor'], dados['descricao'])
@@ -86,9 +89,14 @@ def atualizar_notas_saida(id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
     dados = request.json
     print(dados)
-    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE notas_saida SET contabilidade_id = %s, data = %s, valor = %s, descricao = %s WHERE id = %s'
     val = (dados['contabilidade_id'], dados['data'], dados['valor'], dados['descricao'], id)
@@ -104,7 +112,12 @@ def excluir_notas_saida(id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
-    reconnect_db()
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
     cursor = db.cursor()
     sql = 'DELETE FROM notas_saida WHERE id = %s'
     val = (id,)

@@ -5,17 +5,9 @@ from flask import Blueprint
 from flask import Flask, jsonify, request, abort
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
-from Controller.mysql_connector import get_db_connection
-from Controller.mysql_connector import reconnect_db
+from Controller.db_connection import get_db_connection
 
 api_users = Blueprint('api_users', __name__)
-
-# Configura a conexão com o banco de dados MySQL
-db = get_db_connection()
-
-# Função para reconectar ao banco de dados
-def reconnect_db():
-    db.ping(reconnect=True)
 
 # API USERS #
 # Define a rota GET para buscar dados do banco de dados
@@ -30,9 +22,14 @@ def buscar_dados():
     max_attempts = 3
     current_attempt = 0
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     while current_attempt < max_attempts:
         try:
-            reconnect_db()
             cursor = db.cursor()
             cursor.execute('SELECT * FROM usuarios')
             resultados = cursor.fetchall()
@@ -79,9 +76,14 @@ def buscar_dados_user(user_id):
     max_attempts = 3
     current_attempt = 0
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     while current_attempt < max_attempts:
         try:
-            reconnect_db()
             cursor = db.cursor()
             sql = 'SELECT * FROM usuarios WHERE user_id = %s'
             val = (user_id,)
@@ -109,8 +111,14 @@ def inserir_dados():
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     dados = request.json
-    reconnect_db()
     cursor = db.cursor()
     sql = 'INSERT INTO usuarios (username, name, password, active, email, created_at, level) VALUES (%s, %s, %s, %s, %s, %s, %s)'
     val = (dados['username'], dados['name'], dados['password'], dados['active'], dados['email'], dados['created_at'], dados['level'])
@@ -127,8 +135,14 @@ def atualizar_dados(user_id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     dados = request.json
-    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE usuarios SET username = %s, name = %s, password = %s, active = %s, email = %s, ' \
           'level = %s WHERE user_id = %s'
@@ -146,7 +160,13 @@ def excluir_dados(user_id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
-    reconnect_db()
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     cursor = db.cursor()
     sql = 'DELETE FROM usuarios WHERE user_id = %s'
     val = (user_id,)
@@ -163,7 +183,13 @@ def get_last_user_id():
         current_user = get_jwt_identity()
         if not current_user:
             return abort(404)
-        reconnect_db()
+
+        # Obtém o subdomínio a partir da requisição Flask
+        subdomain = request.headers.get('X-Subdomain')
+
+        # Configura a conexão com o banco de dados MySQL
+        db = get_db_connection(subdomain)
+
         cursor = db.cursor()
         cursor.execute('SELECT MAX(user_id) FROM usuarios')
         last_user_id = cursor.fetchone()[0]
@@ -180,8 +206,15 @@ def atualizar_login_access(user_id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
+
     dados = request.json
-    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE usuarios SET last_login = %s WHERE user_id = %s'
     val = (dados['last_login'], user_id)
@@ -198,6 +231,13 @@ def buscar_senha_user(password):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
 
     try:
         conn = get_db_connection()
@@ -228,8 +268,14 @@ def inserir_cliente_rapido():
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     dados = request.json
-    reconnect_db()
     cursor = db.cursor()
     sql = 'INSERT INTO quick_clients (nome, cpf_cnpj, telefone) VALUES (%s, %s, %s)'
     val = (dados['nome'], dados['cpf_cnpj'], dados['telefone'])

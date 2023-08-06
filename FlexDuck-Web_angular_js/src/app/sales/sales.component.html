@@ -289,7 +289,10 @@
 
           <div class="form-row">
             <div class="col-md-12">
-              <button class="btn btn-success btn-block" id="btnFinalizar" (click)="validarCamposVenda(); buscarUltimoNumeroCF();">Finalizar Venda</button>
+              <button class="btn btn-success btn-block" id="btnFinalizar" [disabled]="loading_UpVenda" (click)="validarCamposVenda(); buscarUltimoNumeroCF()">
+                <span *ngIf="loading_UpVenda" class="spinner-border spinner-border-sm mr-1"></span>
+                Finalizar Venda
+              </button>
             </div>
           </div>
 
@@ -436,7 +439,10 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="fecharModalSenha()">Cancelar</button>
-        <button type="button" class="btn btn-primary" (click)="verificarSenha_valor()">Confirmar</button>
+        <button type="button" class="btn btn-primary" [disabled]="loading" (click)="verificarSenha_valor()">
+          <span *ngIf="loading_senhavalor" class="spinner-border spinner-border-sm mr-1"></span>
+          Confirmar
+        </button>
       </div>
     </div>
   </div>
@@ -457,7 +463,10 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="fecharModalSenha()">Cancelar</button>
-        <button type="button" class="btn btn-primary" (click)="verificarSenha_percent()">Confirmar</button>
+        <button type="button" class="btn btn-primary" [disabled]="loading" (click)="verificarSenha_percent()">
+          <span *ngIf="loading_senhapercent" class="spinner-border spinner-border-sm mr-1"></span>
+          Confirmar
+        </button>
       </div>
     </div>
   </div>

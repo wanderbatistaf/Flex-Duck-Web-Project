@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 import mysql.connector
 
-from Controller.mysql_connector import get_db_connection
+from Controller.db_connection import get_db_connection
 
 api_vendas = Blueprint('api_vendas', __name__)
 

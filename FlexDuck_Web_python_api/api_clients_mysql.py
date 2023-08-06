@@ -6,18 +6,10 @@ from flask import Blueprint
 from flask import Flask, jsonify, request, abort
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
-from Controller.mysql_connector import get_db_connection
-from Controller.mysql_connector import reconnect_db
+from Controller.db_connection import get_db_connection
 
 api_clients = Blueprint('api_clients', __name__)
 
-
-# Configura a conexão com o banco de dados MySQL
-db = get_db_connection()
-
-# Função para reconectar ao banco de dados
-def reconnect_db():
-    db.ping(reconnect=True)
 
 @api_clients.after_request
 def after_request(response):
@@ -36,13 +28,18 @@ def buscar_todos_dados_client():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     # Número máximo de tentativas
     max_attempts = 3
     current_attempt = 0
 
     while current_attempt < max_attempts:
         try:
-            reconnect_db()
             cursor = db.cursor()
             cursor.execute('SELECT * FROM clients')
             resultados = cursor.fetchall()
@@ -99,13 +96,18 @@ def buscar_dados_cliente(client_id):
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     # Número máximo de tentativas
     max_attempts = 3
     current_attempt = 0
 
     while current_attempt < max_attempts:
         try:
-            reconnect_db()
             cursor = db.cursor()
             sql = 'SELECT * FROM clients WHERE client_id = %s'
             val = (client_id,)
@@ -138,6 +140,12 @@ def inserir_dados_client():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
         dados = request.json
         dados['created_at'] = datetime.now()
@@ -145,7 +153,6 @@ def inserir_dados_client():
         if not dados.get('business_name'):
             dados['business_name'] = f"{dados['firstname']} {dados['lastname']}"
         print(dados)
-        reconnect_db()
         cursor = db.cursor()
         sql = 'INSERT INTO clients (business_name, firstname, lastname, cnpj_cpf, telephone, email, blocked_since, cep,' \
               ' created_at, district, gender, inactive_since, natural_person, number, state, street, ' \
@@ -185,8 +192,14 @@ def atualizar_dados_client(id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     dados = request.json
-    reconnect_db()
     cursor = db.cursor()
     sql = 'UPDATE clients SET business_name = %s, firstname = %s, lastname = %s, cnpj_cpf = %s, telephone = %s, ' \
           'email = %s, blocked_since = %s, cep = %s, district = %s, gender = %s, inactive_since = %s, ' \
@@ -211,7 +224,13 @@ def excluir_dados_client(id):
     current_user = get_jwt_identity()
     if not current_user:
         return abort(404)
-    reconnect_db()
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     cursor = db.cursor()
     sql = 'DELETE FROM clients WHERE client_id = %s'
     val = (id,)
@@ -229,13 +248,18 @@ def buscar_todos_dados_client_vendas():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     # Número máximo de tentativas
     max_attempts = 3
     current_attempt = 0
 
     while current_attempt < max_attempts:
         try:
-            reconnect_db()
             cursor = db.cursor()
             cursor.execute('SELECT * FROM combined_clients')
             resultados = cursor.fetchall()

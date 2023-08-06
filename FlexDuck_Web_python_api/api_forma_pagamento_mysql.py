@@ -2,18 +2,9 @@ from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import mysql.connector
 
-from Controller.mysql_connector import get_db_connection
-from Controller.mysql_connector import reconnect_db
+from Controller.db_connection import get_db_connection
 
 api_forma_pagamento = Blueprint('api_forma_pagamento', __name__)
-
-
-# Configura a conexão com o banco de dados MySQL
-db = get_db_connection()
-
-# Função para reconectar ao banco de dados
-def reconnect_db():
-    db.ping(reconnect=True)
 
 
 # API para buscar todas as formas de pagamento
@@ -24,8 +15,14 @@ def buscar_todas_formas_pagamento():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
-        reconnect_db()
+        
         cursor = db.cursor()
         cursor.execute('SELECT * FROM forma_pagamento')
         resultados = cursor.fetchall()
@@ -54,8 +51,14 @@ def buscar_forma_pagamento(forma_pagamento_id):
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
-        reconnect_db()
+        
         cursor = db.cursor()
         sql = 'SELECT * FROM forma_pagamento WHERE forma_pagamento_id = %s'
         val = (forma_pagamento_id,)
@@ -85,9 +88,15 @@ def inserir_forma_pagamento():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
         dados = request.json
-        reconnect_db()
+        
         cursor = db.cursor()
         sql = 'INSERT INTO forma_pagamento (descricao) VALUES (%s)'
         val = (dados['descricao'],)
@@ -110,9 +119,15 @@ def atualizar_forma_pagamento(forma_pagamento_id):
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
         dados = request.json
-        reconnect_db()
+        
         cursor = db.cursor()
         sql = 'UPDATE forma_pagamento SET descricao = %s WHERE forma_pagamento_id = %s'
 
@@ -136,8 +151,13 @@ def excluir_forma_pagamento(forma_pagamento_id):
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
-        reconnect_db()
         cursor = db.cursor()
         sql = 'DELETE FROM forma_pagamento WHERE forma_pagamento_id = %s'
         val = (forma_pagamento_id,)

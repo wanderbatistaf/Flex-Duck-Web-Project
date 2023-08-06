@@ -90,6 +90,9 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   proximoNumeroCF: string = '000000000';
   valorPago: number = 0;
   troco: number = 0;
+  loading_senhavalor = false;
+  loading_senhapercent = false;
+  loading_UpVenda = false;
 
   dadosDaVenda = {
     cliente_id: this.SelectedClienteId,
@@ -889,6 +892,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   }
 
   verificarSenha_valor() {
+    this.loading_senhavalor = true;
     // Realize a verificação da senha aqui, usando a API ou lógica necessária
     // Por exemplo, chame this.userService.getUserLevelByPass(this.senha) para verificar a senha
 
@@ -905,6 +909,8 @@ export class SalesComponent implements OnInit, AfterContentChecked {
           alert('Você não pode adicionar um desconto.');
         }
 
+        this.loading_senhavalor = false;
+
         // Fecha o modal após verificar a senha
         this.fecharModalSenha();
       },
@@ -918,6 +924,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   }
 
   verificarSenha_percent() {
+    this.loading_senhapercent = true;
     // Realize a verificação da senha aqui, usando a API ou lógica necessária
     // Por exemplo, chame this.userService.getUserLevelByPass(this.senha) para verificar a senha
 
@@ -935,6 +942,8 @@ export class SalesComponent implements OnInit, AfterContentChecked {
           // Faça algo se a senha estiver incorreta ou o nível do usuário for menor que 6
           alert('Você não pode adicionar um desconto.');
         }
+
+        this.loading_senhapercent = false;
 
         // Fecha o modal após verificar a senha
         this.fecharModalSenha();

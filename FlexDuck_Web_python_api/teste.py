@@ -2,7 +2,7 @@ import mysql.connector
 
 from flask import Flask, jsonify, request, abort
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
-from Controller import mysql_connector
+from Controller import mysql_utils
 
 # Inicializa o aplicativo Flask
 app = Flask(__name__)

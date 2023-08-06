@@ -1,5 +1,6 @@
-from mysql.connector import pooling
-
+from FlexDuck_Web_python_api.Controller.mysql_utils import get_db_name_from_subdomain, db_pool
+from mysql.connector import pooling, errors
+from flask import request
 
 # Configuração do pool de conexões do MySQL
 db_config = {
@@ -7,22 +8,21 @@ db_config = {
     "port": "3306",
     "user": "duckadmin",
     "password": "lavemopato",
-    "database": "flexduckdb",
-
-    # "host": "db4free.net",
-    # "port": "3306",
-    # "user": "flexduck",
-    # "password": "lavemopato",
-    # "database": "flexduckdb",
 }
 
-# Criação do pool de conexões
-# Atualmente o pool_size minimo é de 10 conexões
-db_pool = pooling.MySQLConnectionPool(pool_name="fleduckdb_pool", pool_size=10, **db_config)
-
-# Função para obter uma conexão do pool
-def get_db_connection():
+def get_db_connection(subdomain):
     try:
+        db_name = get_db_name_from_subdomain(subdomain)
+
+        db_config = {
+            "host": "db-flexduck.cncrrju5nmty.sa-east-1.rds.amazonaws.com",
+            "port": "3306",
+            "user": "duckadmin",
+            "password": "lavemopato",
+            "database": db_name,
+        }
+
+        db_pool = pooling.MySQLConnectionPool(pool_name="fleduckdb_pool", pool_size=5, **db_config)
         return db_pool.get_connection()
     except pooling.errors.PoolError as e:
         print("Erro ao obter conexão do pool: ", str(e))

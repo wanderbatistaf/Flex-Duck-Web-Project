@@ -2,17 +2,9 @@ from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import mysql.connector
 
-from Controller.mysql_connector import get_db_connection
-from Controller.mysql_connector import reconnect_db
+from Controller.db_connection import get_db_connection
 
 api_bandeiras = Blueprint('api_bandeiras', __name__)
-
-# Configura a conexão com o banco de dados MySQL
-db = get_db_connection()
-
-# Função para reconectar ao banco de dados
-def reconnect_db():
-    db.ping(reconnect=True)
 
 
 # API para buscar todas as bandeiras
@@ -23,8 +15,13 @@ def buscar_todas_bandeiras():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
-        reconnect_db()
         cursor = db.cursor()
         cursor.execute('SELECT * FROM bandeiras')
         resultados = cursor.fetchall()
@@ -53,8 +50,13 @@ def buscar_bandeira(bandeira_id):
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
-        reconnect_db()
         cursor = db.cursor()
         sql = 'SELECT * FROM bandeiras WHERE bandeira_id = %s'
         val = (bandeira_id,)
@@ -84,9 +86,14 @@ def inserir_bandeira():
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
         dados = request.json
-        reconnect_db()
         cursor = db.cursor()
         sql = 'INSERT INTO bandeiras (descricao) VALUES (%s)'
         val = (dados['descricao'],)
@@ -109,9 +116,14 @@ def atualizar_bandeira(bandeira_id):
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
         dados = request.json
-        reconnect_db()
         cursor = db.cursor()
         sql = 'UPDATE bandeiras SET descricao = %s WHERE bandeira_id = %s'
 
@@ -135,8 +147,13 @@ def excluir_bandeira(bandeira_id):
     if not current_user:
         return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
     try:
-        reconnect_db()
         cursor = db.cursor()
         sql = 'DELETE FROM bandeiras WHERE bandeira_id = %s'
         val = (bandeira_id,)

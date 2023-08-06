@@ -32,6 +32,7 @@ import { FilterPipeV, VendedorModalComponent } from './modals/vendedor-modal/ven
 import { FilterPipeP, ProdutoModalComponent } from './modals/produto-modal/produto-modal.component';
 import {SharedService} from "@app/_services/SharedService";
 import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/mesas.component';
+import {CustomHttpInterceptor} from "@app/_services";
 
 
 @NgModule({
@@ -76,6 +77,7 @@ import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/me
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: CustomHttpInterceptor, multi: true },
     JwtHelperService,
     SharedService
   ],

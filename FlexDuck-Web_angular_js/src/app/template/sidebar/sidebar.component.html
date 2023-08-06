@@ -80,6 +80,12 @@
       </div>
     </div>
 
+    <div class="sb-sidenav-configs">
+      <a class="nav-link collapsed" routerLink="/notas-saida" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 10"
+      ><div class="sb-nav-link-icon"><i class="fab fa-cuttlefish"></i>onfigurações</div>
+      </a>
+    </div>
+
     <div class="sb-sidenav-footer">
       <a [routerLink]="['/employes/edicao_user']">
         <img class="rounded-circle shadow-4-strong" alt="avatar" width="50" height="50" src="https://mdbcdn.b-cdn.net/img/new/avatars/1.webp" />
@@ -96,10 +102,10 @@
       <i class="fas fa-door-open"></i> Logout
     </div>
 
-<!--    <a class="nav-link collapsed" routerLink="/" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"-->
-<!--    ><div class="sb-nav-link-icon" (click)="logout()">-->
-<!--      Logout</div>-->
-<!--    </a>-->
+    <!--    <a class="nav-link collapsed" routerLink="/" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts"-->
+    <!--    ><div class="sb-nav-link-icon" (click)="logout()">-->
+    <!--      Logout</div>-->
+    <!--    </a>-->
   </nav>
 </div>
 
