@@ -22,7 +22,7 @@ def get_db_connection(subdomain):
             "database": db_name,
         }
 
-        db_pool = pooling.MySQLConnectionPool(pool_name="fleduckdb_pool", pool_size=5, **db_config)
+        db_pool = pooling.MySQLConnectionPool(pool_name="fleduckdb_pool", pool_size=10, **db_config)
         return db_pool.get_connection()
     except pooling.errors.PoolError as e:
         print("Erro ao obter conexão do pool: ", str(e))
