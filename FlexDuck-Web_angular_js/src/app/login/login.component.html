@@ -1,16 +1,16 @@
 ﻿<div id="layoutAuthentication">
   <div id="layoutAuthentication_content">
     <main>
-      <div *ngIf="isDbConnectionSuccess" class="alert alert-success mt-3 mb-0">
+      <div *ngIf="isDbConnectionSuccess" class="alert alert-success mt-1 mb-2 p-2">
         Conexão com o banco de dados OK
       </div>
-      <div *ngIf="!isDbConnectionSuccess" class="alert alert-danger mt-3 mb-0">
+      <div *ngIf="!isDbConnectionSuccess" class="alert alert-danger mt-1 mb-2 p-2">
         Falha na conexão com o banco de dados, aguarde e atualize a página.
       </div>
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-lg-5">
-            <div class="card shadow-lg border-0 rounded-lg mt-5">
+            <div class="card shadow-lg border-0 rounded-lg mt-0">
               <div class="card-header">
                 <h3 class="text-center font-weight-light my-4">
                   <img alt="OnFlexDuck" class="img-fluid" ngSrc="../../assets/on_logo.png" width="200" height="232">

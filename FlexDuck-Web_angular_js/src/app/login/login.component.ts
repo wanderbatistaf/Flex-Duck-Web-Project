@@ -7,7 +7,8 @@ import { AuthenticationService } from '@app/_services';
 import {catchError, throwError} from "rxjs";
 
 @Component({
-  templateUrl: 'login.component.html'
+  templateUrl: 'login.component.html',
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
