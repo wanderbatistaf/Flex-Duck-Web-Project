@@ -1,3 +1,9 @@
+
+#layoutSidenav_nav{
+  display: flex;
+  flex-direction: column;
+}
+
 .text-center {
   text-align: center;
 }
@@ -12,5 +18,14 @@
 
 .avatar-name:hover {
   font-weight: bold;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: rgb(212, 212, 212);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0b011b;
 }
 
