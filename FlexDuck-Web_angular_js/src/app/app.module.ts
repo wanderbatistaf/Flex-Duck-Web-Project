@@ -33,6 +33,7 @@ import { FilterPipeP, ProdutoModalComponent } from './modals/produto-modal/produ
 import {SharedService} from "@app/_services/SharedService";
 import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/mesas.component';
 import {CustomHttpInterceptor} from "@app/_services";
+import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
 
 @NgModule({
@@ -49,7 +50,7 @@ import {CustomHttpInterceptor} from "@app/_services";
     AnQrcodeModule,
     NgbModule,
     NgbModalModule,
-
+    NgxSkeletonLoaderModule,
   ],
   declarations: [
     AppComponent,

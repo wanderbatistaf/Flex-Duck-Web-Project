@@ -9,6 +9,7 @@
       <div *ngIf="!isDbConnectionSuccess" class="alert alert-danger mt-1 mb-2 p-2">
         Falha na conexão com o banco de dados, aguarde e atualize a página.
       </div>
+      <ngx-skeleton-loader count="5" appearance="circle"></ngx-skeleton-loader>
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-lg-5">
