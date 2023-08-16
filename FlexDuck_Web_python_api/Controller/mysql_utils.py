@@ -1,6 +1,5 @@
 from mysql.connector import pooling, errors
 
-
 class AppContext:
     def __init__(self):
         self.subdomain = None
@@ -18,11 +17,11 @@ def get_db_name_from_subdomain(subdomain):
         return "smarttechdb"
     elif subdomain == "flex-duck-web-project.vercel.app":
         return "flexduckdb"
-    elif subdomain == "localhost:4200":
+    elif subdomain == "187.0.34.69":
         return "localtestdb"
     else:
         # Subdomínio desconhecido, retorne um valor padrão ou trate o erro
-        return "flexduckdb"
+        return "localtestdb"
 
 # Configuração do pool de conexões do MySQL
 db_config = {

@@ -208,6 +208,20 @@ def inserir_venda():
             val_item_vendido = (venda_id, produto, codigo_produto, quantidade, preco_unitario, subtotal_item)
             cursor.execute(sql_itens_vendas, val_item_vendido)
 
+        # Atualizar a quantidade de produtos vendidos no estoque em produtos_servicos
+        for item in itens_vendidos:
+            codigo_produto = item['codigo_produto']
+            quantidade_vendida = item['quantidade']
+
+            # Consulta para atualizar a quantidade no estoque
+            sql_atualizar_estoque = '''
+            UPDATE produtos_servicos
+            SET quantidade = quantidade - %s
+            WHERE codigo = %s
+            '''
+            val_atualizar_estoque = (quantidade_vendida, codigo_produto)
+            cursor.execute(sql_atualizar_estoque, val_atualizar_estoque)
+
         conn.commit()
         cursor.close()
         conn.close()

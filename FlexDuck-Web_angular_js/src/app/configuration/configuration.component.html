@@ -1,0 +1,217 @@
+<div fxLayout="column" fxLayout.gt-sm="row">
+    <h1 class="mt-4" xmlns="http://www.w3.org/1999/html">Configurações</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Dados da empresa</li>
+    </ol>
+
+<!--Clientes renderizam aqui-->
+<div class="card mt-4">
+    <div class="card-body">
+
+        <!--Cadastro renderiza aqui-->
+            <div class="container">
+                <form [formGroup]="formCad" novalidate>
+
+                    <div class="row">
+
+                        <!-- RAZÃO SOCIAL -->
+                        <div class="form-group col-md-4">
+                            <label class="form-control-label" for="razao_social">Razão Social <em>*</em></label>
+                            <input type="text" class="form-control" formControlName="razao_social" id="razao_social" placeholder="Ex: Xablau Ltda" maxlength="50">
+                            <div *ngIf="touchedVerify('razao_social')" class="form-control-feedback">Insira um nome válido.</div>
+                        </div>
+
+                        <div class="form-group col-md-4">
+                            <label class="form-control-label">Código de Regime Tributário <em>*</em></label>
+                            <select class="form-control" formControlName="codigo_regime_tributario">
+                                <option value="">Selecione um código</option>
+                                <option value="1">Simples Nacional</option>
+                                <option value="2">Simples Nacional - Excesso de Sublimite</option>
+                                <option value="3">Regime Normal (Lucro Presumido ou Lucro Real)</option>
+                            </select>
+                        </div>
+
+                        <!-- CNPJ -->
+                        <div class="form-group col-md-4">
+                            <label class="form-control-label" for="cnpj">Número do CNPJ <em>*</em></label>
+                            <input type="text" class="form-control" formControlName="cnpj" id="cnpj" placeholder="Digite apenas números" [textMask]="{ mask: getCnpjMask() }">
+                            <div *ngIf="touchedVerify('cnpj')" class="form-control-feedback">O cnpj é invalido.</div>
+                        </div>
+
+
+                    </div>
+
+                    <div class="row">
+
+                        <!-- NOME FANTASIA -->
+                        <div class="form-group col-md-4">
+                            <label class="form-control-label" for="nome_fantasia">Nome Fantasia <em>*</em></label>
+                            <input type="text" class="form-control" formControlName="nome_fantasia" id="nome_fantasia" placeholder="Ex: Doces Alegria" maxlength="50">
+                            <div *ngIf="touchedVerify('nome_fantasia')" class="form-control-feedback">Insira um nome válido.</div>
+                        </div>
+
+<!--                        &lt;!&ndash; LAST NAME &ndash;&gt;-->
+<!--                        <div class="form-group col-md-5">-->
+<!--                            <label class="form-control-label" for="lastname">Sobrenome <em>*</em></label>-->
+<!--                            <input type="text" class="form-control" formControlName="lastname" id="lastname" placeholder="Ex: Renan da Silva" maxlength="60">-->
+<!--                            <div *ngIf="touchedVerify('lastname')" class="form-control-feedback">Por favor, insira um nome válido.</div>-->
+<!--                        </div>-->
+
+                        <!-- INSCRIÇÃO MUNICIPAL -->
+                        <div class="form-group col-md-4">
+                            <label class="form-control-label" for="cnpj">Inscrição Municipal <em>*</em></label>
+                            <input type="text" class="form-control" formControlName="municipal_registration" id="municipal_registration" placeholder="Digite apenas números">
+                            <div *ngIf="touchedVerify('municipal_registration')" class="form-control-feedback">O IM é invalido.</div>
+                        </div>
+
+                        <!-- INSCRIÇÃO ESTADUAL -->
+                        <div class="form-group col-md-4">
+                            <label class="form-control-label" for="cnpj">Inscrição Estadual </label>
+                            <input type="text" class="form-control" formControlName="state_registration" id="state_registration" placeholder="Digite apenas números">
+                            <div *ngIf="touchedVerify('state_registration')" class="form-control-feedback">O IE é invalido.</div>
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+
+                        <!-- PHONE -->
+                        <div class="form-group col-md-3">
+                            <label class="form-control-label" for="telephone">Telefone <em>*</em></label>
+                            <input type="text" class="form-control" formControlName="telephone" id="telephone" placeholder="Ex: (99) 99999-9999" [textMask]="{ mask: phoneMask }">
+                            <div *ngIf="touchedVerify('telephone')" class="form-control-feedback">Número do telefone.</div>
+                        </div>
+
+                        <!-- CHAVE PIX -->
+                        <div class="form-group col-md-4">
+                            <label class="form-control-label" for="nome_fantasia">Chave PIX </label>
+                            <input type="text" class="form-control" formControlName="pix_key" id="pix_key" placeholder="" maxlength="50">
+                            <div *ngIf="touchedVerify('pix_key')" class="form-control-feedback">Insira um nome válido.</div>
+                        </div>
+
+                        <!-- ZIPCODE -->
+                            <div class="form-group col-md-3">
+                                <label class="form-control-label" for="cep">CEP <em>*</em><a href="http://www.buscacep.correios.com.br/servicos/dnec/index.do" target="_blank" class="cep-link"> Não sei meu CEP</a></label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" formControlName="cep" id="cep" placeholder="Digite apenas números" [textMask]="{ mask: zipCodeMask }">
+                                    <span class="input-group-btn">
+                                <button class="btn btn-secondary" type="button" (click)="searchZipCode(formCad.controls.cep.value)">Buscar</button>
+                                    </span>
+                                </div>
+                            </div>
+
+                    </div>
+
+                    <div class="row">
+
+<!--                        &lt;!&ndash; EMAIL &ndash;&gt;-->
+<!--                        <div class="form-group col-md-6">-->
+<!--                            <label class="form-control-label" for="email">Email <em>*</em></label>-->
+<!--                            <input type="email" class="form-control" formControlName="email" id="email" placeholder="Ex: lucas@seuemail.com.br" aria-describedby="emailHelp" maxlength="60">-->
+<!--                            <div *ngIf="touchedVerify('email')" class="form-control-feedback">Por favor, insira um endereço de e-mail válido.</div>-->
+<!--                        </div>-->
+
+
+<!--                        &lt;!&ndash; GENDER &ndash;&gt;-->
+<!--                        <div class="form-group col-md-2">-->
+<!--                            <label class="form-control-label" for="gender">Sexo <em>*</em></label>-->
+<!--                            <select class="form-control custom-select" formControlName="gender" id="gender" name="gender">-->
+<!--                                <option [ngValue]="null">Selecione...</option>-->
+<!--                                <option *ngFor="let gender of genders" [ngValue]="gender">{{ gender }}</option>-->
+<!--                            </select>-->
+<!--                            <div class="form-control-feedback">Campo obrigatório.</div>-->
+<!--                        </div>-->
+
+                    </div>
+
+
+                    <!-- ADDRESS -->
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label class="form-control-label" for="street">Endereço <em>*</em></label>
+                            <input type="text" class="form-control input-readonly" formControlName="street" id="street" placeholder="" tabindex="-1" maxlength="70" >
+                            <div *ngIf="touchedVerify('street')" class="form-control-feedback"></div>
+                        </div>
+
+                        <!-- NUMBER -->
+                        <div class="form-group col-md-2">
+                            <label class="form-control-label" for="number">Número <em>*</em></label>
+                            <input type="text" class="form-control" formControlName="number" id="number" placeholder="Ex: 462" maxlength="10">
+                            <div *ngIf="touchedVerify('number')" class="form-control-feedback">Campo obrigatório.</div>
+                        </div>
+
+                        <!-- COMPLEMENT -->
+                        <div class="form-group col-md-4">
+                            <label class="form-control-label" for="complement">Complemento</label>
+                            <input type="text" class="form-control" formControlName="complement" id="complement" placeholder="Ex: Apto 48" maxlength="20">
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <!-- DISTRICT -->
+                        <div class="form-group col-md-3">
+                            <label class="form-control-label" for="district">Bairro <em>*</em></label>
+                            <input type="text" class="form-control input-readonly" formControlName="district" id="district" placeholder="" tabindex="-1" maxlength="70" >
+                            <div *ngIf="touchedVerify('district')" class="form-control-feedback"></div>
+                        </div>
+
+                        <!-- STATE -->
+                        <div class="form-group col-md-3">
+                            <label class="form-control-label" for="state">Estado <em>*</em></label>
+                            <input type="text" class="form-control input-readonly" formControlName="state" id="state" placeholder="" tabindex="-1" >
+                            <div *ngIf="touchedVerify('state')" class="form-control-feedback"></div>
+                        </div>
+
+                        <!-- CITY -->
+                        <div class="form-group col-md-3">
+                            <label class="form-control-label" for="city">Cidade <em>*</em></label>
+                            <input type="text" class="form-control input-readonly" formControlName="city" id="city" placeholder="" tabindex="-1" >
+                            <div *ngIf="touchedVerify('city')" class="form-control-feedback"></div>
+                        </div>
+
+                        <!-- COUNTRY -->
+                        <div class="form-group col-md-3">
+                            <label class="form-control-label" for="country">País <em>*</em></label>
+                            <input type="text" class="form-control input-readonly" formControlName="country" id="country" placeholder="" tabindex="-1" >
+                            <div *ngIf="touchedVerify('country')" class="form-control-feedback"></div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+
+                        <!-- CUSTOM MODULES -->
+                        <form [formGroup]="formCad">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card w-75">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">Modulo de Mesas</h5>
+                                            <button type="button" class="btn" [ngClass]="{'btn-on': moduloMesas, 'btn-off': !moduloMesas}" (click)="toggleModuloMesas()">
+                                                {{ moduloMesas ? 'Ligado' : 'Desligado' }}
+                                            </button>
+                                            <input type="hidden" formControlName="moduloMesas">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+
+
+
+                    <!--                    <div>-->
+<!--                        <br>-->
+<!--                        <button type="button" class="btn btn-secondary mr-2" (click)="formReset()">Limpar</button>-->
+<!--                        <button type="submit" class="btn btn-primary" (click)="onSubmit()">Cadastrar</button>-->
+<!--                    </div>-->
+                </form>
+
+            </div>
+        </div>
+</div>
+</div>

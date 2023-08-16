@@ -33,6 +33,7 @@ import { FilterPipeP, ProdutoModalComponent } from './modals/produto-modal/produ
 import {SharedService} from "@app/_services/SharedService";
 import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/mesas.component';
 import {CustomHttpInterceptor} from "@app/_services";
+import { ConfigurationComponent } from './configuration/configuration.component';
 
 
 @NgModule({
@@ -72,7 +73,8 @@ import {CustomHttpInterceptor} from "@app/_services";
     FilterPipe,
     FilterPipeP,
     FilterPipeV,
-    FilterPipeC
+    FilterPipeC,
+    ConfigurationComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

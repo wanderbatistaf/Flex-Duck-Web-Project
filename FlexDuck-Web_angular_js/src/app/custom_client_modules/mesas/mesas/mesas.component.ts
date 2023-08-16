@@ -342,18 +342,29 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   adicionarProdutoConsumido(): void {
     // Lógica para adicionar um produto consumido à mesa selecionada
     if (
-      this.mesaSelecionada &&
-      this.produtoSelecionado &&
-      this.quantidadeProdutoAdicionar > 0
+        this.mesaSelecionada &&
+        this.produtoSelecionado &&
+        this.quantidadeProdutoAdicionar > 0
     ) {
-      const produtoParaAdicionar: ProdutoConsumido = {
-        codigo: this.produtoSelecionado.codigo,
-        nome: this.produtoSelecionado.nome,
-        quantidade: this.quantidadeProdutoAdicionar,
-        preco: this.produtoSelecionado.preco,
-      };
+      const produtoExistenteIndex = this.mesaSelecionada.produtosConsumidos.findIndex(
+          (produto) => produto.codigo === this.produtoSelecionado?.codigo
+      );
 
-      this.mesaSelecionada.produtosConsumidos.push(produtoParaAdicionar);
+      if (produtoExistenteIndex !== -1) {
+        // Produto já existe na lista, aumenta a quantidade
+        this.mesaSelecionada.produtosConsumidos[produtoExistenteIndex].quantidade += this.quantidadeProdutoAdicionar;
+      } else {
+        // Produto não existe na lista, adiciona como um novo item
+        const produtoParaAdicionar: ProdutoConsumido = {
+          codigo: this.produtoSelecionado.codigo,
+          nome: this.produtoSelecionado.nome,
+          quantidade: this.quantidadeProdutoAdicionar,
+          preco: this.produtoSelecionado.preco,
+        };
+
+        this.mesaSelecionada.produtosConsumidos.push(produtoParaAdicionar);
+      }
+
       this.calcularTotalAPagar(this.mesaSelecionada);
       this.quantidadeProdutoAdicionar = 1; // Reinicia a quantidade para 1 após adicionar o produto
       this.produtoSelecionado = null; // Limpa a seleção do produto após adicionar à lista
@@ -365,6 +376,8 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       console.log('Produto adicionado com sucesso à mesa selecionada!');
     }
   }
+
+
 
 
   removerProdutoConsumido(index: number): void {

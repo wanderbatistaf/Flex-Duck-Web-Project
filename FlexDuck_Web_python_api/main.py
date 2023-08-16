@@ -111,6 +111,10 @@ app.register_blueprint(api_vendas)
 from api_gerar_report import reports
 app.register_blueprint(reports)
 
+# Adiciona as rotas de dados da empresa
+from api_company_settings import api_company_settings
+app.register_blueprint(api_company_settings)
+
 
 @app.route('/server/status/check-connection', methods=['GET'])
 def check_connection():
