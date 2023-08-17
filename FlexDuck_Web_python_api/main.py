@@ -3,6 +3,7 @@ import sys
 import subprocess
 import threading
 import time
+from datetime import timedelta
 from threading import Thread
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -12,8 +13,9 @@ import mysql.connector
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from custom_logger import setup_logger
-from Controller.mysql_utils import AppContext
+from Controller.mysql_utils import AppContext, get_db_name_from_subdomain
 from Controller.db_connection import get_db_connection
+from Controller.mysql_utils import create_db_pool
 
 # Cria a instância do contexto da aplicação
 app_context = AppContext()
@@ -24,6 +26,7 @@ app = Flask(__name__)
 setup_logger(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = '4Ndr3w5077'  # Chave secreta do JWT
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2) # Define o tempo de vida útil do token
 jwt = JWTManager(app)
 
 
@@ -140,13 +143,19 @@ def check_connection():
 
 
 # Rota para autenticar e obter o token JWT
-@app.route('/auth/login', methods=['POST'])
+@app.route('/auth/login', methods=['POST', 'OPTIONS'])
 def autenticar_usuario():
+    if request.method == 'OPTIONS':
+        # Retorna uma resposta vazia com status 200 para pre-flight request
+        return "", 200
+
     # Obtém o subdomínio a partir da requisição Flask
     subdomain = request.headers.get('X-Subdomain')
+    db_name = create_db_pool(subdomain)
     dados = request.json
-    conn = get_db_connection(subdomain)
+    conn = get_db_connection(db_name)
     cursor = conn.cursor(dictionary=True)
+    print("Executing query on database:", db_name)
     cursor.execute("SELECT * FROM usuarios WHERE username=%s AND password=%s", (dados['username'], dados['password']))
     user = cursor.fetchone()
     cursor.close()
@@ -173,6 +182,7 @@ def autenticar_usuario():
             except Exception as e:
                 print("Erro ao tentar novamente:", str(e))
                 time.sleep(3)  # Aguarda 3 segundos antes de tentar novamente
+
 
 
 @app.route('/auth/user-level', methods=['GET'])
@@ -233,7 +243,9 @@ def reiniciar_aplicativo():
 
 @app.route('/qrscan/<string:codigo>', methods=['GET'])
 def buscar_dados_do_produto_qrscan(codigo):
-    conn = get_db_connection()
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+    conn = get_db_connection(subdomain)
     cursor = conn.cursor()
     sql = 'SELECT codigo, nome, quantidade, preco_venda, descricao FROM produtos_servicos WHERE codigo = %s'
     val = (codigo,)

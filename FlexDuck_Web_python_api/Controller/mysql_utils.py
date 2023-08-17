@@ -17,23 +17,32 @@ def get_db_name_from_subdomain(subdomain):
         return "smarttechdb"
     elif subdomain == "flex-duck-web-project.vercel.app":
         return "flexduckdb"
-    elif subdomain == "187.0.34.69":
+    elif subdomain == "localhost:4200":
         return "localtestdb"
     else:
         # Subdomínio desconhecido, retorne um valor padrão ou trate o erro
         return "localtestdb"
 
 # Configuração do pool de conexões do MySQL
-db_config = {
-    "host": "db-flexduck.cncrrju5nmty.sa-east-1.rds.amazonaws.com",
-    "port": "3306",
-    "user": "duckadmin",
-    "password": "lavemopato",
-    "database": get_db_name_from_subdomain("localtestdb"),  # Use um valor padrão ou None aqui, se necessário
-}
+def create_db_config(subdomain):
+    db_config = {
+        "host": "db-flexduck.cncrrju5nmty.sa-east-1.rds.amazonaws.com",
+        "port": "3306",
+        "user": "duckadmin",
+        "password": "lavemopato",
+        "database": get_db_name_from_subdomain(subdomain),
+    }
+    return db_config
 
 # Criação do pool de conexões
-db_pool = pooling.MySQLConnectionPool(pool_name="flexduckdb_pool", pool_size=10, **db_config)
+def create_db_pool(subdomain):
+    db_config = create_db_config(subdomain)
+    return pooling.MySQLConnectionPool(pool_name="flexduckdb_pool", pool_size=10, **db_config)
+
+
+def get_db_connection(subdomain):
+    return create_db_pool(subdomain).get_connection()
+
 
 # Função para reconectar ao banco de dados MySQL
 def reconnect_db(conn):
