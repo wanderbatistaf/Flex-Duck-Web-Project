@@ -1,9 +1,11 @@
 ﻿<div id="layoutAuthentication">
   <div id="layoutAuthentication_content">
     <main>
+      <!-- Mensagem de OK com conexão de banco de dados -->
       <div *ngIf="isDbConnectionSuccess" class="alert alert-success mt-1 mb-2 p-2">
         Conexão com o banco de dados OK
       </div>
+      <!-- Mensagem de OFF com conexão de banco de dados -->
       <div *ngIf="!isDbConnectionSuccess" class="alert alert-danger mt-1 mb-2 p-2">
         Falha na conexão com o banco de dados, aguarde e atualize a página.
       </div>

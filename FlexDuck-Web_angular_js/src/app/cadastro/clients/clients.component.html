@@ -1,9 +1,7 @@
-<div fxLayout="column" fxLayout.gt-sm="row">
-  <h1 class="mt-4" xmlns="http://www.w3.org/1999/html">Clientes</h1>
-  <ol class="breadcrumb mb-4">
-    <li class="breadcrumb-item active">Cadastro | Consulta</li>
-  </ol>
-
+<h1 class="'mt-4">Clientes</h1>
+<ol class="breadcrumb mb-4">
+  <li class="breadcrumb-item active">Cadastro | Consulta</li>
+</ol>
 
 <!-- Abas de Navegação -->
 <ul class="nav nav-tabs mb-4">
@@ -50,9 +48,8 @@
 <!--Clientes renderizam aqui-->
 <div class="card mt-4">
   <div class="card-body">
-
-    <div class="text-center" *ngIf="loading">
-      <div class="spinner-border spinner-border-sm"></div>
+     <!-- <div class="spinner-border spinner-border-sm"></div> -->
+      <skeleton-table-display class="" *ngIf="loading"></skeleton-table-display>
     </div>
 
     <!--Edição renderiza aqui!-->
