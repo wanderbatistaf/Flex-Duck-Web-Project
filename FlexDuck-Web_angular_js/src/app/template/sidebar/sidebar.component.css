@@ -22,10 +22,10 @@
 
 ::-webkit-scrollbar {
   width: 5px;
-  background-color: rgb(212, 212, 212);
+  background-color: #0b011b;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0b011b;
+  background: rgb(212, 212, 212);
 }
 

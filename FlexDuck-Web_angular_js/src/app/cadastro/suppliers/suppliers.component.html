@@ -147,7 +147,11 @@
 
 
 
-    <div *ngIf="loading" class="spinner-border spinner-border-sm"></div></div>
+    <!-- <div *ngIf="loading" class="spinner-border spinner-border-sm"> -->
+    <div *ngIf="loading">
+      <skeleton-table-display *ngIf="loading"></skeleton-table-display>
+    </div>
+  </div>
   <!--Consulta renderiza aqui-->
   <div class="table-responsive" *ngIf="!loading && activeTab === 'consulta'">
     <table class="table table-condensed table-hover">
