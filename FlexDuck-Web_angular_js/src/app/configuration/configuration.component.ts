@@ -16,7 +16,7 @@ export class ConfigurationComponent implements OnInit {
 
   empresa: string = '';
   segmento: string = '';
-  moduloMesas: boolean = true;
+  moduloMesas: boolean = false;
   razao_social: string = '';
   nome_fantasia: string = '';
   cnpj: string = '';
@@ -35,6 +35,9 @@ export class ConfigurationComponent implements OnInit {
   zipCodePattern = /^\d{5}\\-\d{3}$/;
   company?: Company[];
   companyInfo?: Company;
+  receivedModuloMesas: boolean = false;
+  isToggling = false;
+  EditMode = true;
 
   constructor(private fb: FormBuilder,
               private viaCepService: ViaCepService,
@@ -65,6 +68,7 @@ export class ConfigurationComponent implements OnInit {
   }
 
     mapCompanyInfoToForm() {
+        this.receivedModuloMesas = this.companyInfo?.moduloMesas || false;
         this.formCad.patchValue({
             razao_social: this.companyInfo?.razao_social || '',
             nome_fantasia: this.companyInfo?.nome_fantasia || '',
@@ -81,7 +85,7 @@ export class ConfigurationComponent implements OnInit {
             country: this.companyInfo?.country || '',
             cep: this.companyInfo?.cep || '',
             created_at: this.companyInfo?.created_at || '',
-            codigo_regime_tributario: this.companyInfo?.codigo_regime_tributario || '',
+            codigo_regime_tributario: this.companyInfo?.codigo_regime_tributario || '' ,
             pix_key: this.companyInfo?.pix_key || '',
             moduloMesas: this.companyInfo?.moduloMesas
         });
@@ -89,6 +93,7 @@ export class ConfigurationComponent implements OnInit {
 
     ngOnInit(): void {
         this.getInfos();
+        this.formCad.get('codigo_regime_tributario')?.disable();
     }
 
 
@@ -130,10 +135,15 @@ export class ConfigurationComponent implements OnInit {
     return !this.formCad.get(field)?.valid && this.formCad.get(field)?.touched;
   }
 
-  toggleModuloMesas() {
-      this.moduloMesas = !this.moduloMesas;
-      this.formCad.get('moduloMesas')?.setValue(this.moduloMesas);
+    toggleModuloMesas() {
+        const moduloMesasControl = this.formCad.get('moduloMesas');
+        if (moduloMesasControl) {
+            const currentModuloMesas = moduloMesasControl.value;
+            moduloMesasControl.setValue(!currentModuloMesas);
+        }
     }
+
+
 
     getInfos() {
         this.CompanySettingsService.getAllInfos()
@@ -148,8 +158,17 @@ export class ConfigurationComponent implements OnInit {
                 },
                 // ... lidar com erro ...
             );
-        console.log(this.moduloMesas);
 
+
+    }
+
+    toggleEditMode() {
+      this.EditMode = !this.EditMode;
+      if (this.EditMode) {
+          this.formCad.get('codigo_regime_tributario')?.disable();
+      } else {
+          this.formCad.get('codigo_regime_tributario')?.enable();
+      }
     }
 
   salvarConfiguracoes(): void {

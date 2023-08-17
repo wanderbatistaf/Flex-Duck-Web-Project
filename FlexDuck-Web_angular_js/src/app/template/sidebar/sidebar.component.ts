@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { AuthenticationService } from '@app/_services';
+import { AuthenticationService, CompanySettingsService } from '@app/_services';
 import { User } from '@app/_models';
 import { Level } from '@app/_models';
 import {Router} from "@angular/router";
@@ -19,8 +19,10 @@ export class SidebarComponent {
   userName?: string; // Variável para armazenar o nome do usuário
   userID?: number; // Variável para armazenar o id do usuário
   private router: any;
+  moduloMesasAtivo: boolean = false;
 
-  constructor(private authenticationService: AuthenticationService, router: Router) {
+  constructor(private authenticationService: AuthenticationService, router: Router,
+              private CompanySettingsService: CompanySettingsService) {
     this.isLevel = Level.Default; // Atribuindo um valor no construtor
     this.authenticationService.user.subscribe((x) => {
       this.user = x;
@@ -29,6 +31,10 @@ export class SidebarComponent {
     });
     this.getUserName(); // Chamada adicional para garantir que o nome do usuário seja obtido inicialmente
     this.getUserID();
+  }
+
+  ngOnInit() {
+    this.showModules();
   }
 
 
@@ -86,6 +92,16 @@ export class SidebarComponent {
 
   navigateToEdit() {
     this.router.navigate(['/employes/edicao']);
+  }
+
+  showModules() {
+    this.CompanySettingsService.getModulesOn().subscribe((resposta) => {
+      if (typeof resposta.moduloMesas === 'string') {
+        this.moduloMesasAtivo = JSON.parse(resposta.moduloMesas) === true;
+      } else {
+        this.moduloMesasAtivo = false;
+      }
+    });
   }
 
 
