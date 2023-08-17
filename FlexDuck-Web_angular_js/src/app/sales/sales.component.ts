@@ -659,8 +659,6 @@ export class SalesComponent implements OnInit, AfterContentChecked {
 
     // Show the modal
     this.abrirCupomFiscalModal();
-
-    this.loading_UpVenda = false;
   }
 
 
@@ -861,7 +859,6 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   }
 
   finalizarVenda(): void {
-    this.loading_UpVenda = true;
     this.salesService.addVenda(this.dadosDaVenda).subscribe(
       (res) => {
         // Manipular a resposta do backend, se necessário

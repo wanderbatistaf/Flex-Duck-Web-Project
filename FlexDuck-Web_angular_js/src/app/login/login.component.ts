@@ -99,6 +99,7 @@ export class LoginComponent implements OnInit {
       )
       .subscribe({
         next: (user) => {
+
           if (this.isActive) {
             // Get the return URL from route parameters or use the default '/'
             const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';

@@ -33,7 +33,7 @@ import { FilterPipeP, ProdutoModalComponent } from './modals/produto-modal/produ
 import {SharedService} from "@app/_services/SharedService";
 import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/mesas.component';
 import {CustomHttpInterceptor} from "@app/_services";
-import { ConfigurationComponent } from './configuration/configuration.component';
+import { SkeletonTableDisplay } from './_share/skeleton-table';
 
 
 @NgModule({
@@ -50,7 +50,6 @@ import { ConfigurationComponent } from './configuration/configuration.component'
     AnQrcodeModule,
     NgbModule,
     NgbModalModule,
-
   ],
   declarations: [
     AppComponent,
@@ -74,7 +73,7 @@ import { ConfigurationComponent } from './configuration/configuration.component'
     FilterPipeP,
     FilterPipeV,
     FilterPipeC,
-    ConfigurationComponent
+    SkeletonTableDisplay,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

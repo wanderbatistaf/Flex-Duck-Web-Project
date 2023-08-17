@@ -324,7 +324,14 @@
                     </div>
 
 
-        <div *ngIf="loading" class="spinner-border spinner-border-sm"></div></div>
+
+      </div>
+
+      <!-- <div *ngIf="loading" class="spinner-border spinner-border-sm"> -->
+
+      <div *ngIf="loading">
+        <skeleton-table-display></skeleton-table-display>
+      </div>
 
                 <!--Consulta renderiza aqui-->
                 <div class="table-responsive" *ngIf="!loading && activeTab === 'consulta'">

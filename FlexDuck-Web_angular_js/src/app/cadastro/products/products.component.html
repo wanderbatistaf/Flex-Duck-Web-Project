@@ -46,7 +46,8 @@
 <div class="card table-responsive mt-4">
   <div class="card-body">
     <div class="text-center" *ngIf="loading">
-      <div class="spinner-border spinner-border-sm"></div>
+      <!-- <div class="spinner-border spinner-border-sm"></div> -->
+      <skeleton-table-display *ngIf="loading"></skeleton-table-display>
     </div>
 
     <!--Detalhes renderiza aqui!-->
