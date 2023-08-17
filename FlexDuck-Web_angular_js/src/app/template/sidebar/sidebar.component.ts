@@ -21,7 +21,8 @@ export class SidebarComponent {
   private router: any;
   moduloMesasAtivo: boolean = false;
 
-  constructor(private authenticationService: AuthenticationService, router: Router,
+  constructor(private authenticationService: AuthenticationService,
+              router: Router,
               private CompanySettingsService: CompanySettingsService) {
     this.isLevel = Level.Default; // Atribuindo um valor no construtor
     this.authenticationService.user.subscribe((x) => {
@@ -103,6 +104,7 @@ export class SidebarComponent {
       }
     });
   }
+
 
 
 }

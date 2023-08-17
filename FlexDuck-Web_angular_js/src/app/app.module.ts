@@ -34,6 +34,7 @@ import {SharedService} from "@app/_services/SharedService";
 import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/mesas.component';
 import {CustomHttpInterceptor} from "@app/_services";
 import { SkeletonTableDisplay } from './_share/skeleton-table';
+import {ConfigurationComponent} from "@app/configuration/configuration.component";
 
 
 @NgModule({
@@ -69,6 +70,7 @@ import { SkeletonTableDisplay } from './_share/skeleton-table';
     VendedorModalComponent,
     ProdutoModalComponent,
     MesasComponent,
+    ConfigurationComponent,
     FilterPipe,
     FilterPipeP,
     FilterPipeV,
