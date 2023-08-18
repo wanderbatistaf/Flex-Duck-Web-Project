@@ -15,7 +15,7 @@ class AppContext:
 def get_db_name_from_subdomain(subdomain):
     if subdomain == "smarttech.flexduck.com":
         return "smarttechdb"
-    elif subdomain == "flex-duck-web-project.vercel.app":
+    elif subdomain == "www.flexduck.com.br":
         return "flexduckdb"
     elif subdomain == "localhost:4200":
         return "localtestdb"
