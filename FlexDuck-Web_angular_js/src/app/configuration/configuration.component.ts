@@ -4,6 +4,7 @@ import {ClientsService, CompanySettingsService, ViaCepService} from "@app/_servi
 import {Router} from "@angular/router";
 import {map} from "rxjs/operators";
 import {Clients, Company} from "@app/_models";
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-configuration',
@@ -38,10 +39,15 @@ export class ConfigurationComponent implements OnInit {
   receivedModuloMesas: boolean = false;
   isToggling = false;
   EditMode = true;
+  editingMode = false;
+  editSaveButtonText = 'Editar';
+  savingModalVisible: boolean = false;
+
 
   constructor(private fb: FormBuilder,
               private viaCepService: ViaCepService,
-              private CompanySettingsService: CompanySettingsService) {
+              private CompanySettingsService: CompanySettingsService,
+              private modalService: NgbModal) {
 
     const currentDateTimestamp = Math.floor(Date.now() / 1000);
 
@@ -162,14 +168,61 @@ export class ConfigurationComponent implements OnInit {
 
     }
 
-    toggleEditMode() {
-      this.EditMode = !this.EditMode;
-      if (this.EditMode) {
-          this.formCad.get('codigo_regime_tributario')?.disable();
-      } else {
-          this.formCad.get('codigo_regime_tributario')?.enable();
-      }
+  toggleEditMode() {
+    this.EditMode = !this.EditMode;
+
+    if (this.EditMode) {
+      this.formCad.get('codigo_regime_tributario')?.disable();
+    } else {
+      this.formCad.get('codigo_regime_tributario')?.enable();
     }
+  }
+
+  isEditMode() {
+    return this.EditMode;
+  }
+
+  updateCompany() {
+    const updateCompany: Company = { ...this.formCad.value };
+    const companyId: number | undefined = 1; // Substitua pelo ID da empresa correto
+
+    this.CompanySettingsService.updateCompanyInfos(companyId, updateCompany)
+      .subscribe(
+        updatedCompany => {
+          console.log('Informações da empresa atualizadas:', updatedCompany);
+          this.formCad.disable();
+          this.toggleEditMode(); // Volte para o modo de edição após salvar
+        },
+        error => {
+          console.error('Erro ao atualizar informações da empresa:', error);
+        }
+      );
+  }
+
+  saveCompanyInfos() {
+    if (!this.EditMode) {
+      this.savingModalVisible = true; // Mostrar o modal de salvamento
+
+      const updateCompany: Company = this.formCad.value;
+      const companyId: number | undefined = 1;
+
+      this.CompanySettingsService.updateCompanyInfos(companyId, updateCompany)
+        .subscribe(
+          updatedCompany => {
+            console.log('Informações da empresa atualizadas:', updatedCompany);
+            this.formCad.disable();
+            this.savingModalVisible = false; // Esconder o modal de salvamento após o sucesso
+          },
+          error => {
+            console.error('Erro ao atualizar informações da empresa:', error);
+            this.savingModalVisible = false; // Esconder o modal de salvamento em caso de erro
+          }
+        );
+    }
+    this.EditMode = true;
+  }
+
+
 
   salvarConfiguracoes(): void {
     console.log('Nome da Empresa:', this.empresa);

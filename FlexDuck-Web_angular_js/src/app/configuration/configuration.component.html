@@ -206,7 +206,8 @@
                     <div>
                         <br>
                         <button type="button" class="btn btn-secondary mr-2" routerLink="/home">Cancel</button>
-                        <button type="submit" class="btn btn-primary" (click)="toggleEditMode()">Editar</button>
+                        <button type="submit" class="btn btn-primary" *ngIf="isEditMode()" (click)="toggleEditMode()">Editar</button>
+                        <button type="submit" class="btn btn-primary" *ngIf="!isEditMode()" (click)="saveCompanyInfos()">Salvar</button>
                     </div>
 
                 </form>
@@ -215,3 +216,21 @@
         </div>
 </div>
 </div>
+
+<!-- Modal de salvamento -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': savingModalVisible}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-loading">
+        <div class="caption">Salvando as informações...</div>
+        <div class="animation"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="savingModalVisible"></div>
+
+
+
+
