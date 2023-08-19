@@ -5,6 +5,8 @@ import {FuncPaymentsService, ProductService, SalesService, UserService} from "@a
 import { Pipe, PipeTransform } from '@angular/core';
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {MesasLocalstorageService} from "@app/_services/mesas.localstorage.service";
+
 
 interface Produto {
   codigo: string;
@@ -21,6 +23,7 @@ interface ProdutoConsumido {
 }
 
 interface Mesa {
+  id: number;
   numero: number;
   nome: string;
   telefoneResponsavel: string;
@@ -28,6 +31,9 @@ interface Mesa {
   totalAPagar: number;
   abertura: Date;
   tempoAberta: Date;
+  iniciado: boolean;
+  tempoInicial: number;
+  tempoTotal: number;
 }
 
 interface Cliente {
@@ -113,6 +119,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   numerosMesasDisponiveis!: number[];
   novoNumeroMesa!: number;
   hover: boolean = false;
+  id_mesa: number = 0
 
 
   dadosDaVenda = {
@@ -146,7 +153,8 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   constructor(private productService: ProductService,
               private userService: UserService,
               private paytypeService: FuncPaymentsService,
-              private salesService: SalesService) { }
+              private salesService: SalesService,
+              private mesasLocalStorage: MesasLocalstorageService) { }
 
   ngOnInit(): void {
     this.getProduct();
@@ -155,10 +163,19 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     this.onFormaPagamentoDinheiro();
     this.buscarUltimoNumeroCF();
     this.atualizarNumerosMesasDisponiveis();
+    this.mesasAbertas = this.mesasLocalStorage.mesasAbertas;
     // Atualizar o cronômetro a cada segundo
     setInterval(() => {
       this.calcularTempoDecorrido();
     }, 1000);
+
+    // Verifique se alguma mesa está iniciada e reinicie o cronômetro
+    this.mesasAbertas.forEach(mesa => {
+      if (mesa.iniciado) {
+        this.mesasLocalStorage.iniciarCronometro(mesa);
+      }
+    });
+
 
   }
 
@@ -196,13 +213,17 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     }
 
     const novaMesa: Mesa = {
+      id: this.id_mesa++,
       numero: this.novoNumeroMesa,
       nome: this.novoCliente.nome,
       telefoneResponsavel: this.novoCliente.telefone,
       produtosConsumidos: [],
       totalAPagar: 0,
       abertura: new Date(),
-      tempoAberta: new Date()
+      tempoAberta: new Date(),
+      iniciado: true,
+      tempoInicial: 0,
+      tempoTotal: 0
     };
     this.mesasAbertas.push(novaMesa);
 
@@ -212,6 +233,9 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     }
 
     this.fecharModalNovaMesa();
+
+    // Salvar as mesas no armazenamento local
+    this.mesasLocalStorage.salvarMesasNoLocalStorage(this.mesasAbertas);
   }
 
   isMesaAberta(numeroMesa: number): boolean {
@@ -777,6 +801,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       mesa.tempoAberta = new Date(tempoDecorrido);
     }
   }
+
 
   atualizarTempoAberturaMesa(): void {
     const agora = new Date();
