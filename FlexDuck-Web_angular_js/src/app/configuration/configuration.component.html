@@ -183,24 +183,39 @@
                     <div class="row">
 
                         <!-- CUSTOM MODULES -->
-                        <form [formGroup]="formCad">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="card w-75">
-                                        <div class="card-body text-center">
-                                            <h5 class="card-title">Modulo de Mesas</h5>
-                                            <button type="button" class="btn btn-on" *ngIf="formCad.get('moduloMesas')?.value === 'true'" (click)="toggleModuloMesas()" [disabled]="EditMode">
-                                                Ligado
-                                            </button>
-                                            <button type="button" class="btn btn-off" *ngIf="formCad.get('moduloMesas')?.value === 'false'" (click)="toggleModuloMesas()" [disabled]="EditMode">
-                                                Desligado
-                                            </button>
-                                            <input type="hidden" formControlName="moduloMesas">
-                                        </div>
-                                    </div>
-                                </div>
+                      <form [formGroup]="formMod">
+                        <div class="row">
+                          <div class="col-md-4">
+                            <div class="card w-75">
+                              <div class="card-body text-center">
+                                <h5 class="card-title">Modulo de Mesas</h5>
+                                <button type="button" class="btn btn-on" *ngIf="formCad.get('moduloMesas')?.value" (click)="toggleModuloMesas()" [disabled]="EditMode">
+                                  Ligado
+                                </button>
+                                <button type="button" class="btn btn-off" *ngIf="!formCad.get('moduloMesas')?.value" (click)="toggleModuloMesas()" [disabled]="EditMode">
+                                  Desligado
+                                </button>
+                                <input type="hidden" formControlName="moduloMesas">
+                              </div>
                             </div>
-                        </form>
+                          </div>
+
+                          <div class="col-md-4">
+                            <div class="card w-75">
+                              <div class="card-body text-center">
+                                <h5 class="card-title">Modulo de Varejo</h5>
+                                <button type="button" class="btn btn-on" *ngIf="formCad.get('moduloVarejo')?.value" (click)="toggleModuloVarejo()" [disabled]="EditMode">
+                                  Ligado
+                                </button>
+                                <button type="button" class="btn btn-off" *ngIf="!formCad.get('moduloVarejo')?.value" (click)="toggleModuloVarejo()" [disabled]="EditMode">
+                                  Desligado
+                                </button>
+                                <input type="hidden" formControlName="moduloVarejo">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
                     </div>
 
                     <div>

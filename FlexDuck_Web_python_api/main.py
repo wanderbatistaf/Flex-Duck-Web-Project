@@ -118,6 +118,10 @@ app.register_blueprint(reports)
 from api_company_settings import api_company_settings
 app.register_blueprint(api_company_settings)
 
+# Adiciona as rotas de dados dos modulos
+from api_modulos_mysql import api_modulos
+app.register_blueprint(api_modulos)
+
 
 @app.route('/server/status/check-connection', methods=['GET'])
 def check_connection():

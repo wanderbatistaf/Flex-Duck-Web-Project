@@ -3,7 +3,12 @@ import { Component } from '@angular/core';
 import { AuthenticationService, CompanySettingsService } from '@app/_services';
 import { User } from '@app/_models';
 import { Level } from '@app/_models';
+import { Modulo } from '@app/_models';
 import {Router} from "@angular/router";
+import {ModulosService} from "@app/_services/modulos.service";
+
+
+
 
 @Component({
   selector: 'app-sidebar',
@@ -19,25 +24,54 @@ export class SidebarComponent {
   userName?: string; // Variável para armazenar o nome do usuário
   userID?: number; // Variável para armazenar o id do usuário
   private router: any;
-  moduloMesasAtivo: boolean = false;
+  modulo: Modulo[] = [];
+  modulosAtivos: { [modulo: string]: string } = {};
+  isReady: boolean = false; // Variável de controle
 
   constructor(private authenticationService: AuthenticationService,
               router: Router,
-              private CompanySettingsService: CompanySettingsService) {
+              private ModulosService: ModulosService) {
+  }
+
+  ngOnInit() {
     this.isLevel = Level.Default; // Atribuindo um valor no construtor
+
     this.authenticationService.user.subscribe((x) => {
       this.user = x;
       this.checkLevel();
       this.getUserName();
+      this.getUserID();
+      this.getUserName(); // Chamada adicional para garantir que o nome do usuário seja obtido inicialmente
     });
-    this.getUserName(); // Chamada adicional para garantir que o nome do usuário seja obtido inicialmente
-    this.getUserID();
+
+    const savedModules = localStorage.getItem('modules');
+
+    if (savedModules) {
+      this.modulosAtivos = JSON.parse(savedModules);
+      this.isReady = true;
+    } else {
+      this.ModulosService.getModules().subscribe((response: any) => {
+        if (response && response.modulos && Array.isArray(response.modulos)) {
+          response.modulos.forEach((modulo: any) => {
+            this.modulosAtivos[modulo.modulo] = modulo.status; // Não precisa mais converter para String
+          });
+
+          // Salvar os módulos no localStorage
+          localStorage.setItem('modules', JSON.stringify(this.modulosAtivos));
+
+          this.isReady = true;
+        }
+      });
+    }
   }
 
-  ngOnInit() {
-    this.showModules();
-  }
 
+
+
+
+  isModuloAtivo(modulo: Modulo): boolean {
+    return modulo.status === 'true'; // ou modulo.status === true, dependendo da implementação da API
+  }
 
   toggleCadastroMenu() {
     this.isCadastroMenuOpen = !this.isCadastroMenuOpen;
@@ -93,16 +127,6 @@ export class SidebarComponent {
 
   navigateToEdit() {
     this.router.navigate(['/employes/edicao']);
-  }
-
-  showModules() {
-    this.CompanySettingsService.getModulesOn().subscribe((resposta) => {
-      if (typeof resposta.moduloMesas === 'string') {
-        this.moduloMesasAtivo = JSON.parse(resposta.moduloMesas) === true;
-      } else {
-        this.moduloMesasAtivo = false;
-      }
-    });
   }
 
 

@@ -63,8 +63,7 @@ def buscar_todos_dados_client():
             "cep": row[14],
             "created_at": row[15],
             "codigo_regime_tributario": row[16],
-            "pix_key": row[17],
-            "moduloMesas": row[18]
+            "pix_key": row[17]
         }
         items.append(item)
     response = {
@@ -94,47 +93,19 @@ def atualizar_dados(id):
             razao_social = %s, nome_fantasia = %s, cnpj = %s, state_registration = %s,
             municipal_registration = %s, telephone = %s, city = %s, street = %s,
             district = %s, state = %s, number = %s, complement = %s, country = %s,
-            cep = %s, created_at = %s, codigo_regime_tributario = %s, pix_key = %s,
-            moduloMesas = %s
+            cep = %s, created_at = %s, codigo_regime_tributario = %s, pix_key = %s
         WHERE id = %s
     '''
     val = (
         dados['razao_social'], dados['nome_fantasia'], dados['cnpj'], dados['state_registration'],
         dados['municipal_registration'], dados['telephone'], dados['city'], dados['street'],
         dados['district'], dados['state'], dados['number'], dados['complement'], dados['country'],
-        dados['cep'], dados['created_at'], dados['codigo_regime_tributario'], dados['pix_key'],
-        dados['moduloMesas'], id
+        dados['cep'], dados['created_at'], dados['codigo_regime_tributario'], dados['pix_key'], id
     )
     cursor.execute(sql, val)
     db.commit()
     cursor.close()
     return jsonify({'mensagem': 'Dados atualizados com sucesso!'})
 
-
-
-# Retornar o status atual do módulo de mesas (ligado ou desligado)
-@api_company_settings.route('/company_settings/modulo_mesas', methods=['GET'])
-@jwt_required()
-def obter_status_modulo_mesas():
-    current_user = get_jwt_identity()
-    if not current_user:
-        return abort(404)
-
-    # Obtém o subdomínio a partir da requisição Flask
-    subdomain = request.headers.get('X-Subdomain')
-
-    # Configura a conexão com o banco de dados MySQL
-    db = get_db_connection(subdomain)
-    cursor = db.cursor()
-
-    # Obtém o status do módulo de mesas da tabela empresa
-    sql = 'SELECT moduloMesas FROM company_settings'
-    cursor.execute(sql)
-    modulo_mesas = cursor.fetchone()
-
-    modulo_mesas = modulo_mesas[0] if modulo_mesas else 0
-
-    cursor.close()
-    return jsonify({'moduloMesas': modulo_mesas})
 
 

@@ -1,0 +1,29 @@
+version: '3'
+services:
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./start.sh:/app/start.sh
+    expose:
+      - "5000"
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - flask-app
+
+  certbot:
+    image: certbot/certbot
+    command: certonly --webroot -w /var/www/html -d flexduckapi.servehttp.com --email flexduckdev@gmail.com --agree-tos --non-interactive
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+    depends_on:
+      - nginx

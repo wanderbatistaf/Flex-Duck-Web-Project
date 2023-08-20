@@ -20,10 +20,5 @@ export class CompanySettingsService {
         return this.http.put<Company>(`${environment.apiUrl}/company_settings/att/${id}`, updateCompany)
     }
 
-    // Verifica habilita/desabilita modulo de Mesas
-    getModulesOn(): Observable<Company> {
-        return this.http.get<Company>(`${environment.apiUrl}/company_settings/modulo_mesas`);
-    }
-
 
 }

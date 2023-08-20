@@ -1,10 +1,10 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {ClientsService, CompanySettingsService, ViaCepService} from "@app/_services";
-import {Router} from "@angular/router";
+import {CompanySettingsService, ViaCepService} from "@app/_services";
 import {map} from "rxjs/operators";
-import {Clients, Company} from "@app/_models";
+import { Company, Modulo} from "@app/_models";
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {ModulosService} from "@app/_services/modulos.service";
 
 @Component({
   selector: 'app-configuration',
@@ -24,8 +24,8 @@ export class ConfigurationComponent implements OnInit {
   endereco: string = '';
   bairro: string = '';
   cep: string = '';
-  // Variavel de checagem pessoa Fisica
   formCad: FormGroup;
+  formMod: FormGroup;
   // Mascaras do formulario
   public cpfMask = [/[0-9]/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '-', /\d/, /\d/];
   public phoneMask = ['(', /[1-9]/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/];
@@ -42,12 +42,13 @@ export class ConfigurationComponent implements OnInit {
   editingMode = false;
   editSaveButtonText = 'Editar';
   savingModalVisible: boolean = false;
+  modules?: Modulo[];
 
 
   constructor(private fb: FormBuilder,
               private viaCepService: ViaCepService,
               private CompanySettingsService: CompanySettingsService,
-              private modalService: NgbModal) {
+              private ModulosService: ModulosService) {
 
     const currentDateTimestamp = Math.floor(Date.now() / 1000);
 
@@ -68,13 +69,20 @@ export class ConfigurationComponent implements OnInit {
         cep: ['', [Validators.pattern(this.zipCodePattern)]],
         created_at: currentDateTimestamp,
         codigo_regime_tributario: [''],
-        pix_key: [''],
-        moduloMesas: null
+        pix_key: ['']
     });
+
+    this.formMod = this.fb.group({
+      id: ['', [Validators.minLength(1)]],
+      modulo: [''],
+      status: [''],
+      moduloMesas: [''],
+      moduloVarejo: ['']
+    });
+
   }
 
     mapCompanyInfoToForm() {
-        this.receivedModuloMesas = this.companyInfo?.moduloMesas || false;
         this.formCad.patchValue({
             razao_social: this.companyInfo?.razao_social || '',
             nome_fantasia: this.companyInfo?.nome_fantasia || '',
@@ -92,14 +100,28 @@ export class ConfigurationComponent implements OnInit {
             cep: this.companyInfo?.cep || '',
             created_at: this.companyInfo?.created_at || '',
             codigo_regime_tributario: this.companyInfo?.codigo_regime_tributario || '' ,
-            pix_key: this.companyInfo?.pix_key || '',
-            moduloMesas: this.companyInfo?.moduloMesas
+            pix_key: this.companyInfo?.pix_key || ''
         });
     }
 
     ngOnInit(): void {
         this.getInfos();
+        this.getModules();
         this.formCad.get('codigo_regime_tributario')?.disable();
+
+      this.ModulosService.getModules().subscribe((response: any) => {
+        const modulos = response.modulos;
+
+        const moduloMesas = modulos.find((modulo: any) => modulo.modulo === 'Mesas');
+        if (moduloMesas) {
+          this.formMod.get('moduloMesas')?.setValue(moduloMesas.status === 'true');
+        }
+
+        const moduloVarejo = modulos.find((modulo: any) => modulo.modulo === 'Varejo');
+        if (moduloVarejo) {
+          this.formMod.get('moduloVarejo')?.setValue(moduloVarejo.status === 'true');
+        }
+      });
     }
 
 
@@ -141,13 +163,34 @@ export class ConfigurationComponent implements OnInit {
     return !this.formCad.get(field)?.valid && this.formCad.get(field)?.touched;
   }
 
-    toggleModuloMesas() {
-        const moduloMesasControl = this.formCad.get('moduloMesas');
-        if (moduloMesasControl) {
-            const currentModuloMesas = moduloMesasControl.value;
-            moduloMesasControl.setValue(!currentModuloMesas);
+  toggleModuloMesas() {
+    this.ModulosService.toggleModuloMesasStatus().subscribe((newModule: Modulo) => {
+      if (newModule) {
+        const mesasStatus = newModule.status === 'true';
+
+        // Atualizar o valor no localStorage, convertendo explicitamente para string
+        const savedModules = localStorage.getItem('modules');
+        if (savedModules) {
+          const modules = JSON.parse(savedModules);
+          modules['Mesas'] = mesasStatus ? 'true' : 'false'; // Convertendo para string
+          localStorage.setItem('modules', JSON.stringify(modules));
         }
+
+        // Atualizar o valor do controle 'moduloMesas' no formulário, convertendo explicitamente para string
+        this.formCad.get('moduloMesas')?.setValue(mesasStatus ? 'true' : 'false'); // Convertendo para string
+      }
+    });
+  }
+  
+
+
+  toggleModuloVarejo() {
+    const moduloVarejoControl = this.formCad.get('moduloVarejo');
+    if (moduloVarejoControl) {
+      const currentModuloVarejo = moduloVarejoControl.value;
+      moduloVarejoControl.setValue(!currentModuloVarejo);
     }
+  }
 
 
 
@@ -222,12 +265,12 @@ export class ConfigurationComponent implements OnInit {
     this.EditMode = true;
   }
 
-
-
-  salvarConfiguracoes(): void {
-    console.log('Nome da Empresa:', this.empresa);
-    console.log('Segmento:', this.segmento);
-    console.log('Módulo de Mesas:', this.moduloMesas);
+  getModules(): void {
+    this.ModulosService.getModules()
+      .subscribe(modules => {
+        this.modules = modules;
+      });
   }
+
 
 }
