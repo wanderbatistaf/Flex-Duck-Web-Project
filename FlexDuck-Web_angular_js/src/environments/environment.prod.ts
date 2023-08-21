@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://54.232.70.133:5000',
+    apiUrl: 'https://flexapiduck.flexduck.com.br',
     webUrl: 'https://flex-duck-web-project.vercel.app'
 };
