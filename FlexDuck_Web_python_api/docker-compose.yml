@@ -4,16 +4,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    user: "root"
     volumes:
-      - ./start.sh:/app/start.sh
-    expose:
-      - "5000"
+      - ./start.sh:/start.sh
+    ports:
+      - "5000:5000"
 
   nginx:
     image: nginx
+    user: "root"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - /etc/letsencrypt:/etc/letsencrypt
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./acme-challenge:/var/www/html/.well-known/acme-challenge
+      - ./certified_ssl:/etc/nginx/ssl
+    command: /bin/sh -c "nginx -g 'daemon off;'"
     ports:
       - "80:80"
       - "443:443"
@@ -22,8 +26,10 @@ services:
 
   certbot:
     image: certbot/certbot
-    command: certonly --webroot -w /var/www/html -d flexduckapi.servehttp.com --email flexduckdev@gmail.com --agree-tos --non-interactive
+    user: "root"
     volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
+      - ./certbot:/etc/letsencrypt
+      - ./acme-challenge:/var/www/html/.well-known/acme-challenge
     depends_on:
       - nginx
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 86400; done;'"

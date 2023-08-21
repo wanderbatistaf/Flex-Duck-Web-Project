@@ -25,9 +25,12 @@ COPY start.sh /app/start.sh
 # Conceder permissão de execução ao script
 RUN chmod +x /app/start.sh
 
+# Criar um novo script de inicialização entrypoint.sh
+RUN echo '#!/bin/bash\n/app/start.sh' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+
 # Expor a porta do aplicativo
 EXPOSE 80
 EXPOSE 443
 
-# Configurar o comando de entrada para executar o script start.sh
-CMD ["/app/start.sh"]
+# Configurar o comando de entrada para executar o script de inicialização
+CMD ["/app/entrypoint.sh"]
