@@ -186,28 +186,29 @@
                       <form [formGroup]="formMod">
                         <div class="row">
                           <div class="col-md-4">
-                            <div class="card w-75">
-                              <div class="card-body text-center">
-                                <h5 class="card-title">Modulo de Mesas</h5>
-                                <button type="button" class="btn btn-on" *ngIf="formCad.get('moduloMesas')?.value" (click)="toggleModuloMesas()" [disabled]="EditMode">
-                                  Ligado
-                                </button>
-                                <button type="button" class="btn btn-off" *ngIf="!formCad.get('moduloMesas')?.value" (click)="toggleModuloMesas()" [disabled]="EditMode">
-                                  Desligado
-                                </button>
-                                <input type="hidden" formControlName="moduloMesas">
-                              </div>
+                          <div class="card w-75">
+                            <div class="card-body text-center">
+                              <h5 class="card-title">Modulo de Mesas</h5>
+                              <button type="button" class="btn btn-on" *ngIf="formMod.get('moduloMesas')?.value" (click)="toggleModuloMesas()" [disabled]="EditMode">
+                                Ligado
+                              </button>
+                              <button type="button" class="btn btn-off" *ngIf="!formMod.get('moduloMesas')?.value" (click)="toggleModuloMesas()" [disabled]="EditMode">
+                                Desligado
+                              </button>
+                              <input type="hidden" formControlName="moduloMesas">
                             </div>
                           </div>
+                        </div>
+
 
                           <div class="col-md-4">
                             <div class="card w-75">
                               <div class="card-body text-center">
                                 <h5 class="card-title">Modulo de Varejo</h5>
-                                <button type="button" class="btn btn-on" *ngIf="formCad.get('moduloVarejo')?.value" (click)="toggleModuloVarejo()" [disabled]="EditMode">
+                                <button type="button" class="btn btn-on" *ngIf="formMod.get('moduloVarejo')?.value" (click)="toggleModuloVarejo()" [disabled]="EditMode">
                                   Ligado
                                 </button>
-                                <button type="button" class="btn btn-off" *ngIf="!formCad.get('moduloVarejo')?.value" (click)="toggleModuloVarejo()" [disabled]="EditMode">
+                                <button type="button" class="btn btn-off" *ngIf="!formMod.get('moduloVarejo')?.value" (click)="toggleModuloVarejo()" [disabled]="EditMode">
                                   Desligado
                                 </button>
                                 <input type="hidden" formControlName="moduloVarejo">
@@ -245,6 +246,20 @@
 </div>
 
 <div class="modal-backdrop" *ngIf="savingModalVisible"></div>
+
+<!-- Modal de Carregamento -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': loadingPageModalVisible}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-loading">
+        <div class="caption">Carregando as informações...</div>
+        <div class="animation"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="loadingPageModalVisible"></div>
 
 
 

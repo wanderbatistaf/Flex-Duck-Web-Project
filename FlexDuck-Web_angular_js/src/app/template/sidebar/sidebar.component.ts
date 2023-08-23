@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { AuthenticationService, CompanySettingsService } from '@app/_services';
+import {AuthenticationService, CompanySettingsService, EncryptionService} from '@app/_services';
 import { User } from '@app/_models';
 import { Level } from '@app/_models';
 import { Modulo } from '@app/_models';
@@ -30,10 +30,13 @@ export class SidebarComponent {
 
   constructor(private authenticationService: AuthenticationService,
               router: Router,
-              private ModulosService: ModulosService) {
+              private ModulosService: ModulosService,
+              private encryptionService: EncryptionService) {
+
   }
 
   ngOnInit() {
+
     this.isLevel = Level.Default; // Atribuindo um valor no construtor
 
     this.authenticationService.user.subscribe((x) => {
@@ -42,31 +45,31 @@ export class SidebarComponent {
       this.getUserName();
       this.getUserID();
       this.getUserName(); // Chamada adicional para garantir que o nome do usuário seja obtido inicialmente
+
+      const savedModules = localStorage.getItem('modules');
+
+      if (savedModules) {
+        const decryptedData = this.encryptionService.decryptData(savedModules); // Descriptografa os dados
+        this.modulosAtivos = decryptedData;
+        this.isReady = true;
+      } else {
+        this.ModulosService.getModules().subscribe((response: any) => {
+          if (response && response.modulos && Array.isArray(response.modulos)) {
+            response.modulos.forEach((modulo: any) => {
+              this.modulosAtivos[modulo.modulo] = modulo.status; // Não precisa mais converter para String
+            });
+
+            // Criptografa e salva os módulos no localStorage
+            const encryptedData = this.encryptionService.encryptData(this.modulosAtivos);
+            localStorage.setItem('modules', encryptedData);
+
+            this.isReady = true;
+          }
+        });
+      }
     });
 
-    const savedModules = localStorage.getItem('modules');
-
-    if (savedModules) {
-      this.modulosAtivos = JSON.parse(savedModules);
-      this.isReady = true;
-    } else {
-      this.ModulosService.getModules().subscribe((response: any) => {
-        if (response && response.modulos && Array.isArray(response.modulos)) {
-          response.modulos.forEach((modulo: any) => {
-            this.modulosAtivos[modulo.modulo] = modulo.status; // Não precisa mais converter para String
-          });
-
-          // Salvar os módulos no localStorage
-          localStorage.setItem('modules', JSON.stringify(this.modulosAtivos));
-
-          this.isReady = true;
-        }
-      });
-    }
   }
-
-
-
 
 
   isModuloAtivo(modulo: Modulo): boolean {

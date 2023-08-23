@@ -1,10 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {CompanySettingsService, ViaCepService} from "@app/_services";
+import {AuthenticationService, CompanySettingsService, EncryptionService, ViaCepService} from "@app/_services";
 import {map} from "rxjs/operators";
 import { Company, Modulo} from "@app/_models";
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {ModulosService} from "@app/_services/modulos.service";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'app-configuration',
@@ -42,13 +43,20 @@ export class ConfigurationComponent implements OnInit {
   editingMode = false;
   editSaveButtonText = 'Editar';
   savingModalVisible: boolean = false;
+  loadingPageModalVisible: boolean = false;
   modules?: Modulo[];
+  modulosAtivos: any;
+  isReady: boolean = false;
 
 
   constructor(private fb: FormBuilder,
               private viaCepService: ViaCepService,
               private CompanySettingsService: CompanySettingsService,
-              private ModulosService: ModulosService) {
+              private ModulosService: ModulosService,
+              private authenticationService: AuthenticationService,
+              private router: Router,
+              private route: ActivatedRoute,
+              private encryptionService: EncryptionService) {
 
     const currentDateTimestamp = Math.floor(Date.now() / 1000);
 
@@ -104,28 +112,35 @@ export class ConfigurationComponent implements OnInit {
         });
     }
 
-    ngOnInit(): void {
-        this.getInfos();
-        this.getModules();
-        this.formCad.get('codigo_regime_tributario')?.disable();
+  ngOnInit(): void {
+    this.loadingPageModalVisible = true;
 
-      this.ModulosService.getModules().subscribe((response: any) => {
-        const modulos = response.modulos;
+    this.getInfos();
+    this.getModules();
+    this.formCad.get('codigo_regime_tributario')?.disable();
 
-        const moduloMesas = modulos.find((modulo: any) => modulo.modulo === 'Mesas');
-        if (moduloMesas) {
-          this.formMod.get('moduloMesas')?.setValue(moduloMesas.status === 'true');
-        }
+    this.ModulosService.getModules().subscribe((response: any) => {
+      const modulos = response.modulos;
 
-        const moduloVarejo = modulos.find((modulo: any) => modulo.modulo === 'Varejo');
-        if (moduloVarejo) {
-          this.formMod.get('moduloVarejo')?.setValue(moduloVarejo.status === 'true');
-        }
-      });
-    }
+      const moduloMesas = modulos.find((modulo: any) => modulo.modulo === 'Mesas');
+      if (moduloMesas) {
+        this.formMod.get('moduloMesas')?.setValue(moduloMesas.status === 'true');
+        console.log(moduloMesas);
+      }
+
+      const moduloVarejo = modulos.find((modulo: any) => modulo.modulo === 'Varejo');
+      if (moduloVarejo) {
+        this.formMod.get('moduloVarejo')?.setValue(moduloVarejo.status === 'true');
+        console.log(moduloVarejo);
+      }
+
+      this.loadingPageModalVisible = false;
+    });
+  }
 
 
-    searchZipCode(cep: string) {
+
+  searchZipCode(cep: string) {
     cep = cep.replace(/\D/g, '');
     if (cep !== '') {
       const cepValidate = /^[0-9]{8}$/;
@@ -164,32 +179,44 @@ export class ConfigurationComponent implements OnInit {
   }
 
   toggleModuloMesas() {
+    this.savingModalVisible = true; // Mostrar o modal de salvamento
     this.ModulosService.toggleModuloMesasStatus().subscribe((newModule: Modulo) => {
       if (newModule) {
-        const mesasStatus = newModule.status === 'true';
+        // Limpar informações do localStorage
+        localStorage.removeItem('modules');
 
-        // Atualizar o valor no localStorage, convertendo explicitamente para string
-        const savedModules = localStorage.getItem('modules');
-        if (savedModules) {
-          const modules = JSON.parse(savedModules);
-          modules['Mesas'] = mesasStatus ? 'true' : 'false'; // Convertendo para string
-          localStorage.setItem('modules', JSON.stringify(modules));
-        }
+        // Recarregar o sidebar
+        this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+        this.router.navigate(['/sidebar'], { queryParams: { refresh: new Date().getTime() } });
 
-        // Atualizar o valor do controle 'moduloMesas' no formulário, convertendo explicitamente para string
-        this.formCad.get('moduloMesas')?.setValue(mesasStatus ? 'true' : 'false'); // Convertendo para string
+        // Aguardar um tempo para garantir que o sidebar seja recarregado
+        setTimeout(() => {
+          this.savingModalVisible = false; // Esconder o modal de salvamento após o sidebar ser recarregado
+        }, 1000); // 1000 milissegundos (1 segundo)
       }
     });
   }
-  
+
+
 
 
   toggleModuloVarejo() {
-    const moduloVarejoControl = this.formCad.get('moduloVarejo');
-    if (moduloVarejoControl) {
-      const currentModuloVarejo = moduloVarejoControl.value;
-      moduloVarejoControl.setValue(!currentModuloVarejo);
-    }
+    this.savingModalVisible = true; // Mostrar o modal de salvamento
+    this.ModulosService.toggleModuloVarejoStatus().subscribe((newModule: Modulo) => {
+      if (newModule) {
+        // Limpar informações do localStorage
+        localStorage.removeItem('modules');
+
+        // Recarregar o sidebar
+        this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+        this.router.navigate(['/sidebar'], { queryParams: { refresh: new Date().getTime() } });
+
+        // Aguardar um tempo para garantir que o sidebar seja recarregado
+        setTimeout(() => {
+          this.savingModalVisible = false; // Esconder o modal de salvamento após o sidebar ser recarregado
+        }, 1000); // 1000 milissegundos (1 segundo)
+      }
+    });
   }
 
 

@@ -58,7 +58,7 @@
              (click)="toggleContabilidadeMenu()"
              style="color: white"
              onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'; this.style.backgroundColor='rgba(0,0,0,0.2)'"
-             onmouseout="this.style.boxShadow=''; this.style.backgroundColor=''">
+             onmouseout="this.style.boxShadow=''; this.style.backgroundColor=''" *ngIf="isLevel >= 15">
           <i class="fas fa-list"></i> Contabilidade
         </div>
         <div *ngIf="isContabilidadeMenuOpen">
@@ -81,7 +81,7 @@
     </div>
 
     <div class="sb-sidenav-configs">
-      <a class="nav-link collapsed" routerLink="/configs" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 10"
+      <a class="nav-link collapsed" routerLink="/configs" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 15"
       ><div class="sb-nav-link-icon"><i class="fab fa-cuttlefish"></i>onfigurações</div>
       </a>
     </div>
