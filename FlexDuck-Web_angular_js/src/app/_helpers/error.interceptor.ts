@@ -21,6 +21,7 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((err) => {
         if ([401, 403].includes(err.status)) {
+//          if ([403].includes(err.status)) {
           // logout automático se a resposta 401 Não Autorizado ou 403 Proibido for retornada pela api
           this.authenticationService.logout();
         }

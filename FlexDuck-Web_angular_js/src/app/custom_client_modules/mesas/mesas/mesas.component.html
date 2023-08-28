@@ -44,11 +44,11 @@
                 <table id="cupom-fiscal" class="printer-ticket scrollable-table" bgcolor="#fbfdd1">
                   <thead>
                   <tr>
-                    <th class="title; text-center" colspan="3">--- FlexDuck ---</th>
+                    <th class="title; text-center" colspan="3">--- {{ companyInfo?.nome_fantasia }} ---</th>
                   </tr>
                   <tr>
-                    <th colspan="3" class="text-center">CNPJ: 12.345.678/0001-01<br />
-                      Tel: (27) 3244-6491</th>
+                    <th colspan="3" class="text-center">CNPJ: {{ companyInfo?.cnpj }}<br />
+                      Tel: {{ companyInfo?.telephone }}</th>
                   </tr>
                   <tr>
                     <th class="text-center" colspan="3">{{ CfiscalDataHora }}<br />
@@ -131,7 +131,7 @@
                   <div class="col-md-12">
                     <div class="form-group">
                       <label for="total">Total:</label>
-                      <input type="text" class="form-control" id="total" [(ngModel)]="total" readonly>
+                      <input type="text" class="form-control" id="total" [(ngModel)]="total" value="{{ total | number:'1.2-2' }}" readonly>
                     </div>
                   </div>
                 </div>

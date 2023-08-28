@@ -2,8 +2,8 @@
 // @ts-ignore
 
 import {AfterContentChecked, Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
-import {Bandeiras, Paytype, Products} from '@app/_models';
-import {FuncPaymentsService, ProductService, SalesService, UserService} from '@app/_services';
+import {Bandeiras, Company, Paytype, Products} from '@app/_models';
+import {CompanySettingsService, FuncPaymentsService, ProductService, SalesService, UserService} from '@app/_services';
 import {FormBuilder} from '@angular/forms';
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {Router} from "@angular/router";
@@ -16,6 +16,7 @@ import {SharedService} from "@app/_services/SharedService";
 import 'jspdf-autotable';
 // @ts-ignore
 import jsPDF from "jspdf";
+import {map} from "rxjs";
 
 
 interface Produto {
@@ -93,6 +94,8 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   loading_senhavalor = false;
   loading_senhapercent = false;
   loading_UpVenda = false;
+  company?: Company[];
+  companyInfo?: Company;
 
   dadosDaVenda = {
     cliente_id: this.SelectedClienteId,
@@ -135,7 +138,8 @@ export class SalesComponent implements OnInit, AfterContentChecked {
               private modalService: NgbModal,
               private sharedService: SharedService,
               private userService: UserService,
-              private salesService: SalesService) {
+              private salesService: SalesService,
+              private CompanySettingsService: CompanySettingsService) {
   }
 
 // Executa ao inicializar o componente
@@ -151,6 +155,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     this.onFormaPagamentoDinheiro();
     this.buscarUltimoNumeroCF();
     this.Cancelar();
+    this.getInfos();
 
   }
 
@@ -955,6 +960,20 @@ export class SalesComponent implements OnInit, AfterContentChecked {
         this.fecharModalSenha();
       }
     );
+  }
+
+  getInfos() {
+    this.CompanySettingsService.getAllInfos()
+      .pipe(
+        map((response: any) => response.items as Company[])
+      )
+      .subscribe(
+        (company: Company[]) => {
+          this.company = company;
+          this.companyInfo = company[0];
+        },
+        // ... lidar com erro ...
+      );
   }
 
 

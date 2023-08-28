@@ -5,8 +5,8 @@
 export const environment = {
     production: false,
     // apiUrl: 'https://ykthsd-5000.csb.app',
-    apiUrl: 'https://54.232.70.133:5000',
-    // apiUrl: 'http://127.0.0.1:5000',
+    // apiUrl: 'http://flexapiduck.flexduck.com.br:5000',
+    apiUrl: 'http://127.0.0.1:5000',
     // apiUrl: 'http://15.229.79.164:5000',
     webUrl: 'https://flex-duck-web-project.vercel.app',
     // WebTestUrl: 'http://127.0.0.1:4200'

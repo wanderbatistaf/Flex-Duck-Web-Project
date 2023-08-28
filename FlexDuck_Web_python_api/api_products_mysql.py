@@ -1,5 +1,7 @@
 import json
 import time
+from datetime import datetime
+
 import mysql.connector
 
 from flask import Blueprint
@@ -269,6 +271,56 @@ def atualizar_dados_atalho(id):
     db.commit()
     cursor.close()
     return jsonify({'mensagem': 'Dados atualizados com sucesso!'})
+
+
+# Cadastro de variações de tamanho de produtos
+@api_products.route('/products/add_variations', methods=['POST'])
+@jwt_required()
+def inserir_variacoes():
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+    variacoes = request.json  # Recebe a lista de variações
+
+    print(variacoes)
+
+    cursor = db.cursor()
+    sql = ('INSERT INTO produtos_servicos (codigo, descricao, nome, categoria, marca, preco_venda, preco_custo, '
+           'margem_lucro, quantidade, localizacao, estoque_minimo, estoque_maximo, alerta_reposicao, fornecedor_id, '
+           'created_at, fornecedor_nome) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)')
+
+    # Loop para inserir cada variação na base de dados
+    for variacao in variacoes:
+        val = (
+            variacao['sku'],  # Usando o SKU como "codigo"
+            variacao['descricao'],
+            variacao['nome'],
+            variacao['categoria'],
+            variacao['marca'],
+            variacao['preco_venda'],
+            variacao['preco_custo'],
+            variacao['margem_lucro'],
+            variacao['quantity'],
+            variacao['localizacao'],
+            variacao['estoque_minimo'],
+            variacao['estoque_maximo'],
+            variacao['alerta_reposicao'],
+            variacao['fornecedor_id'],
+            datetime.now(),  # Use a função datetime.now() para obter a data e hora atual
+            variacao['fornecedor_nome']
+        )
+        cursor.execute(sql, val)
+
+    db.commit()
+    cursor.close()
+    return jsonify({'mensagem': 'Variações inseridas com sucesso!'})
+
 
 # @api_products.route('/products/increment/<int:id>', methods=['PUT'])
 # @jwt_required()

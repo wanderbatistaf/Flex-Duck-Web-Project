@@ -1,7 +1,7 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { JwtHelperService } from "@auth0/angular-jwt";
 import {Products, Suppliers, User} from "@app/_models";
-import {FormBuilder, FormGroup, Validators, ɵElement} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, Validators, ɵElement} from "@angular/forms";
 import { UserService, ProductService, SuppliersService } from "@app/_services";
 import { Router } from "@angular/router";
 import { map } from "rxjs";
@@ -56,6 +56,12 @@ export class ProductsComponent implements OnInit {
   }>;
   _margemLucro: number;
   mostrarInput: boolean = false;
+  sizes = ['P', 'M', 'G', 'GG'];
+  isGrade = false;
+  productVariations: any[] = []; // Aqui você pode usar uma interface para definir a estrutura dos dados
+
+
+
 
   constructor(private usersService: UserService,
               private fb: FormBuilder,
@@ -98,7 +104,15 @@ export class ProductsComponent implements OnInit {
       fornecedor_id: ['', [Validators.required, Validators.minLength(1)]],
       fornecedor_nome: ['', [Validators.required, Validators.minLength(1)]],
       is_product: [1],
-
+      isGrade: this.isGrade,
+      sizes: this.fb.group({
+        P: [''], // Adicione cada um dos tamanhos aqui
+        M: [''],
+        G: [''],
+        GG: ['']
+      }),
+      gradeMode: ['unico'], // Valor padrão: 'unico'
+      totalGradeQuantity: 0 // Inicializado com zero
     });
 
     this.formEdit = this.fb.group({
@@ -120,6 +134,14 @@ export class ProductsComponent implements OnInit {
       fornecedor_nome: ['', [Validators.required, Validators.minLength(1)]],
       is_product: [1],
       desconto: ['0.00', [Validators.required]],
+      gradeMode: ['unico'], // Valor padrão: 'unico'
+      sizes: this.fb.group({
+        P: [''],
+        M: [''],
+        G: [''],
+        GG: ['']
+      }),
+      totalGradeQuantity: 0 // Inicializado com zero
     });
     this._margemLucro = 0;
     this.registerValueChangeListeners();
@@ -133,7 +155,7 @@ export class ProductsComponent implements OnInit {
     this.filterProduct(this.searchText);
     this.getCurrentUser();
     this.buscarFornecedores();
-
+    this.updateTotalQuantity();
 
   }
 
@@ -622,11 +644,137 @@ export class ProductsComponent implements OnInit {
     }
   }
 
+  toggleTable() {
+    if (this.isGrade) {
+      // Reset dos valores de P, M, G e GG quando a grade for ocultada
+      this.formCad.get('sizes.P')?.setValue('');
+      this.formCad.get('sizes.M')?.setValue('');
+      this.formCad.get('sizes.G')?.setValue('');
+      this.formCad.get('sizes.GG')?.setValue('');
+      this.formCad.get('quantidade')?.setValue(0)
+    }
+
+    this.isGrade = !this.isGrade;
+  }
+
+  // Função para obter o controle de formulário para um tamanho específico
+  getFormControl(size: string): FormControl {
+    return this.formCad.get('sizes')?.get(size) as FormControl;
+  }
+
+  updateTotalQuantity() {
+    const gradeForm = this.formCad.get('sizes');
+
+    if (gradeForm) {
+      console.log('Sizes group:', gradeForm.value);
+
+      const sizes = ['P', 'M', 'G', 'GG'];
+
+      let total = 0;
+      sizes.forEach(size => {
+        const control = gradeForm.get(size);
+        total += parseInt(control?.value, 10) || 0;
+      });
+
+      this.formCad.get('quantidade')?.setValue(total);
+    }
+  }
+
+  addProductVariation() {
+    const variationsToAdd = [];
+
+    const sizesQuantities: Record<string, number> = {
+      'P': this.formCad.get('sizes.P')?.value || 0,
+      'M': this.formCad.get('sizes.M')?.value || 0,
+      'G': this.formCad.get('sizes.G')?.value || 0,
+      'GG': this.formCad.get('sizes.GG')?.value || 0,
+    };
+
+    for (const selectedSize of this.sizes) {
+      const lastProductCodeWithSize = this.lastProductCode + ' - ' + selectedSize;
+
+      const newVariation = {
+        sku: lastProductCodeWithSize,
+        size: selectedSize,
+        quantity: sizesQuantities[selectedSize] || 0,
+        nome: this.formCad.get('nome')?.value,
+        categoria: this.formCad.get('categoria')?.value,
+        marca: this.formCad.get('marca')?.value,
+        preco_custo: this.formCad.get('preco_custo')?.value,
+        preco_venda: this.formCad.get('preco_venda')?.value,
+        margem_lucro: this.formCad.get('margem_lucro')?.value,
+        desconto: this.formCad.get('desconto')?.value,
+        estoque_minimo: this.formCad.get('estoque_minimo')?.value,
+        estoque_maximo: this.formCad.get('estoque_maximo')?.value,
+        alerta_reposicao: this.formCad.get('alerta_reposicao')?.value,
+        fornecedor_id: this.formCad.get('fornecedor_id')?.value,
+        fornecedor_nome: this.formCad.get('fornecedor_nome')?.value,
+        is_product: this.formCad.get('is_product')?.value,
+        descricao: this.formCad.get('descricao')?.value,
+        localizacao: null
+      };
+
+      variationsToAdd.push(newVariation);
+    }
+
+    // Agora você pode fazer a chamada à API para cadastrar todas as variações
+    // Exemplo fictício (substitua pelo método ou endpoint correto da sua API)
+    this.productService.addVariations(variationsToAdd).subscribe(
+      (newProducts) => {
+        console.log('Variações cadastradas com sucesso:', newProducts);
+        this.formCad.reset();
+        this.setActiveTab('consulta');
+        this.getProduct();
+        this.filterProduct(this.searchText);
+        this.getCurrentUser();
+        this.getProduct();
+      },
+      (error) => {
+        console.error('Erro ao cadastrar variações:', error);
+      }
+    );
+  }
+
+
+
+
+  handleCadastrarClick() {
+    if (this.isGrade) {
+      this.addProductVariation();
+    } else {
+      this.onSubmit();
+    }
+  }
 
 
 
 
 
+
+
+
+
+
+
+
+  // sizesValueChanged() {
+  //   const gradeForm = this.formCad.get('sizes');
+  //   const totalGradeQuantityControl = this.formCad.get('totalGradeQuantity');
+  //
+  //   if (gradeForm && totalGradeQuantityControl) {
+  //     const sizes = ['P', 'M', 'G', 'GG'];
+  //
+  //     let total = 0;
+  //     sizes.forEach(size => {
+  //       const sizeControl = gradeForm.get(size);
+  //       if (sizeControl) {
+  //         total += sizeControl.value || 0;
+  //       }
+  //     });
+  //
+  //     totalGradeQuantityControl.setValue(total);
+  //   }
+  // }
 
 
 

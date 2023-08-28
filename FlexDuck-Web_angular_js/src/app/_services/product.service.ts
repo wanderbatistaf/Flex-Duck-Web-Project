@@ -20,6 +20,11 @@ export class ProductService {
     return this.http.post<Products>(`${environment.apiUrl}/products/add`, newProduct);
   }
 
+  // Cria o método para adicionar produtos com variações de tamanho
+  addVariations(newProducts: any[]): Observable<Products> {
+    return this.http.post<Products>(`${environment.apiUrl}/products/add_variations`, newProducts);
+  }
+
   // Cria o método para requisitar um produto específico pelo ID
   getProductById(id: string): Observable<Products> {
     return this.http.get<Products>(`${environment.apiUrl}/products/${id}`)

@@ -498,6 +498,49 @@
           </div>
 
           <div class="row">
+            <!-- GRADE -->
+            <div class="form-group col-md-12">
+              <button class="btn btn-primary" (click)="toggleTable()">
+                {{ isGrade ? 'Ocultar Grade' : 'Exibir Grade' }}
+              </button>
+              <div *ngIf="isGrade">
+                <label class="form-control-label">Grade</label>
+                <table class="table table-bordered">
+                  <thead>
+                  <tr>
+                    <th></th>
+                    <th *ngFor="let size of sizes">{{ size }}</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr>
+                    <td>Quantidade</td>
+                    <ng-container *ngFor="let size of sizes">
+                      <td>
+                        <input type="text" class="form-control" [formControl]="getFormControl(size)" [id]="'grade_' + size" (change)="updateTotalQuantity()">
+                      </td>
+                    </ng-container>
+                  </tr>
+
+                  <!--                <tr>-->
+                  <!--                  <td>Price</td>-->
+                  <!--                  <ng-container *ngFor="let size of sizes">-->
+                  <!--                    <td>-->
+                  <!--                      <div class="input-group">-->
+                  <!--                        <span class="input-group-text">R$</span>-->
+                  <!--                        <input type="number" class="form-control" [formControlName]="'price.' + size" [id]="'price_' + size">-->
+                  <!--                      </div>-->
+                  <!--                    </td>-->
+                  <!--                  </ng-container>-->
+                  <!--                </tr>-->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="row">
 
             <!-- PREÇO CUSTO -->
             <div class="form-group col-md-4">
@@ -532,9 +575,17 @@
               <label class="form-control-label" for="quantidade_c">Quantidade<em>*</em> </label>
               <div class="input-group">
                 <span class="input-group-text">UN</span>
-                <input type="number" class="form-control" formControlName="quantidade" id="quantidade_c">
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="quantidade"
+                  id="quantidade_c"
+                  [readonly]="isGrade"
+                >
               </div>
             </div>
+
+
 
             <!-- ESTOQUE MINIMO -->
             <div class="form-group col-md-4">
@@ -584,7 +635,7 @@
           <div>
             <br>
             <button type="button" class="btn btn-secondary mr-2" (click)="formReset()">Limpar</button>
-            <button type="submit" class="btn btn-primary" (click)="onSubmit()">Cadastrar</button>
+            <button type="submit" class="btn btn-primary" (click)="handleCadastrarClick()">Cadastrar</button>
           </div>
         </form>
       </div>

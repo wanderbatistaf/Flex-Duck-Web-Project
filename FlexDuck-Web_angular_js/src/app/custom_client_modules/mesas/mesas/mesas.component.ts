@@ -1,11 +1,12 @@
 import {AfterContentChecked, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {map} from "rxjs";
-import {Bandeiras, Paytype, Products} from "@app/_models";
-import {FuncPaymentsService, ProductService, SalesService, UserService} from "@app/_services";
+import {Bandeiras, Company, Paytype, Products} from "@app/_models";
+import {CompanySettingsService, FuncPaymentsService, ProductService, SalesService, UserService} from "@app/_services";
 import { Pipe, PipeTransform } from '@angular/core';
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 import {MesasLocalstorageService} from "@app/_services/mesas.localstorage.service";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 
 interface Produto {
@@ -120,6 +121,9 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   novoNumeroMesa!: number;
   hover: boolean = false;
   id_mesa: number = 0
+  company?: Company[];
+  companyInfo?: Company;
+  formComp: FormGroup;
 
 
   dadosDaVenda = {
@@ -154,7 +158,21 @@ export class MesasComponent implements OnInit, AfterContentChecked {
               private userService: UserService,
               private paytypeService: FuncPaymentsService,
               private salesService: SalesService,
-              private mesasLocalStorage: MesasLocalstorageService) { }
+              private mesasLocalStorage: MesasLocalstorageService,
+              private CompanySettingsService: CompanySettingsService,
+              private fb: FormBuilder,) {
+
+    this.formComp = this.fb.group({
+      razao_social: [''],
+      nome_fantasia: [''],
+      cnpj: [''],
+      state_registration: [''],
+      municipal_registration: [''],
+      telephone: [''],
+      pix_key: ['']
+    });
+
+  }
 
   ngOnInit(): void {
     this.getProduct();
@@ -175,6 +193,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
         this.mesasLocalStorage.iniciarCronometro(mesa);
       }
     });
+    this.getInfos();
 
 
   }
@@ -364,31 +383,42 @@ export class MesasComponent implements OnInit, AfterContentChecked {
 
 
   adicionarProdutoConsumido(): void {
-    // Lógica para adicionar um produto consumido à mesa selecionada
     if (
       this.mesaSelecionada &&
       this.produtoSelecionado &&
       this.quantidadeProdutoAdicionar > 0
     ) {
-      const produtoParaAdicionar: ProdutoConsumido = {
-        codigo: this.produtoSelecionado.codigo,
-        nome: this.produtoSelecionado.nome,
-        quantidade: this.quantidadeProdutoAdicionar,
-        preco: this.produtoSelecionado.preco,
-      };
+      // Verifica se o produto já existe na lista de produtos consumidos da mesa
+      const produtoExistente = this.mesaSelecionada.produtosConsumidos.find(
+        (produto) => produto.codigo === this.produtoSelecionado?.codigo
+      );
 
-      this.mesaSelecionada.produtosConsumidos.push(produtoParaAdicionar);
+      if (produtoExistente) {
+        // Atualiza a quantidade do produto existente
+        produtoExistente.quantidade += this.quantidadeProdutoAdicionar;
+      } else {
+        // Cria um novo produto consumido
+        const produtoParaAdicionar: ProdutoConsumido = {
+          codigo: this.produtoSelecionado.codigo,
+          nome: this.produtoSelecionado.nome,
+          quantidade: this.quantidadeProdutoAdicionar,
+          preco: this.produtoSelecionado.preco,
+        };
+        this.mesaSelecionada.produtosConsumidos.push(produtoParaAdicionar);
+      }
+
+      // Calcula o total a pagar e realiza outras ações necessárias
       this.calcularTotalAPagar(this.mesaSelecionada);
-      this.quantidadeProdutoAdicionar = 1; // Reinicia a quantidade para 1 após adicionar o produto
-      this.produtoSelecionado = null; // Limpa a seleção do produto após adicionar à lista
+      this.quantidadeProdutoAdicionar = 1;
+      this.produtoSelecionado = null;
 
-      // Fecha o modal para adicionar o produto
+      // Fecha o modal
       this.fecharModalAdicionarProduto();
 
-      // Exibe mensagem no console após a adição do produto
-      console.log('Produto adicionado com sucesso à mesa selecionada!');
+      console.log('Produto adicionado/atualizado com sucesso à mesa selecionada!');
     }
   }
+
 
 
   removerProdutoConsumido(index: number): void {
@@ -810,6 +840,38 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       mesa.tempoAberta = new Date(tempoDecorrido);
     }
   }
+
+
+  getInfos() {
+    this.CompanySettingsService.getAllInfos()
+      .pipe(
+        map((response: any) => response.items as Company[])
+      )
+      .subscribe(
+        (company: Company[]) => {
+          this.company = company;
+          this.companyInfo = company[0];
+        },
+        // ... lidar com erro ...
+      );
+  }
+
+  formatCNPJ(cnpj: string): string {
+    // Removendo caracteres não numéricos
+    const numericCNPJ = cnpj.replace(/\D/g, '');
+
+    // Aplicando a formatação: 12345678901234 -> 12.345.678/9012-34
+    return `${numericCNPJ.slice(0, 2)}.${numericCNPJ.slice(2, 5)}.${numericCNPJ.slice(5, 8)}/${numericCNPJ.slice(8, 12)}-${numericCNPJ.slice(12)}`;
+  }
+
+  formatTelefone(telefone: string): string {
+    // Removendo caracteres não numéricos
+    const numericTelefone = telefone.replace(/\D/g, '');
+
+    // Aplicando a formatação: 2732446491 -> (27) 3244-6491
+    return `(${numericTelefone.slice(0, 2)}) ${numericTelefone.slice(2, 6)}-${numericTelefone.slice(6)}`;
+  }
+
 
 
 
