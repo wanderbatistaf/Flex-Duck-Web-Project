@@ -322,6 +322,43 @@ def inserir_variacoes():
     return jsonify({'mensagem': 'Variações inseridas com sucesso!'})
 
 
+# Capturar se já existe o produto igual ou similar no banco para sugerir preço
+@api_products.route('/products/suggest_price/<string:product_name>', methods=['GET'])
+@jwt_required() # Protege a rota com JWT
+def suggest_price_for_product(product_name):
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
+    try:
+        cursor = db.cursor()
+        sql = 'SELECT preco_venda FROM produtos_servicos WHERE nome LIKE %s ORDER BY created_at DESC LIMIT 1'
+        val = ('%' + product_name + '%',)
+        cursor.execute(sql, val)
+        result = cursor.fetchone()
+        cursor.close()
+    except mysql.connector.errors.OperationalError:
+        print("Erro de conexão com o banco de dados. Verifique a conexão e tente novamente mais tarde.")
+        return jsonify({'mensagem': 'Erro de conexão com o banco de dados.'}), 500
+
+    if result:
+        suggested_price = result[0]
+        return jsonify({'mensagem': 'Produto localizado com sucesso!', 'suggested_price': suggested_price})
+    else:
+        return jsonify({'mensagem': 'Produto não encontrado!', 'suggested_price': '0,00'}), 200
+
+
+
+
+
+
+
 # @api_products.route('/products/increment/<int:id>', methods=['PUT'])
 # @jwt_required()
 # def incrementar_quantidade(id):

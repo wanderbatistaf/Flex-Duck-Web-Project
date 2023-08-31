@@ -1,1 +1,314 @@
-<p>notas-entrada works!</p>
+<!-- Modal de Carregamento -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': loadingPageModalVisible}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-loading">
+        <div class="caption">Carregando as informações...</div>
+        <div class="animation"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="loadingPageModalVisible"></div>
+
+<div fxLayout="column" fxLayout.gt-sm="row">
+  <h1 class="mt-4">Nota Fiscal - Entrada</h1>
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">Cadastro | Consulta</li>
+  </ol>
+
+  <!-- Abas de Navegação -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="isTabActive('cadastro')" style="cursor: pointer" (click)="setActiveTab('cadastro')">Cadastro</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="isTabActive('consulta')" style="cursor: pointer" (click)="setActiveTab('consulta')">Notas</a>
+    </li>
+    <li class="nav-item" [hidden]="true">
+      <a class="nav-link" [class.active]="isTabActive('detalhes')" (click)="setActiveTab('detalhes')">Detalhes</a>
+    </li>
+  </ul>
+
+  <!-- Cadastro renderiza aqui! -->
+  <div *ngIf="activeTab === 'cadastro'" class="container mt-4">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card p-4">
+          <div class="card-body">
+
+            <!-- Campo de Upload de XML -->
+            <div class="form-group">
+              <label for="xmlFile">Enviar XML:</label>
+              <input type="file" class="form-control-file" id="xmlFile" accept=".xml" (change)="handleXmlUpload($event)">
+            </div>
+            <hr>
+
+            <!-- Numero da Nota e Numero da UF -->
+            <br/>
+            <div class="row">
+              <div class="form-group col-md-4">
+                <label class="form-control-label">Número NF</label>
+                <input #cNFField type="text" class="form-control" placeholder="cNF" readonly>
+              </div>
+
+              <div class="form-group col-md-4">
+                <label class="form-control-label">Número UF</label>
+                <input #cUFField type="text" class="form-control" placeholder="cNF" readonly>
+              </div>
+
+              <div class="form-group col-md-4">
+                <label class="form-control-label">Série</label>
+                <input #serieField type="text" class="form-control" placeholder="Série" readonly>
+              </div>
+            </div>
+
+            <!-- Dados do Emitente -->
+            <br/>
+            <h4>Emitente</h4>
+            <div class="row border rounded p-3">
+              <!-- NOME DO EMITENTE -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">Nome do Emitente</label>
+                <input #emitenteNomeField type="text" class="form-control" placeholder="Nome do Emitente" readonly>
+              </div>
+
+              <!-- CNPJ DO EMITENTE -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">CNPJ do Emitente</label>
+                <input #emitenteCNPJField type="text" class="form-control" placeholder="CNPJ do Emitente" readonly>
+              </div>
+
+              <!-- ENDEREÇO DO EMITENTE -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">Endereço do Emitente</label>
+                <input #emitenteEnderecoField type="text" class="form-control" placeholder="Endereço do Emitente" readonly>
+              </div>
+            </div>
+
+            <!-- Dados do Destinatário -->
+            <br/>
+            <h4>Destinatário</h4>
+            <div class="row border rounded p-3">
+              <!-- NOME DO DESTINATARIO -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">Nome do Destinatário</label>
+                <input #destinatarioNomeField type="text" class="form-control" placeholder="Nome do Destinatário" readonly>
+              </div>
+
+              <!-- CNPJ DO DESTINATARIO -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">CNPJ do Destinatário</label>
+                <input #destinatarioCNPJField type="text" class="form-control" placeholder="CNPJ do Destinatário" readonly>
+              </div>
+
+              <!-- ENDEREÇO DO DESTINATARIO -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">Endereço do Destinatário</label>
+                <input #destinatarioEnderecoField type="text" class="form-control" placeholder="Endereço do Destinatário" readonly>
+              </div>
+            </div>
+
+            <!-- Dados da Transportadora -->
+            <br/>
+            <h4>Transportadora</h4>
+            <div class="card p-4">
+              <div class="card-body">
+                <div class="row">
+                  <!-- MODO DE FRETE -->
+                  <div class="form-group col-md-4">
+                    <label class="form-control-label">Modo de Frete</label>
+                    <input #modFreteField type="text" class="form-control" placeholder="Modo de Frete" readonly>
+                  </div>
+
+                  <!-- QUANTIDADE DE VOLUMES -->
+                  <div class="form-group col-md-4">
+                    <label class="form-control-label">Quantidade de Volumes</label>
+                    <input #qVolField type="text" class="form-control" placeholder="Quantidade de Volumes" readonly>
+                  </div>
+
+                  <!-- ESPECIFICAÇÃO DOS VOLUMES -->
+                  <div class="form-group col-md-4">
+                    <label class="form-control-label">Especificação dos Volumes</label>
+                    <input #espField type="text" class="form-control" placeholder="Especificação dos Volumes" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabela de Produtos -->
+            <br/>
+            <h4>Produtos</h4>
+            <div class="card p-4">
+              <div class="card-body">
+            <div class="col-md-12">
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>Código do Produto</th>
+                  <th>Descrição do Produto</th>
+                  <th>Quantidade</th>
+                  <th>Valor Unitário</th>
+                  <th>Valor Total</th>
+                  <th>CFOP</th>
+                  <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let produto of produtos">
+                  <td>{{ produto.cProd }}</td>
+                  <td>{{ produto.xProd }}</td>
+                  <td>{{ Number(produto.qCom) }}</td>
+                  <td>{{ Number(produto.vUnCom).toFixed(2) }}</td>
+                  <td>{{ produto.vProd }}</td>
+                  <td>{{ produto.cfop }}</td>
+                  <td><button type="submit" class="btn btn-outline-primary" (click)="openModal(produto)">Inserir</button></td>
+                </tr>
+                <br/>
+                <button type="submit" class="btn btn-primary" (click)="abrirModalTodos()">Inserir Todos</button>
+                </tbody>
+              </table>
+            </div>
+              </div>
+            </div>
+
+            <!-- Informações Adicionais -->
+            <br/>
+            <h4>Informações Adicionais</h4>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-control-label">Informações Adicionais</label>
+                  <textarea #infAdicField class="form-control" placeholder="Informações Adicionais" readonly></textarea>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-control-label">Total</label>
+                  <input #totalValorNFField type="text" class="form-control" placeholder="Valor Total da NF" readonly>
+                </div>
+              </div>
+
+
+              <div class="form-group col-md-6">
+                <label class="form-control-label">Valor dos Impostos</label>
+                <input #impostosValor type="text" class="form-control" readonly>
+              </div>
+
+              <div class="form-group col-md-6">
+                <label class="form-control-label">Impostos Detalhados</label>
+                <textarea #impostosDetalhadosField class="form-control" placeholder="Impostos Detalhados" rows="4" readonly></textarea>
+              </div>
+
+
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal para exibir as informações do produto (Inserir Unitario) -->
+<div class="modal fade" id="produtoModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Inserir Produto</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="card table-responsive mt-4">
+          <div class="card-body">
+            <table class="table">
+        <thead>
+        <tr>
+          <th>Código do Produto</th>
+          <th>Descrição do Produto</th>
+          <th>Quantidade</th>
+          <th>Valor Unitário</th>
+          <th>Preço de Venda</th>
+          <th>Valor Total</th>
+          <th>CFOP</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>{{ modalSelectedProduto?.cProd }}</td>
+        <td>{{ modalSelectedProduto?.xProd }}</td>
+        <td>{{ Number(modalSelectedProduto?.qCom) }}</td>
+        <td>{{ Number(modalSelectedProduto?.vUnCom).toFixed(2) }}</td>
+        <td><input type="number" class="form-control" formControlName="preco_venda" id="preco_venda" placeholder="" [value]="precoVendaValue"></td>
+        <td>{{ modalSelectedProduto?.vProd }}</td>
+        <td>{{ modalSelectedProduto?.cfop }}</td>
+        <!-- Adicione mais informações do produto aqui -->
+        </tr>
+        </tbody>
+            </table>
+      </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal para exibir todos os produtos -->
+<div class="modal fade" id="produtoModalTodos" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitleT">Inserir Produtos</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="card table-responsive mt-4">
+          <div class="card-body">
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Novo Código</th>
+                <th>Nome do Produto</th>
+                <th>Quantidade</th>
+                <th>Valor Unitário</th>
+                <th>Preço de Venda</th>
+                <th>Valor Total</th>
+                <th>CFOP</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let produto of modalProdutosMultiple">
+                <td>{{ produto.cProd }}</td>
+                <td>{{ produto.xProd }}</td>
+                <td>{{ Number(produto.qCom) }}</td>
+                <td>{{ Number(produto.vUnCom).toFixed(2) }}</td>
+                <td><input type="number" class="form-control" placeholder="" [value]="precoVendaValueMultiple"></td>
+                <td>{{ produto.vProd }}</td>
+                <td>{{ produto.cfop }}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

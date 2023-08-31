@@ -55,5 +55,10 @@ export class ProductService {
     return this.http.put<Products>(`${environment.apiUrl}/products/shortcut/update/${id}`, updateProduct)
   }
 
+  // Recupera o valor de venda do produto igual ou semelhante (nome)
+  suggestPrice(productName: string): Observable<Products> {
+    return this.http.get<Products>(`${environment.apiUrl}/products/suggest_price/${productName}`);
+  }
+
 
 }
