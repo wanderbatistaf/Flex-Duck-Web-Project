@@ -338,7 +338,7 @@ def suggest_price_for_product(product_name):
 
     try:
         cursor = db.cursor()
-        sql = 'SELECT preco_venda FROM produtos_servicos WHERE nome LIKE %s ORDER BY created_at DESC LIMIT 1'
+        sql = 'SELECT codigo, preco_venda FROM produtos_servicos WHERE nome LIKE %s ORDER BY created_at DESC LIMIT 1'
         val = ('%' + product_name + '%',)
         cursor.execute(sql, val)
         result = cursor.fetchone()
@@ -348,8 +348,13 @@ def suggest_price_for_product(product_name):
         return jsonify({'mensagem': 'Erro de conexão com o banco de dados.'}), 500
 
     if result:
-        suggested_price = result[0]
-        return jsonify({'mensagem': 'Produto localizado com sucesso!', 'suggested_price': suggested_price})
+        suggested_price = result[1]
+        product_code_full  = result[0]
+
+        # Extract the raw product code (without variant) from the full product code
+        product_code = product_code_full.split(' ')[0]
+
+        return jsonify({'mensagem': 'Produto localizado com sucesso!', 'product_code': product_code, 'suggested_price': suggested_price})
     else:
         return jsonify({'mensagem': 'Produto não encontrado!', 'suggested_price': '0,00'}), 200
 

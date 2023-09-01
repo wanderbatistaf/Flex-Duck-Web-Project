@@ -45,6 +45,13 @@
             </div>
             <hr>
 
+            <div class="row">
+              <div class="form-group col-md-12">
+                <label>Chave de Acesso</label>
+                <input #chNFeField type="text" class="form-control" placeholder="chNFe" readonly>
+              </div>
+            </div>
+
             <!-- Numero da Nota e Numero da UF -->
             <br/>
             <div class="row">
@@ -241,7 +248,7 @@
         </thead>
         <tbody>
         <tr>
-        <td>{{ modalSelectedProduto?.cProd }}</td>
+        <td>{{ modalSelectedProduto?.modalCProd }}</td>
         <td>{{ modalSelectedProduto?.xProd }}</td>
         <td>{{ Number(modalSelectedProduto?.qCom) }}</td>
         <td>{{ Number(modalSelectedProduto?.vUnCom).toFixed(2) }}</td>

@@ -24,6 +24,7 @@ declare var $: any;
 
 export class NotasEntradaComponent implements OnInit {
   activeTab: string = 'consulta';
+  @ViewChild('chNFeField', {static: false}) chNFeField!: ElementRef<HTMLInputElement>;
   @ViewChild('cUFField', {static: false}) cUFField!: ElementRef<HTMLInputElement>;
   @ViewChild('cNFField', {static: false}) cNFField!: ElementRef<HTMLInputElement>;
   @ViewChild('natOpField', {static: false}) natOpField!: ElementRef<HTMLInputElement>;
@@ -31,6 +32,7 @@ export class NotasEntradaComponent implements OnInit {
   @ViewChild('emitenteNomeField', {static: false}) emitenteNomeField!: ElementRef<HTMLInputElement>;
   @ViewChild('emitenteEnderecoField', {static: false}) emitenteEnderecoField!: ElementRef<HTMLInputElement>;
   @ViewChild('destinatarioCNPJField', {static: false}) destinatarioCNPJField!: ElementRef<HTMLInputElement>;
+  @ViewChild('destinatarioCPFField', {static: false}) destinatarioCPFField!: ElementRef<HTMLInputElement>;
   @ViewChild('destinatarioNomeField', {static: false}) destinatarioNomeField!: ElementRef<HTMLInputElement>;
   @ViewChild('destinatarioEnderecoField', {static: false}) destinatarioEnderecoField!: ElementRef<HTMLInputElement>;
   @ViewChild('totalValorNFField', {static: false}) totalValorNFField!: ElementRef<HTMLInputElement>;
@@ -46,6 +48,7 @@ export class NotasEntradaComponent implements OnInit {
   lastProductCode: string = 'P000000';
   nextProductCode: string = '';
   precoVendaValue?: string;
+  suggestResponse: any;
 
   produtos: Produto[] = [];
   modalSelectedProduto: any = {
@@ -110,6 +113,9 @@ export class NotasEntradaComponent implements OnInit {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
 
+    // Extrair a chave de acesso
+    const chNFe = xmlDoc.querySelector('infProt chNFe')?.textContent;
+
     // Extrair informações do emitente
     const emitenteCNPJ = xmlDoc.querySelector('emit CNPJ')?.textContent;
     const emitenteNome = xmlDoc.querySelector('emit xNome')?.textContent;
@@ -118,6 +124,7 @@ export class NotasEntradaComponent implements OnInit {
 
     // Extrair informações do destinatário
     const destinatarioCNPJ = xmlDoc.querySelector('dest CNPJ')?.textContent;
+    const destinatarioCPF = xmlDoc.querySelector('dest CPF')?.textContent;
     const destinatarioNome = xmlDoc.querySelector('dest xNome')?.textContent;
     const destinatarioEndereco = xmlDoc.querySelector('dest enderDest xLgr')?.textContent;
     // Continue obtendo as informações de outros campos do destinatário
@@ -150,6 +157,9 @@ export class NotasEntradaComponent implements OnInit {
     const infAdic = xmlDoc.querySelector('infAdic infCpl')?.textContent;
 
     // Preencher os campos com as informações extraídas
+    if (this.chNFeField) {
+      this.chNFeField.nativeElement.value = chNFe || '';
+    }
     if (this.cUFField) {
       this.cUFField.nativeElement.value = cUF || '';
     }
@@ -169,7 +179,9 @@ export class NotasEntradaComponent implements OnInit {
       this.emitenteEnderecoField.nativeElement.value = emitenteEndereco || '';
     }
     // Continue preenchendo os outros campos do emitente
-
+    if (this.destinatarioCPFField) {
+      this.destinatarioCPFField.nativeElement.value = destinatarioCPF || '';
+    }
     if (this.destinatarioCNPJField) {
       this.destinatarioCNPJField.nativeElement.value = destinatarioCNPJ || '';
     }
@@ -238,9 +250,16 @@ export class NotasEntradaComponent implements OnInit {
     });
 
     console.log('Extracted products:', produtos);
+    this.preencherCNPJSeVazio();
 
     // Preencher os campos da tabela com os detalhes dos produtos
     this.produtos = produtos;
+  }
+
+  preencherCNPJSeVazio() {
+    if (!this.destinatarioCNPJField) {
+      this.destinatarioCNPJField = this.destinatarioCPFField;
+    }
   }
 
   openModal(produto: Produto) {
@@ -263,6 +282,8 @@ export class NotasEntradaComponent implements OnInit {
     this.loadingPageModalVisible = false;
   }
 
+  // Certifique-se de definir a variável suggestResponse com a resposta da API antes de usá-la no código abaixo
+
   getLastProductCode() {
     const isProductDefault = 1;
 
@@ -274,28 +295,36 @@ export class NotasEntradaComponent implements OnInit {
       }
 
       if (this.modalSelectedProduto) {
-        const nextCode = this.generateNextCode();
+        let productCodeToUse = ''; // Inicializar com um valor vazio
 
-        const updatedModalSelectedProduto = { ...this.modalSelectedProduto };
-        updatedModalSelectedProduto.cProd = nextCode;
-
-        this.productService.suggestPrice(updatedModalSelectedProduto.xProd).subscribe((suggestResponse: any) => {
+        this.productService.suggestPrice(this.modalSelectedProduto.xProd).subscribe((suggestResponse: any) => {
           console.log('suggestResponse:', suggestResponse);
 
           if (suggestResponse && suggestResponse.mensagem === "Produto localizado com sucesso!") {
             if (typeof suggestResponse.suggested_price === 'number') {
-              this.precoVendaValue = suggestResponse.suggested_price.toFixed(2); // Formatação para duas casas decimais
+              this.precoVendaValue = suggestResponse.suggested_price.toFixed(2);
             } else {
               this.precoVendaValue = '0.00';
             }
+
+            if (suggestResponse.product_code) {
+              productCodeToUse = suggestResponse.product_code; // Armazena o product_code
+            } else {
+              productCodeToUse = this.generateNextCode(); // Gera um novo código apenas quando não há product_code
+            }
           } else {
             this.precoVendaValue = '0.00';
+            productCodeToUse = this.generateNextCode(); // Gera um novo código
           }
 
-          console.log('Updated modalSelectedProduto:', updatedModalSelectedProduto);
+          console.log('Código do produto alterado para:', productCodeToUse);
+
+          // Armazena o productCodeToUse no modalSelectedProduto somente para o modal
+          this.modalSelectedProduto.modalCProd = productCodeToUse;
+
+          console.log('Updated modalSelectedProduto:', this.modalSelectedProduto);
           console.log('precoVendaValue:', this.precoVendaValue);
 
-          this.modalSelectedProduto = updatedModalSelectedProduto;
           $('#produtoModal').modal('show');
           this.loadingPageModalVisible = false;
         });
@@ -304,12 +333,8 @@ export class NotasEntradaComponent implements OnInit {
   }
 
 
-
-
-
-
   getLastProductCodeMultiple() {
-    const isProductDefault = 1; // Define o valor de is_product para produtos como true
+    const isProductDefault = 1;
 
     this.productService.getLastCode(isProductDefault).subscribe((response: any) => {
       if (response && response.produto && response.produto[2]) {
@@ -323,36 +348,42 @@ export class NotasEntradaComponent implements OnInit {
       // Criar uma cópia dos produtos para o modal
       this.modalProdutosMultiple = this.produtos.map(produto => ({ ...produto }));
 
-      for (const produto of this.modalProdutosMultiple) {
-        nextNumericPart++; // Incrementa o número para cada produto
-        produto.cProd = `P${nextNumericPart.toString().padStart(6, '0')}`; // Gera o próximo código
-      }
-
-      this.productService.suggestPrice(this.modalProdutosMultiple[0].xProd).subscribe((suggestResponse: any) => {
-        console.log('suggestResponse:', suggestResponse);
-
+      const getProductCode = (suggestResponse: { mensagem: string; suggested_price: number; product_code: string; }) => {
         if (suggestResponse && suggestResponse.mensagem === "Produto localizado com sucesso!") {
-          if (typeof suggestResponse.suggested_price === 'number') {
-            this.precoVendaValueMultiple = suggestResponse.suggested_price.toFixed(2); // Formatação para duas casas decimais
+          this.precoVendaValueMultiple = suggestResponse.suggested_price.toFixed(2);
+
+          if (suggestResponse.product_code) {
+            return suggestResponse.product_code;
           } else {
-            this.precoVendaValueMultiple = '0.00';
+            nextNumericPart++;
+            return `P${nextNumericPart.toString().padStart(6, '0')}`;
           }
         } else {
           this.precoVendaValueMultiple = '0.00';
+          nextNumericPart++;
+          return `P${nextNumericPart.toString().padStart(6, '0')}`;
         }
+      };
 
-        console.log('Modal produtos (Multiple):', this.modalProdutosMultiple);
-        console.log('precoVendaValue (Multiple):', this.precoVendaValueMultiple);
+      const processNextProduct = (index: number) => {
+        if (index < this.modalProdutosMultiple.length) {
+          const currentProduct = this.modalProdutosMultiple[index];
+          this.productService.suggestPrice(currentProduct.xProd).subscribe((suggestResponse: any) => {
+            currentProduct.cProd = getProductCode(suggestResponse);
+            processNextProduct(index + 1); // Processar o próximo produto
+          });
+        } else {
+          console.log('Modal produtos (Multiple):', this.modalProdutosMultiple);
+          console.log('precoVendaValue (Multiple):', this.precoVendaValueMultiple);
 
-        $('#produtoModalTodos').modal('show');
-        this.loadingPageModalVisible = false;
-      });
+          $('#produtoModalTodos').modal('show');
+          this.loadingPageModalVisible = false;
+        }
+      };
+
+      processNextProduct(0); // Iniciar o processamento do primeiro produto
     });
   }
-
-
-
-
 
 
 
