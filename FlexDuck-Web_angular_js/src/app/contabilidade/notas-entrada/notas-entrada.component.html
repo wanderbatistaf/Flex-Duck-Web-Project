@@ -107,7 +107,8 @@
               <!-- CNPJ DO DESTINATARIO -->
               <div class="form-group col-md-4 text-center">
                 <label class="form-control-label">CNPJ do Destinatário</label>
-                <input #destinatarioCNPJField type="text" class="form-control" placeholder="CNPJ do Destinatário" readonly>
+<!--                <input #destinatarioCNPJField type="text" class="form-control" placeholder="CNPJ do Destinatário" readonly>-->
+                <input #destinatarioField type="text" class="form-control" [value]="destinatario" placeholder="CNPJ ou CPF do Destinatário" readonly>
               </div>
 
               <!-- ENDEREÇO DO DESTINATARIO -->
@@ -170,7 +171,12 @@
                   <td>{{ Number(produto.vUnCom).toFixed(2) }}</td>
                   <td>{{ produto.vProd }}</td>
                   <td>{{ produto.cfop }}</td>
-                  <td><button type="submit" class="btn btn-outline-primary" (click)="openModal(produto)">Inserir</button></td>
+                  <td><button
+                    type="submit"
+                    class="btn btn-outline-primary"
+                    [disabled]="produtoJaInserido(produto)"
+                    (click)="openModal(produto)"
+                  >Inserir</button></td>
                 </tr>
                 <br/>
                 <button type="submit" class="btn btn-primary" (click)="abrirModalTodos()">Inserir Todos</button>
@@ -263,6 +269,12 @@
         </div>
       </div>
       <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="inserirProduto()"
+          [disabled]="produtoJaInserido(modalSelectedProduto)"
+        >Inserir Produto</button>
         <button type="button" class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
       </div>
     </div>
@@ -312,6 +324,14 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="inserirProduto()"
+          [disabled]="produtoJaInserido(modalSelectedProduto)"
+        >
+          Inserir Produtos
+        </button>
       </div>
     </div>
   </div>

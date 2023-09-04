@@ -2,6 +2,7 @@ import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { viewport } from "@popperjs/core";
 import {ProductService} from "@app/_services";
 import {Products} from "@app/_models";
+import {FormBuilder, FormGroup} from "@angular/forms";
 
 interface Produto {
   cProd: string;
@@ -49,16 +50,24 @@ export class NotasEntradaComponent implements OnInit {
   nextProductCode: string = '';
   precoVendaValue?: string;
   suggestResponse: any;
+  destinatario: string | null | undefined = '';
+  itensInseridos: Produto[] = [];
+  isItemAlreadyInserted: boolean = false;
+
 
   produtos: Produto[] = [];
   modalSelectedProduto: any = {
-    preco_venda: ''
+    preco_venda: 0
   };
   precoVendaValueMultiple?: string;
   modalProdutosMultiple: any;
+  formGroup: FormGroup;
 
 
-  constructor( private productService: ProductService) {
+  constructor( private productService: ProductService, private formBuilder: FormBuilder) {
+    this.formGroup = this.formBuilder.group({
+      preco_venda: [''] // ou qualquer valor padrão desejado
+    });
   }
 
   ngOnInit(): void {
@@ -127,7 +136,10 @@ export class NotasEntradaComponent implements OnInit {
     const destinatarioCPF = xmlDoc.querySelector('dest CPF')?.textContent;
     const destinatarioNome = xmlDoc.querySelector('dest xNome')?.textContent;
     const destinatarioEndereco = xmlDoc.querySelector('dest enderDest xLgr')?.textContent;
-    // Continue obtendo as informações de outros campos do destinatário
+
+
+    // Verificar se o CNPJ está disponível no XML
+    const cnpjDisponivel = !!destinatarioCNPJ;
 
     // Extrair informações do total
     const totalValorNF = xmlDoc.querySelector('total ICMSTot vNF')?.textContent;
@@ -178,12 +190,13 @@ export class NotasEntradaComponent implements OnInit {
     if (this.emitenteEnderecoField) {
       this.emitenteEnderecoField.nativeElement.value = emitenteEndereco || '';
     }
-    // Continue preenchendo os outros campos do emitente
-    if (this.destinatarioCPFField) {
-      this.destinatarioCPFField.nativeElement.value = destinatarioCPF || '';
-    }
-    if (this.destinatarioCNPJField) {
-      this.destinatarioCNPJField.nativeElement.value = destinatarioCNPJ || '';
+    // Use a função cnpjOuCpfDisponivel() para decidir qual campo preencher
+    if (this.destinatarioCNPJField && this.destinatarioCPFField) {
+      if (cnpjDisponivel) {
+        this.destinatarioCNPJField.nativeElement.value = destinatarioCNPJ || '';
+      } else {
+        this.destinatarioCPFField.nativeElement.value = destinatarioCPF || '';
+      }
     }
     if (this.destinatarioNomeField) {
       this.destinatarioNomeField.nativeElement.value = destinatarioNome || '';
@@ -191,8 +204,6 @@ export class NotasEntradaComponent implements OnInit {
     if (this.destinatarioEnderecoField) {
       this.destinatarioEnderecoField.nativeElement.value = destinatarioEndereco || '';
     }
-    // Continue preenchendo os outros campos do destinatário
-
     if (this.totalValorNFField) {
       this.totalValorNFField.nativeElement.value = totalValorNF || '';
     }
@@ -206,8 +217,6 @@ export class NotasEntradaComponent implements OnInit {
     if (this.espField) {
       this.espField.nativeElement.value = esp || '';
     }
-    // Continue preenchendo os outros campos da transportadora
-
     if (this.infAdicField) {
       this.infAdicField.nativeElement.value = infAdic || '';
     }
@@ -224,6 +233,9 @@ export class NotasEntradaComponent implements OnInit {
       this.impostosDetalhadosField.nativeElement.value = impostosDetalhados;
     }
 
+
+    const valorDestinatario = cnpjDisponivel ? destinatarioCNPJ : destinatarioCPF;
+    this.destinatario = valorDestinatario;
 
     // Extrair detalhes dos produtos
     const produtos: Produto[] = [];
@@ -269,7 +281,6 @@ export class NotasEntradaComponent implements OnInit {
   }
 
 
-
   fecharModal() {
     $('#produtoModal').modal('hide');
     $('#produtoModalTodos').modal('hide');
@@ -281,8 +292,6 @@ export class NotasEntradaComponent implements OnInit {
     $('#produtoModalTodos').modal('show');
     this.loadingPageModalVisible = false;
   }
-
-  // Certifique-se de definir a variável suggestResponse com a resposta da API antes de usá-la no código abaixo
 
   getLastProductCode() {
     const isProductDefault = 1;
@@ -395,6 +404,30 @@ export class NotasEntradaComponent implements OnInit {
 
     return newFormattedCode;
   }
+
+  inserirProduto() {
+    const precoVendaDigitado = (document.getElementById('preco_venda') as HTMLInputElement)?.value;
+
+    // Verifica se o item já foi inserido
+    if (!this.itensInseridos.some(item => item.cProd === this.modalSelectedProduto.modalCProd)) {
+      // Atualiza o valor de cProd com modalCProd
+      this.modalSelectedProduto.cProd = this.modalSelectedProduto.modalCProd;
+
+      this.modalSelectedProduto.preco_venda = precoVendaDigitado;
+
+      // Insere o item na lista de itens inseridos
+      this.itensInseridos.push(this.modalSelectedProduto);
+    }
+    // Feche o modal ou realize outras ações necessárias
+    this.loadingPageModalVisible = false;
+  }
+
+
+
+  produtoJaInserido(produto: Produto): boolean {
+    return this.itensInseridos.some(p => p.cProd === produto.cProd);
+  }
+
 
 
   protected readonly Number = Number;
