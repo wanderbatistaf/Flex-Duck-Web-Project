@@ -1,4 +1,8 @@
+import json
+import logging
 import time
+from datetime import datetime
+
 import mysql.connector
 import decimal
 
@@ -69,22 +73,76 @@ def buscar_notas_entrada():
 def inserir_notas_entrada():
     current_user = get_jwt_identity()
     if not current_user:
-        return abort(404)
+        return jsonify({'mensagem': 'Usuário não autenticado'}), 401
 
     # Obtém o subdomínio a partir da requisição Flask
     subdomain = request.headers.get('X-Subdomain')
 
-    # Configura a conexão com o banco de dados MySQL
-    db = get_db_connection(subdomain)
-    dados = request.json
-    print(dados)
-    cursor = db.cursor()
-    sql = 'INSERT INTO notas_entrada (contabilidade_id, data, valor, descricao, natureza_op, nf_fatura, serie) VALUES (%s, %s, %s, %s, %s, %s, %s)'
-    val = (dados['contabilidade_id'], dados['data'], dados['valor'], dados['descricao'], dados['natureza_op'], dados['nf_fatura'], dados['serie'])
-    cursor.execute(sql, val)
-    db.commit()
-    cursor.close()
-    return jsonify({'mensagem': 'Dados de notas de entrada inseridos com sucesso!'})
+    dados = request.json['extractedData']
+    itens = request.json['itensInseridos']
+
+    print('Dados da solicitação:', dados)
+
+    try:
+        # Conecta ao banco de dados
+        db = get_db_connection(subdomain)
+        cursor = db.cursor()
+
+        destinatarioCNPJ = dados.get('destinatarioCNPJ', dados.get('destinatarioCPF', None))
+        qVol = dados.get('qVol', None)
+        chNFe = dados.get('chNFe')
+        esp = dados.get('esp', None)
+
+
+        # Insere os dados da nota de entrada na tabela notas_entrada
+        sql_nota = '''
+            INSERT INTO notas_entrada (chaveAcesso, numeroNF, cUF, serie, nomeEmitente, cnpjEmitente, enderecoEmitente,
+            nomeDestinatario, cnpjDestinatario, enderecoDestinatario, modoFrete, quantidadeVolumes, especificacaoVolumes,
+            produtos, informacoesAdicionais, total, valorImpostos, impostosDetalhados, dataEmissao)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        val_nota = (
+            chNFe, dados['cNF'], dados['cUF'], dados['serie'], dados['emitenteNome'],
+            dados['emitenteCNPJ'], dados['emitenteEndereco'], dados['destinatarioNome'],
+            destinatarioCNPJ, dados['destinatarioEndereco'], dados['modFrete'], qVol, esp,
+            json.dumps(dados['produtos']), dados['infAdic'], dados['totalValorNF'], dados['valorImpostos'],
+            dados['impostosDetalhados'], dados['dataEmissao']
+        )
+        cursor.execute(sql_nota, val_nota)
+        nota_id = cursor.lastrowid
+
+        # Insere os produtos da nota de entrada na tabela produtos_servicos
+        for produto in itens:
+            vUnCom = '{:.2f}'.format(float(produto['vUnCom'])).rstrip('0').rstrip('.')
+            qCom = str(int(float(produto['qCom'])))
+            current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            print(produto)
+
+            sql_produto = '''
+                    INSERT INTO produtos_servicos (codigo, descricao, nome, categoria, preco_venda, quantidade,
+                     preco_custo, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                '''
+            val_produto = (
+                produto['cProd'], produto['xProd'], produto['xProd'], produto['category_suggested'],
+                produto['preco_venda'], qCom, vUnCom, current_datetime
+            )
+            cursor.execute(sql_produto, val_produto)
+
+        # Confirma a inserção e fecha a conexão
+        db.commit()
+        cursor.close()
+        db.close()
+
+        return jsonify({'mensagem': 'Dados de notas de entrada inseridos com sucesso!'}), 201
+    except Exception as e:
+        logging.error('Erro no servidor: %s', str(e))
+        return jsonify({'erro': str(e)}), 500
+
+
+
+
 
 # Define a rota PUT para atualizar dados das notas de entrada no banco de dados
 @api_notas_entrada.route('/notas-entrada/update/<int:id>', methods=['PUT'])
