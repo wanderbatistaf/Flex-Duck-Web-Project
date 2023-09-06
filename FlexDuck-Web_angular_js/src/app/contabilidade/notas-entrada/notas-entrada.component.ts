@@ -1,8 +1,6 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { viewport } from "@popperjs/core";
+import {Component, OnInit, ElementRef, ViewChild, Pipe, PipeTransform} from '@angular/core';
 import {ContabilService, ProductService} from "@app/_services";
-import {Products} from "@app/_models";
-import {FormBuilder, FormControl, FormGroup} from "@angular/forms";
+import {FormBuilder, FormGroup} from "@angular/forms";
 
 interface Produto {
   cProd: string;
@@ -17,7 +15,23 @@ interface Produto {
 
 declare var $: any;
 
+@Pipe({
+  name: 'filter'
+})
+export class FilterPipeNF implements PipeTransform {
+  transform(items: any[], searchText: string): any[] {
+    if (!items || !searchText || !searchText.trim()) {
+      return items;
+    }
 
+    searchText = searchText.toLowerCase();
+
+    return items.filter((item) => {
+      const keys = Object.keys(item);
+      return keys.some((key) => item[key] && item[key].toString().toLowerCase().includes(searchText));
+    });
+  }
+}
 
 @Component({
   selector: 'app-notas-entrada',
@@ -54,6 +68,10 @@ export class NotasEntradaComponent implements OnInit {
   itensInseridos: Produto[] = [];
   isTodosOsProdutosInseridos: boolean = false;
   private extractedData: any = {};
+  savingModalVisible = false;
+  loading: boolean = true;
+  pesquisaNotas: string = '';
+  notaSelecionada: any;
 
 
   produtos: Produto[] = [];
@@ -64,6 +82,7 @@ export class NotasEntradaComponent implements OnInit {
   categoriaValueMultiple?: string;
   modalProdutosMultiple: any;
   formGroup: FormGroup;
+  nfnotes: any = [{mostrarChaveAcesso: false}];
 
 
   constructor( private productService: ProductService, private formBuilder: FormBuilder,
@@ -74,6 +93,7 @@ export class NotasEntradaComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadNotasEntrada();
   }
 
   isTabActive(tab: string): boolean {
@@ -594,8 +614,9 @@ export class NotasEntradaComponent implements OnInit {
 
     salvarNota() {
         // Exibir as informações extraídas no console
-        console.log('Dados extraídos:', this.extractedData);
-        console.log('Itens a inserir:', this.itensInseridos);
+        // console.log('Dados extraídos:', this.extractedData);
+        // console.log('Itens a inserir:', this.itensInseridos);
+      this.savingModalVisible = true;
 
         this.contabilService.addNotes(this.extractedData, this.itensInseridos).subscribe(
             (response) => {
@@ -605,8 +626,39 @@ export class NotasEntradaComponent implements OnInit {
                 console.error('API Error:', error);
             }
         );
+      this.limparCampos();
+      this.savingModalVisible = false;
+      this.activeTab = 'consulta';
     }
 
+  loadNotasEntrada() {
+    this.loading = true;
+    this.contabilService.getAllNotes().subscribe(
+      (data) => {
+        this.nfnotes = data.items; // Assumindo que os dados são armazenados em data.items
+      },
+      (error) => {
+        console.error('Erro ao carregar notas de entrada:', error);
+      }
+    );
+    this.loading = false;
+  }
 
-    protected readonly Number = Number;
+  toggleMostrarChaveAcesso(nota: any) {
+    nota.mostrarChaveAcesso = !nota.mostrarChaveAcesso;
+  }
+
+  selecionarNota(nota: any): void {
+    this.notaSelecionada = nota;
+    this.notaSelecionada.produtos = JSON.parse(this.notaSelecionada.produtos);
+    this.activeTab = 'cadastro'; // Ative a página de detalhes
+    console.log(this.notaSelecionada);
+    console.log(this.notaSelecionada.produtos)
+  }
+
+
+
+
+
+  protected readonly Number = Number;
 }

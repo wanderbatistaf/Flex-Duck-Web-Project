@@ -52,13 +52,25 @@ def buscar_notas_entrada():
     for row in resultados:
         item = {
             'id': row[0],
-            'contabilidade_id': row[1],
-            'data': row[2],
-            'valor': float(row[3]),
-            'descricao': row[4],
-            'natureza_op': row[5],
-            'nf_fatura': row[6],
-            'serie': row[7]
+            'chaveAcesso': row[1],
+            'numeroNF': row[2],
+            'cUF': float(row[3]),
+            'serie': row[4],
+            'nomeEmitente': row[5],
+            'cnpjEmitente': row[6],
+            'enderecoEmitente': row[7],
+            'nomeDestinatario': row[8],
+            'cnpjDestinatario': row[9],
+            'enderecoDestinatario': row[10],
+            'modoFrete': row[11],
+            'quantidadeVolumes': row[12],
+            'especificacaoVolumes': row[13],
+            'produtos': row[14],
+            'informacoesAdicionais': row[15],
+            'total': row[16],
+            'valorImpostos': row[17],
+            'impostosDetalhados': row[18],
+            'dataEmissao': row[19]
         }
         items.append(item)
     response = {
@@ -119,16 +131,32 @@ def inserir_notas_entrada():
 
             print(produto)
 
-            sql_produto = '''
+            # Verifica se o item já existe no banco de dados
+            sql_check_produto = "SELECT id, quantidade FROM produtos_servicos WHERE codigo = %s"
+            cursor.execute(sql_check_produto, (produto['cProd'],))
+            existing_product = cursor.fetchone()
+
+            if existing_product:
+                # O item já existe, portanto, atualize os campos necessários
+                sql_update_produto = '''
+                    UPDATE produtos_servicos
+                    SET quantidade = quantidade + %s, preco_custo = %s, preco_venda = %s, nome = %s
+                    WHERE id = %s
+                '''
+                val_update_produto = (qCom, vUnCom, produto['preco_venda'], produto['xProd'], existing_product['id'])
+                cursor.execute(sql_update_produto, val_update_produto)
+            else:
+                # O item não existe, então insira-o
+                sql_insert_produto = '''
                     INSERT INTO produtos_servicos (codigo, descricao, nome, categoria, preco_venda, quantidade,
                      preco_custo, created_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 '''
-            val_produto = (
-                produto['cProd'], produto['xProd'], produto['xProd'], produto['category_suggested'],
-                produto['preco_venda'], qCom, vUnCom, current_datetime
-            )
-            cursor.execute(sql_produto, val_produto)
+                val_insert_produto = (
+                    produto['cProd'], produto['xProd'], produto['xProd'], produto['category_suggested'],
+                    produto['preco_venda'], qCom, vUnCom, current_datetime
+                )
+                cursor.execute(sql_insert_produto, val_insert_produto)
 
         # Confirma a inserção e fecha a conexão
         db.commit()

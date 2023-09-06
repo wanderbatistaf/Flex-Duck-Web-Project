@@ -10,9 +10,9 @@ export class ContabilService {
     constructor(private http: HttpClient) {
     }
 
-    // getAllNotes(): Observable<> {
-    //     return this.http.get<>(`${environment.apiUrl}/notas-entrada`);
-    // }
+    getAllNotes(): Observable<any> {
+        return this.http.get<any>(`${environment.apiUrl}/notas-entrada`);
+    }
 
     addNotes(extractedData: any, itensInseridos: any[]): Observable<any> {
         const dataToSend = {
