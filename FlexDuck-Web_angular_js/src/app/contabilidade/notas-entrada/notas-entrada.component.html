@@ -12,6 +12,20 @@
 
 <div class="modal-backdrop" *ngIf="loadingPageModalVisible"></div>
 
+<!-- Modal de salvamento -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': savingModalVisible}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-loading">
+        <div class="caption">Salvando as informações...</div>
+        <div class="animation"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="savingModalVisible"></div>
+
 <div fxLayout="column" fxLayout.gt-sm="row">
   <h1 class="mt-4">Nota Fiscal - Entrada</h1>
   <ol class="breadcrumb mb-4">
@@ -30,6 +44,263 @@
       <a class="nav-link" [class.active]="isTabActive('detalhes')" (click)="setActiveTab('detalhes')">Detalhes</a>
     </li>
   </ul>
+
+  <!--NavBar superior (Search+Adicionar)-->
+
+  <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+    <a class="navbar-brand"></a>
+    <form class="form-inline mr-auto">
+      <input class="form-control mr-sm-2 flex-grow-1" type="search" [(ngModel)]="pesquisaNotas" placeholder="Search" name="searchText">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit"
+              style="margin-right: 5px;">Buscar</button>
+    </form>
+  </nav>
+
+<div class="card table-responsive mt-4" *ngIf="activeTab === 'consulta'">
+  <div class="card-body">
+    <div class="text-center" *ngIf="loading">
+      <!-- <div class="spinner-border spinner-border-sm"></div> -->
+      <skeleton-table-display *ngIf="loading"></skeleton-table-display>
+    </div>
+
+  <!--Consulta renderiza aqui-->
+  <div class="table-responsive" *ngIf="activeTab === 'consulta'">
+    <table class="table table-condensed table-hover">
+      <thead>
+      <tr>
+        <th style="text-align: center;">Código</th>
+        <th style="text-align: center;">Chave de Acesso</th>
+        <th style="text-align: center;">Emitente</th>
+        <th style="text-align: center;">CNPJ</th>
+        <th style="text-align: center;">Total</th>
+        <th style="text-align: center;">Impostos</th>
+        <th style="text-align: center;">Emissão</th>
+        <th style="text-align: center;">Ações</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let notas of nfnotes | filter: pesquisaNotas">
+        <td>{{ notas.numeroNF }}</td>
+        <td style="text-align: center;">
+    {{ notas.mostrarChaveAcesso ? notas.chaveAcesso : '********************************************' }}
+
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            *ngIf="!notas.mostrarChaveAcesso; else hideIcon"
+            (click)="toggleMostrarChaveAcesso(notas)"
+          >
+            <i class="fa" [ngClass]="{'fa-eye': !notas.mostrarChaveAcesso, 'fa-eye-slash': notas.mostrarChaveAcesso}" aria-hidden="true"></i>
+          </button>
+
+          <ng-template #hideIcon>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              (click)="toggleMostrarChaveAcesso(notas)"
+            >
+              <i class="fa" [ngClass]="{'fa-eye': !notas.mostrarChaveAcesso, 'fa-eye-slash': notas.mostrarChaveAcesso}" aria-hidden="true"></i>
+            </button>
+          </ng-template>
+        </td>
+
+        <td style="text-align: center;">{{ notas.nomeEmitente }}</td>
+        <td style="text-align: center;">{{ notas.cnpjEmitente }}</td>
+        <td style="text-align: center;">R$ {{ notas.total }}</td>
+        <td style="text-align: center;">R$ {{ notas.valorImpostos }}</td>
+        <td style="text-align: center;">{{ notas.dataEmissao | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td style="text-align: center;">
+
+          <button type="button" class="btn btn-sm btn-outline-primary btn-block" (click)="selecionarNota(notas); setActiveTab('detalhes')">
+            Detalhes
+          </button>
+
+
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+</div>
+
+  <!-- Detalhes renderiza aqui! -->
+  <div *ngIf="activeTab === 'detalhes'" class="container mt-4">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card p-4">
+          <div class="card-body">
+
+            <div class="row">
+              <div class="form-group col-md-12">
+                <label>Chave de Acesso</label>
+                <input [(ngModel)]="notaSelecionada.chaveAcesso" type="text" class="form-control" placeholder="chNFe" readonly>
+              </div>
+            </div>
+
+            <!-- Numero da Nota e Numero da UF -->
+            <br/>
+            <div class="row">
+              <div class="form-group col-md-4">
+                <label class="form-control-label">Número NF</label>
+                <input [(ngModel)]="notaSelecionada.numeroNF" type="text" class="form-control" placeholder="cNF" readonly>
+              </div>
+
+              <div class="form-group col-md-4">
+                <label class="form-control-label">Número UF</label>
+                <input [(ngModel)]="notaSelecionada.cUF" type="text" class="form-control" placeholder="cNF" readonly>
+              </div>
+
+              <div class="form-group col-md-4">
+                <label class="form-control-label">Série</label>
+                <input [(ngModel)]="notaSelecionada.serie" type="text" class="form-control" placeholder="Série" readonly>
+              </div>
+            </div>
+
+            <!-- Dados do Emitente -->
+            <br/>
+            <h4>Emitente</h4>
+            <div class="row border rounded p-3">
+              <!-- NOME DO EMITENTE -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">Nome do Emitente</label>
+                <input [(ngModel)]="notaSelecionada.nomeEmitente" type="text" class="form-control" placeholder="Nome do Emitente" readonly>
+              </div>
+
+              <!-- CNPJ DO EMITENTE -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">CNPJ do Emitente</label>
+                <input [(ngModel)]="notaSelecionada.cnpjEmitente" type="text" class="form-control" placeholder="CNPJ do Emitente" readonly>
+              </div>
+
+              <!-- ENDEREÇO DO EMITENTE -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">Endereço do Emitente</label>
+                <input [(ngModel)]="notaSelecionada.enderecoEmitente" type="text" class="form-control" placeholder="Endereço do Emitente" readonly>
+              </div>
+            </div>
+
+            <!-- Dados do Destinatário -->
+            <br/>
+            <h4>Destinatário</h4>
+            <div class="row border rounded p-3">
+              <!-- NOME DO DESTINATARIO -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">Nome do Destinatário</label>
+                <input [(ngModel)]="notaSelecionada.nomeDestinatario" type="text" class="form-control" placeholder="Nome do Destinatário" readonly>
+              </div>
+
+              <!-- CNPJ DO DESTINATARIO -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">CNPJ do Destinatário</label>
+                <!--                <input #destinatarioCNPJField type="text" class="form-control" placeholder="CNPJ do Destinatário" readonly>-->
+                <input [(ngModel)]="notaSelecionada.cnpjDestinatario" type="text" class="form-control" [value]="destinatario" placeholder="CNPJ ou CPF do Destinatário" readonly>
+              </div>
+
+              <!-- ENDEREÇO DO DESTINATARIO -->
+              <div class="form-group col-md-4 text-center">
+                <label class="form-control-label">Endereço do Destinatário</label>
+                <input [(ngModel)]="notaSelecionada.enderecoDestinatario" type="text" class="form-control" placeholder="Endereço do Destinatário" readonly>
+              </div>
+            </div>
+
+            <!-- Dados da Transportadora -->
+            <br/>
+            <h4>Transportadora</h4>
+            <div class="card p-4">
+              <div class="card-body">
+                <div class="row">
+                  <!-- MODO DE FRETE -->
+                  <div class="form-group col-md-4">
+                    <label class="form-control-label">Modo de Frete</label>
+                    <input [(ngModel)]="notaSelecionada.modoFrete" type="text" class="form-control" placeholder="Modo de Frete" readonly>
+                  </div>
+
+                  <!-- QUANTIDADE DE VOLUMES -->
+                  <div class="form-group col-md-4">
+                    <label class="form-control-label">Quantidade de Volumes</label>
+                    <input [(ngModel)]="notaSelecionada.quantidadeVolumes" type="text" class="form-control" placeholder="Quantidade de Volumes" readonly>
+                  </div>
+
+                  <!-- ESPECIFICAÇÃO DOS VOLUMES -->
+                  <div class="form-group col-md-4">
+                    <label class="form-control-label">Especificação dos Volumes</label>
+                    <input [(ngModel)]="notaSelecionada.especificacaoVolumes" type="text" class="form-control" placeholder="Especificação dos Volumes" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabela de Produtos -->
+            <br/>
+            <h4>Produtos</h4>
+            <div class="card p-4">
+              <div class="card-body">
+                <div class="col-md-12">
+                  <table class="table">
+                    <thead>
+                    <tr>
+                      <th>Código do Produto</th>
+                      <th>Descrição do Produto</th>
+                      <th>Quantidade</th>
+                      <th>Valor Unitário</th>
+                      <th>Valor Total</th>
+                      <th>CFOP</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let produto of notaSelecionada.produtos">
+                      <td>{{ produto.cProd }}</td>
+                      <td>{{ produto.xProd }}</td>
+                      <td>{{ Number(produto.qCom) }}</td>
+                      <td>{{ Number(produto.vUnCom).toFixed(2) }}</td>
+                      <td>{{ produto.vProd }}</td>
+                      <td>{{ produto.cfop }}</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Informações Adicionais -->
+            <br/>
+            <h4>Informações Adicionais</h4>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-control-label">Informações Adicionais</label>
+                  <textarea [(ngModel)]="notaSelecionada.informacoesAdicionais" class="form-control" placeholder="Informações Adicionais" readonly></textarea>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-control-label">Total</label>
+                  <input [(ngModel)]="notaSelecionada.total"type="text" class="form-control" placeholder="Valor Total da NF" readonly>
+                </div>
+              </div>
+
+
+              <div class="form-group col-md-6">
+                <label class="form-control-label">Valor dos Impostos</label>
+                <input [(ngModel)]="notaSelecionada.valorImpostos" type="text" class="form-control" readonly>
+              </div>
+
+              <div class="form-group col-md-6">
+                <label class="form-control-label">Impostos Detalhados</label>
+                <textarea [(ngModel)]="notaSelecionada.impostosDetalhados" class="form-control" placeholder="Impostos Detalhados" rows="4" readonly></textarea>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 
   <!-- Cadastro renderiza aqui! -->
   <div *ngIf="activeTab === 'cadastro'" class="container mt-4">
