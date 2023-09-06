@@ -43,7 +43,7 @@ interface Cliente {
 }
 
 @Pipe({
-  name: 'filter'
+  name: 'filter',
 })
 export class FilterPipe implements PipeTransform {
   transform(items: any[], searchText: string): any[] {
@@ -55,7 +55,10 @@ export class FilterPipe implements PipeTransform {
 
     return items.filter((item) => {
       const keys = Object.keys(item);
-      return keys.some((key) => item[key] && item[key].toString().toLowerCase().includes(searchText));
+      return keys.some(
+        (key) =>
+          item[key] && item[key].toString().toLowerCase().includes(searchText)
+      );
     });
   }
 }
@@ -63,9 +66,11 @@ export class FilterPipe implements PipeTransform {
 @Component({
   selector: 'app-mesas',
   templateUrl: './mesas.component.html',
-  styleUrls: ['./mesas.component.less']
+  styleUrls: ['./mesas.component.less'],
 })
 export class MesasComponent implements OnInit, AfterContentChecked {
+  public alertMesa: boolean = false;
+  public alertDesconto: string = '';
   modalSenhaVisivel_val = false;
   modalSenhaVisivel_perc = false;
   modalNovaMesaVisivel = false;
@@ -90,10 +95,11 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   parcelamentoReadonly!: boolean;
   bandeira!: string;
   parcelamento!: number;
-  @ViewChild('notaFiscalContentElement', { static: true }) notaFiscalContentElement!: ElementRef;
+  @ViewChild('notaFiscalContentElement', { static: true })
+  notaFiscalContentElement!: ElementRef;
   jwtHelper: JwtHelperService = new JwtHelperService();
   level?: string;
-  qrcode: string = ''
+  qrcode: string = '';
   products: Products[] = [];
   paytypes: any[] = [];
   bandtypes: any[] = [];
@@ -102,14 +108,14 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   listaProdutos: Produto[] = [];
   nome: string = '';
   telefone: string = '';
-  vendorName = ''
-  ClienteName = ''
-  ClienteCPF_CNPJ = ''
-  SubTotal: number = 0
-  Total: number = 0
-  DescontoValor: number = 0
-  DescontoPercent: number = 0
-  Parcelamento: number = 0
+  vendorName = '';
+  ClienteName = '';
+  ClienteCPF_CNPJ = '';
+  SubTotal: number = 0;
+  Total: number = 0;
+  DescontoValor: number = 0;
+  DescontoPercent: number = 0;
+  Parcelamento: number = 0;
   CfiscalDataHora: string | undefined;
   formaPagamento: string = '0';
   valorParcela: number = 1;
@@ -125,7 +131,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   companyInfo?: Company;
   formComp: FormGroup;
 
-
   dadosDaVenda = {
     cliente_id: this.SelectedClienteId,
     vendedor: this.vendorName,
@@ -139,17 +144,17 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     desconto: this.DescontoValor,
     valor_total: this.Total,
     valor_total_pago: this.valorPago,
-    troco: (this.valorPago-this.total).toFixed(2),
+    troco: (this.valorPago - this.total).toFixed(2),
     quantidade_itens: this.listaProdutos.length,
     numero_cupom_fiscal: this.proximoNumeroCF,
     imposto_estadual: 6, // Insira o valor do imposto estadual, caso possua
     imposto_federal: 10, // Insira o valor do imposto federal, caso possua
-    itens_vendidos: this.listaProdutos.map(produto => ({
+    itens_vendidos: this.listaProdutos.map((produto) => ({
       produto: produto.nome,
       codigo_produto: produto.codigo,
       quantidade: produto.quantidade,
       preco_unitario: produto.preco,
-      subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2))
+      subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2)),
     })),
   };
 
@@ -204,11 +209,12 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     // Outras atualizações, se houver
   }
 
-
   abrirNovaMesa(): void {
-    const numerosMesasAbertas = this.mesasAbertas.map(mesa => mesa.numero);
+    const numerosMesasAbertas = this.mesasAbertas.map((mesa) => mesa.numero);
     const numerosTodasMesas = Array.from({ length: 30 }, (_, i) => i + 1);
-    this.numerosMesasDisponiveis = numerosTodasMesas.filter(numero => !numerosMesasAbertas.includes(numero));
+    this.numerosMesasDisponiveis = numerosTodasMesas.filter(
+      (numero) => !numerosMesasAbertas.includes(numero)
+    );
     this.atualizarNumerosMesasDisponiveis();
     // Exibir o modal para abrir uma nova mesa
     this.modalNovaMesaVisivel = true;
@@ -218,17 +224,21 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     // Fechar o modal para abrir uma nova mesa
     this.modalNovaMesaVisivel = false;
     this.novoCliente = { nome: '', telefone: '' };
+    this.alertMesa = false;
+    this.alertDesconto = '';
   }
 
-  criarNovaMesa(): void {
+  criarNovaMesa(): any {
     if (!this.novoNumeroMesa || this.novoNumeroMesa <= 0) {
-      alert('Selecione um número de mesa válido.');
-      return;
+      // alert('Selecione um número de mesa válido.');
+      this.alertMesa = true;
+      return 'Selecione um número de mesa válido.';
     }
-
-    if (this.mesasAbertas.some(mesa => mesa.numero === this.novoNumeroMesa)) {
-      alert('Essa mesa já está aberta.');
-      return;
+    this.alertMesa = false;
+    if (this.mesasAbertas.some((mesa) => mesa.numero === this.novoNumeroMesa)) {
+      // alert('Essa mesa já está aberta.');
+      this.alertMesa = true;
+      return 'Essa mesa já está aberta.';
     }
 
     const novaMesa: Mesa = {
@@ -258,9 +268,8 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   isMesaAberta(numeroMesa: number): boolean {
-    return this.mesasAbertas.some(mesa => mesa.numero === numeroMesa);
+    return this.mesasAbertas.some((mesa) => mesa.numero === numeroMesa);
   }
-
 
   finalizarMesaSelecionada(mesa: Mesa, abrirModal: boolean): void {
     this.mesaSelecionada = mesa;
@@ -272,7 +281,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       this.abrirModalFinalizarMesa();
     }
   }
-
 
   calcularTotalAPagar(mesa: Mesa): void {
     const subtotal = this.calcularSubtotal(mesa);
@@ -290,7 +298,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   calcularTotal(): number {
     let total = 0;
 
-    this.mesasAbertas.forEach(mesa => {
+    this.mesasAbertas.forEach((mesa) => {
       total += mesa.totalAPagar;
     });
 
@@ -298,8 +306,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     return Number(total);
   }
 
-
-  verificarSenha_valor() {
+  verificarSenha_valor(): void {
     // Realize a verificação da senha aqui, usando a API ou lógica necessária
     // Por exemplo, chame this.userService.getUserLevelByPass(this.senha) para verificar a senha
 
@@ -307,13 +314,21 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       (user) => {
         // Verifique o nível de usuário aqui
         if (user.level >= 6) {
-          const descontoPercentElement = document.getElementById('descontoValor') as HTMLInputElement;
+          const descontoPercentElement = document.getElementById(
+            'descontoValor'
+          ) as HTMLInputElement;
           if (descontoPercentElement) {
             descontoPercentElement.readOnly = false;
           }
         } else {
           // Faça algo se a senha estiver incorreta ou o nível do usuário for menor que 6
-          alert('Você não pode adicionar um desconto.');
+          // alert('Você não pode adicionar um desconto.');
+          this.alertMesa = true;
+          this.alertDesconto = 'Você não pode adicionar um desconto.';
+
+          setTimeout(() => {
+            this.alertMesa = false;
+          },3000);
         }
 
         // Fecha o modal após verificar a senha
@@ -321,9 +336,16 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       },
       (error) => {
         // Trate erros aqui, como senha incorreta ou erro de conexão
-        alert('Erro ao verificar a senha. Por favor, tente novamente.');
+        this.alertMesa = true;
+        this.alertDesconto =
+          'Erro ao verificar a senha. Por favor, tente novamente.';
+
+          setTimeout(() => {
+            this.alertMesa = false;
+          },3000);
+        // alert('Erro ao verificar a senha. Por favor, tente novamente.');
         // Fecha o modal após verificar a senha, mesmo em caso de erro
-        this.fecharModalSenha();
+        // this.fecharModalSenha();
       }
     );
   }
@@ -338,25 +360,47 @@ export class MesasComponent implements OnInit, AfterContentChecked {
         if (user.level >= 6) {
           // Faça algo se a senha estiver correta e o nível do usuário for maior ou igual a 6
           // Por exemplo, desbloquear o campo de desconto:
-          const descontoPercentElement = document.getElementById('descontoPercent') as HTMLInputElement;
+          const descontoPercentElement = document.getElementById(
+            'descontoPercent'
+          ) as HTMLInputElement;
           if (descontoPercentElement) {
             descontoPercentElement.readOnly = false;
           }
         } else {
           // Faça algo se a senha estiver incorreta ou o nível do usuário for menor que 6
-          alert('Você não pode adicionar um desconto.');
+          // alert('Você não pode adicionar um desconto.');
+
+          this.alertMesa = true;
+          this.alertDesconto = 'Você não pode adicionar um desconto.';
+
+          setTimeout(() => {
+            this.alertMesa = false;
+          },3000);
+
+          this.fecharModalSenha();
         }
 
         // Fecha o modal após verificar a senha
-        this.fecharModalSenha();
+        // this.fecharModalSenha();
       },
       (error) => {
         // Trate erros aqui, como senha incorreta ou erro de conexão
-        alert('Erro ao verificar a senha. Por favor, tente novamente.');
+        // alert('Erro ao verificar a senha. Por favor, tente novamente.');
+
+        this.alertMesa = true;
+        this.alertDesconto =
+          'Erro ao verificar a senha. Por favor, tente novamente.';
+
+          setTimeout(() => {
+            this.alertMesa = false;
+          },3000);
+
         // Fecha o modal após verificar a senha, mesmo em caso de erro
-        this.fecharModalSenha();
+        // this.fecharModalSenha();
       }
     );
+
+    this.alertMesa = false;
   }
 
   fecharModalSenha(): void {
@@ -375,12 +419,10 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     this.modalSenhaVisivel_perc = true;
   }
 
-
   fecharModalSenhaPercent(): void {
     // Lógica para fechar o modal de senha para desconto em percentual (ao cancelar ou confirmar)
     // Implemente essa lógica de acordo com o seu modal de senha para percentual
   }
-
 
   adicionarProdutoConsumido(): void {
     if (
@@ -441,14 +483,12 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   calcularSubtotal(mesa: Mesa): number {
     let subtotal = 0;
 
-    mesa.produtosConsumidos.forEach(produto => {
+    mesa.produtosConsumidos.forEach((produto) => {
       subtotal += produto.preco * produto.quantidade;
     });
 
     return subtotal;
   }
-
-
 
   aplicarDesconto(): void {
     if (this.mesaSelecionada) {
@@ -456,8 +496,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       this.total = this.mesaSelecionada.totalAPagar;
     }
   }
-
-
 
   finalizarMesa(): void {
     if (this.mesaSelecionada) {
@@ -467,21 +505,18 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     }
   }
 
-
   atualizarDescontoValor(): void {
     const subtotal = this.calcularSubtotal(this.mesaSelecionada!); // Certifique-se de que a mesa selecionada não é nula
 
     if (subtotal === 0) {
       this.descontoPercent = 0;
     } else {
-      this.descontoPercent = +(this.descontoValor / subtotal * 100);
+      this.descontoPercent = +((this.descontoValor / subtotal) * 100);
       this.descontoPercent = Math.min(this.descontoPercent, 100); // Garante que o desconto em % não ultrapasse 100%
     }
 
     this.aplicarDesconto(); // Adicione esta linha para atualizar o valor total
   }
-
-
 
   atualizarDescontoPercent(): void {
     const total = this.mesaSelecionada?.totalAPagar || 0; // Certifique-se de que a mesa selecionada não é nula
@@ -491,7 +526,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
 
     this.aplicarDesconto(); // Adicione esta linha para atualizar o valor total
   }
-
 
   abrirModalFinalizarMesa(): void {
     this.modalFinalizarMesaVisivel = true;
@@ -527,10 +561,9 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   getProduct() {
     this.loading = true;
     // Recupera todos os pagamentos do servidor
-    this.productService.getAllProducts()
-      .pipe(
-        map((response: any) => response.items as Products[])
-      )
+    this.productService
+      .getAllProducts()
+      .pipe(map((response: any) => response.items as Products[]))
       .subscribe(
         // Quando a resposta for bem-sucedida
         (produtos: Products[]) => {
@@ -543,12 +576,11 @@ export class MesasComponent implements OnInit, AfterContentChecked {
           console.log(this.produtos);
         },
         // Quando ocorrer um erro na resposta
-        error => {
+        (error) => {
           console.log('Houve um erro ao requisitar os produtos.');
         }
       );
   }
-
 
   perguntarQuantidade(produto: Produto): void {
     this.produtoSelecionado = produto;
@@ -556,9 +588,12 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   onFormaPagamentoDinheiro() {
-    const formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
+    const formaPagamento = (
+      document.getElementById('formaPagamento') as HTMLSelectElement
+    ).value;
 
-    if (formaPagamento === '1') { // 1 representa a forma de pagamento "Dinheiro"
+    if (formaPagamento === '1') {
+      // 1 representa a forma de pagamento "Dinheiro"
       this.bandeiraReadonly = true;
       this.parcelamentoReadonly = true;
       this.bandeira = '6'; // "6" representa "À vista"
@@ -566,14 +601,17 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     } else {
       this.bandeiraReadonly = false;
       this.parcelamentoReadonly = false;
-      this.bandeira = 'select'
+      this.bandeira = 'select';
     }
   }
 
   buscarPaytypes() {
     this.paytypeService.getAllPayTypes().subscribe(
       (paytypes: Paytype[]) => {
-        this.paytypes = paytypes.map((paytype: Paytype) => ({ id: paytype.forma_pagamento_id, nome: paytype.descricao }))
+        this.paytypes = paytypes.map((paytype: Paytype) => ({
+          id: paytype.forma_pagamento_id,
+          nome: paytype.descricao,
+        }));
         this.loading = false;
         console.log(this.paytypes);
       },
@@ -584,7 +622,9 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   checkValorPago(): void {
-    let formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
+    let formaPagamento = (
+      document.getElementById('formaPagamento') as HTMLSelectElement
+    ).value;
     if (formaPagamento === 'Dinheiro') {
       if (this.valorPago === null || isNaN(this.valorPago)) {
         this.valorPago = 0;
@@ -593,7 +633,12 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   calcularTroco(): number {
-    this.Total = parseFloat((document.getElementById('total') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+    this.Total = parseFloat(
+      (document.getElementById('total') as HTMLSelectElement).value.replace(
+        /[^0-9.-]/g,
+        ''
+      )
+    );
     if (this.valorPago >= this.Total) {
       this.troco = this.valorPago - this.Total;
     } else {
@@ -710,7 +755,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     );
   }
 
-
   finalizarVenda(): void {
     this.salesService.addVenda(this.dadosDaVenda).subscribe(
       (res) => {
@@ -728,39 +772,80 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   gerarCupomFiscal() {
-    this.formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
+    this.formaPagamento = (
+      document.getElementById('formaPagamento') as HTMLSelectElement
+    ).value;
     let dataAtual = new Date();
     dataAtual.setUTCHours(dataAtual.getUTCHours() - 3);
 
-
     // Formatar a data e hora no formato (DD/MM/AAAA - HH:mm:ss)
-    this.CfiscalDataHora = `${dataAtual.getUTCDate().toString().padStart(2, '0')}/${
-      (dataAtual.getUTCMonth() + 1).toString().padStart(2, '0')}/${
-      dataAtual.getUTCFullYear()} - ${
-      dataAtual.getUTCHours().toString().padStart(2, '0')}:${
-      dataAtual.getUTCMinutes().toString().padStart(2, '0')}:${
-      dataAtual.getUTCSeconds().toString().padStart(2, '0')}`;
+    this.CfiscalDataHora = `${dataAtual
+      .getUTCDate()
+      .toString()
+      .padStart(2, '0')}/${(dataAtual.getUTCMonth() + 1)
+      .toString()
+      .padStart(2, '0')}/${dataAtual.getUTCFullYear()} - ${dataAtual
+      .getUTCHours()
+      .toString()
+      .padStart(2, '0')}:${dataAtual
+      .getUTCMinutes()
+      .toString()
+      .padStart(2, '0')}:${dataAtual
+      .getUTCSeconds()
+      .toString()
+      .padStart(2, '0')}`;
 
     // Atualizar os valores das variáveis
-    this.Total = parseFloat((document.getElementById('total') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
-    this.DescontoValor = parseFloat((document.getElementById('descontoValor') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
-    this.DescontoPercent = parseFloat((document.getElementById('descontoPercent') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
-    this.Parcelamento = parseInt((document.getElementById('parcelamento') as HTMLSelectElement).value, 10);
+    this.Total = parseFloat(
+      (document.getElementById('total') as HTMLSelectElement).value.replace(
+        /[^0-9.-]/g,
+        ''
+      )
+    );
+    this.DescontoValor = parseFloat(
+      (
+        document.getElementById('descontoValor') as HTMLSelectElement
+      ).value.replace(/[^0-9.-]/g, '')
+    );
+    this.DescontoPercent = parseFloat(
+      (
+        document.getElementById('descontoPercent') as HTMLSelectElement
+      ).value.replace(/[^0-9.-]/g, '')
+    );
+    this.Parcelamento = parseInt(
+      (document.getElementById('parcelamento') as HTMLSelectElement).value,
+      10
+    );
 
-    this.ClienteName = (document.getElementById('inputCliente') as HTMLSelectElement).value;
-    this.ClienteCPF_CNPJ = (document.getElementById('inputCpf') as HTMLSelectElement).value;
-    this.vendorName = (document.getElementById('inputVendedor') as HTMLSelectElement).value;
-    this.SubTotal = parseFloat((document.getElementById('subtotal') as HTMLSelectElement).value.replace(/[^0-9.-]/g, ''));
+    this.ClienteName = (
+      document.getElementById('inputCliente') as HTMLSelectElement
+    ).value;
+    this.ClienteCPF_CNPJ = (
+      document.getElementById('inputCpf') as HTMLSelectElement
+    ).value;
+    this.vendorName = (
+      document.getElementById('inputVendedor') as HTMLSelectElement
+    ).value;
+    this.SubTotal = parseFloat(
+      (document.getElementById('subtotal') as HTMLSelectElement).value.replace(
+        /[^0-9.-]/g,
+        ''
+      )
+    );
 
-    let bandeiraElement = document.getElementById('bandeira') as HTMLSelectElement;
-    this.bandeira = (document.getElementById('bandeira') as HTMLSelectElement).selectedOptions[0].text;
+    let bandeiraElement = document.getElementById(
+      'bandeira'
+    ) as HTMLSelectElement;
+    this.bandeira = (
+      document.getElementById('bandeira') as HTMLSelectElement
+    ).selectedOptions[0].text;
 
     // Verificar se a forma de pagamento é parcelada
     if (this.parcelamento !== 0) {
       let parcelamento = this.Parcelamento;
       let total = this.calcularTotal();
       // Define o valor por parcela
-      this.valorParcela = total / parcelamento
+      this.valorParcela = total / parcelamento;
     }
 
     // Verificar se o desconto é zero e calcular com base no Subtotal e no Total
@@ -771,24 +856,26 @@ export class MesasComponent implements OnInit, AfterContentChecked {
 
       // Define o valor do desconto em R$ e em percentual
       this.DescontoValor = descontoValor;
-      this.DescontoPercent = ((descontoValor / subtotal) * 100);
-    };
+      this.DescontoPercent = (descontoValor / subtotal) * 100;
+    }
 
     // Show the modal
     // this.abrirCupomFiscalModal();
   }
 
-
-  buscarBandTypes(){
+  buscarBandTypes() {
     this.paytypeService.getAllBandsTypes().subscribe(
       (bandtypes: Bandeiras[]) => {
-        this.bandtypes = bandtypes.map((bandtype: Bandeiras) => ({id: bandtype.bandeira_id, nome:bandtype.descricao}));
+        this.bandtypes = bandtypes.map((bandtype: Bandeiras) => ({
+          id: bandtype.bandeira_id,
+          nome: bandtype.descricao,
+        }));
         this.loading = false;
       },
       (error) => {
         console.log('Ocorreu um erro ao solicitar os tipos de bandeiras.');
       }
-    )
+    );
   }
 
   fecharCupomFiscalModal() {

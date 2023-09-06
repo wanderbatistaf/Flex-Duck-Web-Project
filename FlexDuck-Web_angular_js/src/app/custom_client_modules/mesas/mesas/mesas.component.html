@@ -221,6 +221,7 @@
             <option value="">Selecione a mesa:</option>
             <option *ngFor="let numero of numerosMesasDisponiveis" [value]="numero">{{ numero }}</option>
           </select>
+          <p *ngIf="alertMesa" class="alert-mesa">{{criarNovaMesa()}}</p>
         </div>
       </div>
       <div class="modal-footer">
@@ -301,6 +302,7 @@
         <div class="modal-body">
           <input type="password" class="form-control" [(ngModel)]="senha">
         </div>
+        <p *ngIf="alertMesa" class="alert-mesa">{{alertDesconto}}</p>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="fecharModalSenha()">Cancelar</button>
           <button type="button" class="btn btn-primary" (click)="verificarSenha_valor()">Confirmar</button>
