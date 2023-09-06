@@ -1,8 +1,8 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { viewport } from "@popperjs/core";
-import {ProductService} from "@app/_services";
+import {ContabilService, ProductService} from "@app/_services";
 import {Products} from "@app/_models";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup} from "@angular/forms";
 
 interface Produto {
   cProd: string;
@@ -11,6 +11,8 @@ interface Produto {
   vUnCom: string;
   vProd: string;
   cfop: string;
+  preco_venda: string;
+  category_suggested: string;
 }
 
 declare var $: any;
@@ -44,15 +46,14 @@ export class NotasEntradaComponent implements OnInit {
   @ViewChild('serieField', {static: false}) serieField!: ElementRef<HTMLInputElement>;
   @ViewChild('impostosValor', {static: false}) impostosValor!: ElementRef<HTMLInputElement>;
   @ViewChild('impostosDetalhadosField', {static: false}) impostosDetalhadosField!: ElementRef<HTMLInputElement>;
-  selectedProduto: Produto | undefined;
   loadingPageModalVisible: boolean = false;
   lastProductCode: string = 'P000000';
-  nextProductCode: string = '';
   precoVendaValue?: string;
-  suggestResponse: any;
+  categoriaValue?: string;
   destinatario: string | null | undefined = '';
   itensInseridos: Produto[] = [];
-  isItemAlreadyInserted: boolean = false;
+  isTodosOsProdutosInseridos: boolean = false;
+  private extractedData: any = {};
 
 
   produtos: Produto[] = [];
@@ -60,14 +61,16 @@ export class NotasEntradaComponent implements OnInit {
     preco_venda: 0
   };
   precoVendaValueMultiple?: string;
+  categoriaValueMultiple?: string;
   modalProdutosMultiple: any;
   formGroup: FormGroup;
 
 
-  constructor( private productService: ProductService, private formBuilder: FormBuilder) {
-    this.formGroup = this.formBuilder.group({
-      preco_venda: [''] // ou qualquer valor padrão desejado
-    });
+  constructor( private productService: ProductService, private formBuilder: FormBuilder,
+               private contabilService:ContabilService) {
+      this.formGroup = this.formBuilder.group({
+          preco_venda: ['']
+      });
   }
 
   ngOnInit(): void {
@@ -129,6 +132,7 @@ export class NotasEntradaComponent implements OnInit {
     const emitenteCNPJ = xmlDoc.querySelector('emit CNPJ')?.textContent;
     const emitenteNome = xmlDoc.querySelector('emit xNome')?.textContent;
     const emitenteEndereco = xmlDoc.querySelector('emit enderEmit xLgr')?.textContent;
+    const dataEmissao = xmlDoc.querySelector('ide dhEmi')?.textContent;
     // Continue obtendo as informações de outros campos do emitente
 
     // Extrair informações do destinatário
@@ -253,7 +257,9 @@ export class NotasEntradaComponent implements OnInit {
           qCom: prodElement.querySelector('qCom')?.textContent || '',
           vUnCom: prodElement.querySelector('vUnCom')?.textContent || '',
           vProd: prodElement.querySelector('vProd')?.textContent || '',
-          cfop: prodElement.querySelector('CFOP')?.textContent || ''
+          cfop: prodElement.querySelector('CFOP')?.textContent || '',
+          preco_venda: '',
+          category_suggested: ''
         };
         produtos.push(produto);
       } else {
@@ -266,6 +272,30 @@ export class NotasEntradaComponent implements OnInit {
 
     // Preencher os campos da tabela com os detalhes dos produtos
     this.produtos = produtos;
+
+    this.extractedData = {
+    chNFe,
+    cUF,
+    cNF,
+    natOp,
+    emitenteCNPJ,
+    emitenteNome,
+    emitenteEndereco,
+    destinatarioCNPJ,
+    destinatarioCPF,
+    destinatarioNome,
+    destinatarioEndereco,
+    modFrete,
+    qVol,
+    esp,
+    serie,
+    infAdic,
+    totalValorNF,
+    valorImpostos,
+    impostosDetalhados,
+    produtos, // Array de produtos
+    dataEmissao
+  };
   }
 
   preencherCNPJSeVazio() {
@@ -325,14 +355,25 @@ export class NotasEntradaComponent implements OnInit {
             this.precoVendaValue = '0.00';
             productCodeToUse = this.generateNextCode(); // Gera um novo código
           }
+          // Adiciona a categoria sugerida ao modalSelectedProduto
+          if (suggestResponse.category_suggested) {
+            this.modalSelectedProduto.category_suggested = suggestResponse.category_suggested;
+            this.categoriaValue = this.modalSelectedProduto.category_suggested;
+          } else {
+            // Defina um valor padrão caso a categoria sugerida não seja fornecida
+            this.modalSelectedProduto.category_suggested = 'Categoria';
+            this.categoriaValue = this.modalSelectedProduto.category_suggested;
+          }
 
           console.log('Código do produto alterado para:', productCodeToUse);
+          console.log('Categoria sugerida:', this.modalSelectedProduto.category_suggested);
 
           // Armazena o productCodeToUse no modalSelectedProduto somente para o modal
           this.modalSelectedProduto.modalCProd = productCodeToUse;
 
           console.log('Updated modalSelectedProduto:', this.modalSelectedProduto);
           console.log('precoVendaValue:', this.precoVendaValue);
+          console.log('categoriaValue:', this.categoriaValue);
 
           $('#produtoModal').modal('show');
           this.loadingPageModalVisible = false;
@@ -342,61 +383,73 @@ export class NotasEntradaComponent implements OnInit {
   }
 
 
-  getLastProductCodeMultiple() {
-    const isProductDefault = 1;
+    getLastProductCodeMultiple() {
+        const isProductDefault = 1;
 
-    this.productService.getLastCode(isProductDefault).subscribe((response: any) => {
-      if (response && response.produto && response.produto[2]) {
-        this.lastProductCode = response.produto[2];
-      } else {
-        this.lastProductCode = 'P000001';
-      }
+        this.productService.getLastCode(isProductDefault).subscribe((response: any) => {
+            if (response && response.produto && response.produto[2]) {
+                this.lastProductCode = response.produto[2];
+            } else {
+                this.lastProductCode = 'P000001';
+            }
 
-      let nextNumericPart = parseInt(this.lastProductCode.substring(1), 10);
+            let nextNumericPart = parseInt(this.lastProductCode.substring(1), 10);
 
-      // Criar uma cópia dos produtos para o modal
-      this.modalProdutosMultiple = this.produtos.map(produto => ({ ...produto }));
+            // Criar uma cópia dos produtos para o modal
+            this.modalProdutosMultiple = this.produtos.map(produto => ({ ...produto }));
 
-      const getProductCode = (suggestResponse: { mensagem: string; suggested_price: number; product_code: string; }) => {
-        if (suggestResponse && suggestResponse.mensagem === "Produto localizado com sucesso!") {
-          this.precoVendaValueMultiple = suggestResponse.suggested_price.toFixed(2);
+            const getProductCode = (suggestResponse: { mensagem: string; suggested_price: number; product_code: string; }) => {
+                if (suggestResponse && suggestResponse.mensagem === "Produto localizado com sucesso!") {
+                    this.precoVendaValueMultiple = suggestResponse.suggested_price.toFixed(2);
 
-          if (suggestResponse.product_code) {
-            return suggestResponse.product_code;
-          } else {
-            nextNumericPart++;
-            return `P${nextNumericPart.toString().padStart(6, '0')}`;
-          }
-        } else {
-          this.precoVendaValueMultiple = '0.00';
-          nextNumericPart++;
-          return `P${nextNumericPart.toString().padStart(6, '0')}`;
-        }
-      };
+                    if (suggestResponse.product_code) {
+                        return suggestResponse.product_code;
+                    } else {
+                        nextNumericPart++;
+                        return `P${nextNumericPart.toString().padStart(6, '0')}`;
+                    }
+                } else {
+                    this.precoVendaValueMultiple = '0.00';
+                    nextNumericPart++;
+                    return `P${nextNumericPart.toString().padStart(6, '0')}`;
+                }
+            };
 
-      const processNextProduct = (index: number) => {
-        if (index < this.modalProdutosMultiple.length) {
-          const currentProduct = this.modalProdutosMultiple[index];
-          this.productService.suggestPrice(currentProduct.xProd).subscribe((suggestResponse: any) => {
-            currentProduct.cProd = getProductCode(suggestResponse);
-            processNextProduct(index + 1); // Processar o próximo produto
-          });
-        } else {
-          console.log('Modal produtos (Multiple):', this.modalProdutosMultiple);
-          console.log('precoVendaValue (Multiple):', this.precoVendaValueMultiple);
+            const processNextProduct = (index: number) => {
+                if (index < this.modalProdutosMultiple.length) {
+                    const currentProduct = this.modalProdutosMultiple[index];
+                    this.productService.suggestPrice(currentProduct.xProd).subscribe((suggestResponse: any) => {
+                        currentProduct.cProd = getProductCode(suggestResponse);
 
-          $('#produtoModalTodos').modal('show');
-          this.loadingPageModalVisible = false;
-        }
-      };
+                        // Adicione a categoria sugerida ao produto
+                        if (suggestResponse.category_suggested) {
+                            currentProduct.category_suggested = suggestResponse.category_suggested;
+                            this.categoriaValueMultiple = suggestResponse.category_suggested;
+                        } else {
+                            // Defina um valor padrão para a categoria sugerida em caso de erro
+                            currentProduct.category_suggested = 'Categoria';
+                            this.categoriaValueMultiple = 'Categoria';
+                        }
 
-      processNextProduct(0); // Iniciar o processamento do primeiro produto
-    });
-  }
+                        processNextProduct(index + 1); // Processar o próximo produto
+                    });
+                } else {
+                    console.log('Modal produtos (Multiple):', this.modalProdutosMultiple);
+                    console.log('precoVendaValue (Multiple):', this.precoVendaValueMultiple);
+
+                    $('#produtoModalTodos').modal('show');
+                    this.loadingPageModalVisible = false;
+                }
+            };
+
+            processNextProduct(0); // Iniciar o processamento do primeiro produto
+        });
+    }
 
 
 
-  generateNextCode(): string {
+
+    generateNextCode(): string {
     const prefix = this.lastProductCode.charAt(0);
     const numericPart = parseInt(this.lastProductCode.substring(1), 10);
     const newNumericPart = numericPart + 1;
@@ -407,6 +460,7 @@ export class NotasEntradaComponent implements OnInit {
 
   inserirProduto() {
     const precoVendaDigitado = (document.getElementById('preco_venda') as HTMLInputElement)?.value;
+    const categoriaDigitado = (document.getElementById('categoria') as HTMLInputElement)?.value;
 
     // Verifica se o item já foi inserido
     if (!this.itensInseridos.some(item => item.cProd === this.modalSelectedProduto.modalCProd)) {
@@ -415,20 +469,144 @@ export class NotasEntradaComponent implements OnInit {
 
       this.modalSelectedProduto.preco_venda = precoVendaDigitado;
 
+      this.modalSelectedProduto.category_suggested = categoriaDigitado
+
       // Insere o item na lista de itens inseridos
       this.itensInseridos.push(this.modalSelectedProduto);
+      console.log(this.itensInseridos);
     }
     // Feche o modal ou realize outras ações necessárias
     this.loadingPageModalVisible = false;
   }
 
 
+    inserirTodosOsProdutos() {
+        this.modalProdutosMultiple.forEach((produto: Produto) => {
+            const precoVendaInputId = `preco_venda_${produto.cProd}`;
+            const categoriaInputId = `categoria_${produto.cProd}`;
+            const precoVendaInput = document.getElementById(precoVendaInputId) as HTMLInputElement;
+            const categoriaInput = document.getElementById(categoriaInputId) as HTMLInputElement;
 
-  produtoJaInserido(produto: Produto): boolean {
+            console.log(`ID do campo de preço de venda: ${precoVendaInputId}`);
+            console.log(`ID do campo de categoria: ${categoriaInputId}`);
+
+            if (!this.produtoJaInserido(produto)) {
+                // Verifica se o preço de venda e a categoria estão definidos
+                if (precoVendaInput && categoriaInput) {
+                    const precoVendaDigitado = precoVendaInput.value;
+                    const categoriaDigitada = categoriaInput.value;
+
+                    if (precoVendaDigitado) {
+                        const produtoComPreco = { ...produto }; // Crie uma cópia do produto
+                        produtoComPreco.preco_venda = precoVendaDigitado; // Defina o preço de venda na cópia
+                        produtoComPreco.category_suggested = categoriaDigitada; // Defina a categoria na cópia
+                        this.itensInseridos.push(produtoComPreco); // Adicione a cópia à lista de itens inseridos
+                    } else {
+                        // Trate a situação em que o preço de venda não foi digitado pelo usuário
+                        console.error(`O preço de venda não foi digitado para o produto ${produto.cProd}.`);
+                    }
+                } else {
+                    console.error(`Campo de preço de venda ou categoria não encontrado para o produto ${produto.cProd}.`);
+                }
+            }
+        });
+
+        // Defina isTodosOsProdutosInseridos como true após a inserção dos produtos
+        this.isTodosOsProdutosInseridos = true;
+
+        console.log(this.itensInseridos);
+        this.fecharModal()
+    }
+
+
+    produtoJaInserido(produto: Produto): boolean {
     return this.itensInseridos.some(p => p.cProd === produto.cProd);
   }
 
 
+  limparCampos() {
+        if (this.chNFeField) {
+            this.chNFeField.nativeElement.value = '';
+        }
+        if (this.cUFField) {
+            this.cUFField.nativeElement.value = '';
+        }
+        if (this.cNFField) {
+            this.cNFField.nativeElement.value = '';
+        }
+        if (this.natOpField) {
+            this.natOpField.nativeElement.value = '';
+        }
+        if (this.emitenteCNPJField) {
+            this.emitenteCNPJField.nativeElement.value = '';
+        }
+        if (this.emitenteNomeField) {
+            this.emitenteNomeField.nativeElement.value = '';
+        }
+        if (this.emitenteEnderecoField) {
+            this.emitenteEnderecoField.nativeElement.value = '';
+        }
+        if (this.destinatarioCNPJField) {
+            this.destinatarioCNPJField.nativeElement.value = '';
+        }
+        if (this.destinatarioCPFField) {
+            this.destinatarioCPFField.nativeElement.value = '';
+        }
+        if (this.destinatarioNomeField) {
+            this.destinatarioNomeField.nativeElement.value = '';
+        }
+        if (this.destinatarioEnderecoField) {
+            this.destinatarioEnderecoField.nativeElement.value = '';
+        }
+        if (this.totalValorNFField) {
+            this.totalValorNFField.nativeElement.value = '';
+        }
+        if (this.modFreteField) {
+            this.modFreteField.nativeElement.value = '';
+        }
+        if (this.qVolField) {
+            this.qVolField.nativeElement.value = '';
+        }
+        if (this.espField) {
+            this.espField.nativeElement.value = '';
+        }
+        if (this.infAdicField) {
+            this.infAdicField.nativeElement.value = '';
+        }
+        if (this.serieField) {
+            this.serieField.nativeElement.value = '';
+        }
+        if (this.impostosValor) {
+            this.impostosValor.nativeElement.value = '';
+        }
+        if (this.impostosDetalhadosField) {
+            this.impostosDetalhadosField.nativeElement.value = '';
+        }
 
-  protected readonly Number = Number;
+        // Limpe os detalhes dos produtos
+        this.produtos = [];
+
+        this.formGroup.reset();
+
+        this.destinatario = '';
+        this.activeTab = 'consulta'
+    }
+
+    salvarNota() {
+        // Exibir as informações extraídas no console
+        console.log('Dados extraídos:', this.extractedData);
+        console.log('Itens a inserir:', this.itensInseridos);
+
+        this.contabilService.addNotes(this.extractedData, this.itensInseridos).subscribe(
+            (response) => {
+                console.log('API Response:', response);
+            },
+            (error) => {
+                console.error('API Error:', error);
+            }
+        );
+    }
+
+
+    protected readonly Number = Number;
 }

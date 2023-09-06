@@ -174,12 +174,12 @@
                   <td><button
                     type="submit"
                     class="btn btn-outline-primary"
-                    [disabled]="produtoJaInserido(produto)"
+                    [disabled]="produtoJaInserido(produto) || isTodosOsProdutosInseridos"
                     (click)="openModal(produto)"
                   >Inserir</button></td>
                 </tr>
                 <br/>
-                <button type="submit" class="btn btn-primary" (click)="abrirModalTodos()">Inserir Todos</button>
+                <button type="submit" class="btn btn-primary" [disabled]="isTodosOsProdutosInseridos" (click)="abrirModalTodos()">Inserir Todos</button>
                 </tbody>
               </table>
             </div>
@@ -217,9 +217,12 @@
 
 
             </div>
+            <button class="btn btn-primary" (click)="salvarNota()">Salvar Nota</button>
+            <button class="btn btn-danger" (click)="limparCampos()">Cancelar</button>
 
 
           </div>
+
         </div>
       </div>
     </div>
@@ -248,6 +251,7 @@
           <th>Quantidade</th>
           <th>Valor Unitário</th>
           <th>Preço de Venda</th>
+          <th>Categoria</th>
           <th>Valor Total</th>
           <th>CFOP</th>
         </tr>
@@ -259,6 +263,7 @@
         <td>{{ Number(modalSelectedProduto?.qCom) }}</td>
         <td>{{ Number(modalSelectedProduto?.vUnCom).toFixed(2) }}</td>
         <td><input type="number" class="form-control" formControlName="preco_venda" id="preco_venda" placeholder="" [value]="precoVendaValue"></td>
+        <td><input type="text" class="form-control" formControlName="categoria" id="categoria" placeholder="" [value]="categoriaValue"></td>
         <td>{{ modalSelectedProduto?.vProd }}</td>
         <td>{{ modalSelectedProduto?.cfop }}</td>
         <!-- Adicione mais informações do produto aqui -->
@@ -303,6 +308,7 @@
                 <th>Quantidade</th>
                 <th>Valor Unitário</th>
                 <th>Preço de Venda</th>
+                <th>Categoria</th>
                 <th>Valor Total</th>
                 <th>CFOP</th>
               </tr>
@@ -313,7 +319,8 @@
                 <td>{{ produto.xProd }}</td>
                 <td>{{ Number(produto.qCom) }}</td>
                 <td>{{ Number(produto.vUnCom).toFixed(2) }}</td>
-                <td><input type="number" class="form-control" placeholder="" [value]="precoVendaValueMultiple"></td>
+                <td><input type="number" class="form-control" placeholder="" class="form-control" [formControlName]="'preco_venda_' + produto.cProd" [id]="'preco_venda_' + produto.cProd" [value]="precoVendaValueMultiple"></td>
+                <td><input type="text" class="form-control" placeholder="" class="form-control" [formControlName]="'categoria_' + produto.cProd" [id]="'categoria_' + produto.cProd" [value]="categoriaValueMultiple"></td>
                 <td>{{ produto.vProd }}</td>
                 <td>{{ produto.cfop }}</td>
               </tr>
@@ -327,8 +334,8 @@
         <button
           type="button"
           class="btn btn-primary"
-          (click)="inserirProduto()"
-          [disabled]="produtoJaInserido(modalSelectedProduto)"
+          (click)="inserirTodosOsProdutos()"
+          [disabled]="isTodosOsProdutosInseridos"
         >
           Inserir Produtos
         </button>
