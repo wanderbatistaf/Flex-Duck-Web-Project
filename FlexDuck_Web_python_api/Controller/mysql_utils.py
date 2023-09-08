@@ -13,10 +13,12 @@ class AppContext:
 
 # Função para mapear o subdomínio ao nome do banco de dados
 def get_db_name_from_subdomain(subdomain):
-    if subdomain == "smarttech.flexduck.com.br":
-        return "smarttechdb"
-    elif subdomain == "www.flexduck.com.br":
-        return "flexduckdb"
+    if subdomain == "pqa1.flexduck.com.br":
+        return "pqa1"
+    elif subdomain == "pqa2.flexduck.com.br":
+        return "pqa2"
+    elif subdomain == "pqa3.flexduck.com.br":
+        return "pqa3"
     elif subdomain == "localhost:4200":
         return "localtestdb"
     else:
@@ -24,25 +26,25 @@ def get_db_name_from_subdomain(subdomain):
         return "localtestdb"
 
 # Configuração do pool de conexões do MySQL
-#def create_db_config(subdomain):
-#    db_config = {
-#        "host": "db-flexduck.cncrrju5nmty.sa-east-1.rds.amazonaws.com",
-#        "port": "3306",
-#        "user": "duckadmin",
-#        "password": "lavemopato",
-#        "database": get_db_name_from_subdomain(subdomain),
-#    }
-#    return db_config
-
 def create_db_config(subdomain):
-    db_config = {
-        "host": "localhost",
-        "port": "3306",
-        "user": "root",
-        "password": "senha123",
-        "database": get_db_name_from_subdomain(subdomain),
-    }
-    return db_config
+   db_config = {
+       "host": "db-flexduck.cncrrju5nmty.sa-east-1.rds.amazonaws.com",
+       "port": "3306",
+       "user": "duckadmin",
+       "password": "lavemopato",
+       "database": get_db_name_from_subdomain(subdomain),
+   }
+   return db_config
+
+# def create_db_config(subdomain):
+#     db_config = {
+#         "host": "localhost",
+#         "port": "3306",
+#         "user": "root",
+#         "password": "senha123",
+#         "database": get_db_name_from_subdomain(subdomain),
+#     }
+#     return db_config
 
 
 # Criação do pool de conexões
