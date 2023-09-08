@@ -13,7 +13,7 @@ import mysql.connector
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from custom_logger import setup_logger
-from Controller.mysql_utils import AppContext, get_db_name_from_subdomain
+from Controller.mysql_utils import AppContext
 from Controller.db_connection import get_db_connection
 from Controller.mysql_utils import create_db_pool
 
@@ -151,45 +151,53 @@ def check_connection():
 
 
 # Rota para autenticar e obter o token JWT
-@app.route('/auth/login', methods=['POST', 'OPTIONS'])
+@app.route('/auth/login', methods=['POST'])
 def autenticar_usuario():
     if request.method == 'OPTIONS':
         # Retorna uma resposta vazia com status 200 para pre-flight request
         return "", 200
 
-    # Obtém o subdomínio a partir da requisição Flask
-    subdomain = request.headers.get('X-Subdomain')
-    db_name = create_db_pool(subdomain)
-    dados = request.json
-    conn = get_db_connection(db_name)
-    cursor = conn.cursor(dictionary=True)
-    print("Executing query on database:", db_name)
-    cursor.execute("SELECT * FROM usuarios WHERE username=%s AND password=%s", (dados['username'], dados['password']))
-    user = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if user:
-        token_data = {
-            'username': user['username'],
-            'level': user['level'],
-            'user_id': user['user_id'],
-            'name': user['name'],
-            'active': user['active']
-        }
-        token = create_access_token(identity=token_data)
-        print(token)
-        return jsonify({'access_token': token})
-    else:
-        # Tentar novamente até conectar
-        while True:
-            try:
-                # Encerra o aplicativo Flask
-                encerrar_aplicativo()
-                # Reinicia o aplicativo em um novo processo
-                reiniciar_aplicativo()
-            except Exception as e:
-                print("Erro ao tentar novamente:", str(e))
-                time.sleep(3)  # Aguarda 3 segundos antes de tentar novamente
+    try:
+        # Obtém o subdomínio a partir da requisição Flask
+        subdomain = request.headers.get('X-Subdomain')
+
+        # Obtém a conexão com o banco de dados usando o subdomínio como argumento
+        conn = get_db_connection(subdomain)
+
+        dados = request.json
+        cursor = conn.cursor(dictionary=True)
+        print("Executing query on database:", subdomain)
+        cursor.execute("SELECT * FROM usuarios WHERE username=%s AND password=%s", (dados['username'], dados['password']))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if user:
+            token_data = {
+                'username': user['username'],
+                'level': user['level'],
+                'user_id': user['user_id'],
+                'name': user['name'],
+                'active': user['active']
+            }
+            token = create_access_token(identity=token_data)
+            print(token)
+            return jsonify({'access_token': token})
+        else:
+            # Tentar novamente até conectar
+            while True:
+                try:
+                    # Encerra o aplicativo Flask
+                    encerrar_aplicativo()
+                    # Reinicia o aplicativo em um novo processo
+                    reiniciar_aplicativo()
+                except Exception as e:
+                    print("Erro ao tentar novamente:", str(e))
+                    time.sleep(3)  # Aguarda 3 segundos antes de tentar novamente
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 
 
