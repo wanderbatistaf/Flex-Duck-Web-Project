@@ -85,15 +85,12 @@ export class ClienteModalComponent implements OnInit {
           // Define os pagamentos recuperados na propriedade da classe
           this.clientes = clientes;
           this.isLoading = false;
-          // Renderiza os pagamentos
-          console.log(clientes);
         },
         // Quando ocorrer um erro na resposta
         error => {
           console.log('Houve um erro ao requisitar os clientes.');
         }
       );
-    console.log(this.clientes);
   }
 
   selecionarClient(cliente: Clients) {
@@ -109,11 +106,6 @@ export class ClienteModalComponent implements OnInit {
     this.sharedService.selectedCliente.cnpj_cpf = String(cliente.cnpj_cpf?.toString());
     this.sharedService.selectedCliente.telephone = String(cliente.telephone?.toString());
     this.sharedService.selectedCliente.id = String(cliente.id?.toString());
-
-    console.log(cliente.business_name);
-    console.log(cliente.cnpj_cpf);
-    console.log(cliente.telephone);
-    console.log(cliente.id);
 
     // Fecha o modal
     this.activeModal.close();

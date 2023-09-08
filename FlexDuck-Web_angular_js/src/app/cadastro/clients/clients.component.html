@@ -50,7 +50,6 @@
   <div class="card-body">
      <!-- <div class="spinner-border spinner-border-sm"></div> -->
       <skeleton-table-display class="" *ngIf="loading"></skeleton-table-display>
-    </div>
 
     <!--Edição renderiza aqui!-->
     <div *ngIf="activeTab === 'edicao'">
@@ -401,7 +400,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let clients of filteredClients">
+        <tr *ngFor="let clients of filteredClients | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
           <td>{{ clients.business_name }}</td>
           <td>{{ clients.firstname }}</td>
           <td>{{ clients.lastname }}</td>
@@ -441,30 +440,25 @@
 
   <!--Botões de paginação-->
   <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
-    <div class="mt-3">
-      <button class="btn btn-sm btn-outline-secondary mr-2" *ngIf="cPage > 1" (click)="goToPage(1)">
-        Início
+    <section class="pagination pagination-left">
+      <button id="pg-button-prev" type="button" class="pagination__button" (click)="previousPage()" [disabled]="currentPage === 1">
+        <i class="fa fa-chevron-left"></i>
       </button>
 
-      <button class="btn btn-sm btn-outline-secondary mr-2" *ngIf="cPage > 1" (click)="goToPage(cPage - 1)">
-        Anterior
-      </button>
+      <ul class="pagination__list">
+        <li class="pagination__item pagination__item--1">
+          <button id="pg-button-1" type="button" (click)="goToPage(1)" [class.active]="currentPage === 1">1</button>
+        </li>
+        <li class="pagination__item pagination__item--2">
+          <button id="pg-button-2" type="button" (click)="goToPage(2)" [class.active]="currentPage === 2">2</button>
+        </li>
+      </ul>
 
-      <ng-container *ngFor="let page of pages">
-        <button class="btn btn-sm mr-2" [class.btn-outline-secondary]="page !== cPage"
-                [class.btn-secondary]="page === cPage" (click)="goToPage(page)">
-          {{ page }}
-        </button>
-      </ng-container>
-
-      <button class="btn btn-sm btn-outline-secondary mr-2" *ngIf="cPage < totalPages" (click)="goToPage(cPage + 1)">
-        Próximo
+      <button id="pg-button-next" type="button" class="pagination__button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        <i class="fa fa-chevron-right"></i>
       </button>
-
-      <button class="btn btn-sm btn-outline-secondary" *ngIf="cPage < totalPages" (click)="goToPage(totalPages)">
-        Final
-      </button>
-    </div>
+    </section>
 
   </nav>
+</div>
 </div>

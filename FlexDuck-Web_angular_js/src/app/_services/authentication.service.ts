@@ -34,7 +34,6 @@ export class AuthenticationService {
 
           // Decode the JWT token to extract information
           const decodedToken: any = jwt_decode(user.access_token);
-          console.log('Decoded Token:', decodedToken);
 
           // Extract the level property from the decoded token
           const level = decodedToken?.sub?.level;
@@ -56,9 +55,6 @@ export class AuthenticationService {
             active: active,
             user_id: user_id,
           };
-
-          console.log('User with Level:', userWithLevel);
-          console.log('User id is:', userWithLevel.user_id);
 
           this.userSubject.next(userWithLevel);
           return userWithLevel;

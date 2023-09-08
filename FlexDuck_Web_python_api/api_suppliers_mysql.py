@@ -140,7 +140,7 @@ def atualizar_dados(id):
     db = get_db_connection(subdomain)
     dados = request.json
     cursor = db.cursor()
-    sql = 'UPDATE fornecedores SET id = %s, nome = %s, contato = %s, detalhes_pagamento = %s, prazo_entrega = %s'
+    sql = 'UPDATE fornecedores SET id = %s, nome = %s, contato = %s, detalhes_pagamento = %s, prazo_entrega = %s WHERE id = %s'
     val = (dados['id'], dados['nome'], dados['contato'], dados['detalhes_pagamento'], dados['prazo_entrega'], id)
     cursor.execute(sql, val)
     db.commit()

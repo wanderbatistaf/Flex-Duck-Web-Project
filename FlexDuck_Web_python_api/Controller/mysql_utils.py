@@ -13,7 +13,7 @@ class AppContext:
 
 # Função para mapear o subdomínio ao nome do banco de dados
 def get_db_name_from_subdomain(subdomain):
-    if subdomain == "smarttech.flexduck.com":
+    if subdomain == "smarttech.flexduck.com.br":
         return "smarttechdb"
     elif subdomain == "www.flexduck.com.br":
         return "flexduckdb"
@@ -24,15 +24,26 @@ def get_db_name_from_subdomain(subdomain):
         return "localtestdb"
 
 # Configuração do pool de conexões do MySQL
+#def create_db_config(subdomain):
+#    db_config = {
+#        "host": "db-flexduck.cncrrju5nmty.sa-east-1.rds.amazonaws.com",
+#        "port": "3306",
+#        "user": "duckadmin",
+#        "password": "lavemopato",
+#        "database": get_db_name_from_subdomain(subdomain),
+#    }
+#    return db_config
+
 def create_db_config(subdomain):
     db_config = {
-        "host": "db-flexduck.cncrrju5nmty.sa-east-1.rds.amazonaws.com",
+        "host": "localhost",
         "port": "3306",
-        "user": "duckadmin",
-        "password": "lavemopato",
+        "user": "root",
+        "password": "senha123",
         "database": get_db_name_from_subdomain(subdomain),
     }
     return db_config
+
 
 # Criação do pool de conexões
 def create_db_pool(subdomain):

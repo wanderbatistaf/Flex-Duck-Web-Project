@@ -20,6 +20,11 @@ export class SalesService {
     return this.http.post<Products>(`${environment.apiUrl}/vendas/add`, newProduct);
   }
 
+  // Cria o método para adicionar um novo produto
+  addMesasVenda(newProduct: Products): Observable<Products> {
+    return this.http.post<Products>(`${environment.apiUrl}/vendas/mesas/add`, newProduct);
+  }
+
   // Cria o método para requisitar um produto específico pelo ID
   getProductById(id: number): Observable<Products> {
     return this.http.get<Products>(`${environment.apiUrl}/vendas/${id}`)

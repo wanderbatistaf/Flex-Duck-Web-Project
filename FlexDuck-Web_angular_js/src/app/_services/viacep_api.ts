@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders  } from '@angular/common/http';
 
 import { Cep } from "@app/_models";
 import { Observable } from 'rxjs';
+import {environment} from "@environments/environment";
 
 @Injectable({ providedIn: 'root' })
 export class ViaCepService {
@@ -11,7 +12,7 @@ export class ViaCepService {
   constructor(private http: HttpClient) { }
 
   getAddress(zipCode: string): Observable<any> {
-    const url = `https://viacep.com.br/ws/${zipCode}/json/`;
+    const url = `${environment.apiUrl}/get_address/${zipCode}`;
     return this.http.get(url);
   }
 }

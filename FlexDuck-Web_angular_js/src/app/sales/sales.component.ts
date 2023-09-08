@@ -186,7 +186,6 @@ export class SalesComponent implements OnInit, AfterContentChecked {
       (paytypes: Paytype[]) => {
         this.paytypes = paytypes.map((paytype: Paytype) => ({ id: paytype.forma_pagamento_id, nome: paytype.descricao }))
         this.loading = false;
-        console.log(this.paytypes);
       },
       (error) => {
         console.log('Ocorreu um erro ao solicitar os tipos de pagamento.');
@@ -332,8 +331,6 @@ export class SalesComponent implements OnInit, AfterContentChecked {
             // Atualizar a lista de produtos no HTML
             this.atualizarListaProdutos();
 
-            // Exibir o produto no console para verificar se os valores estão corretos
-            console.log(produtoAdicionado);
           } else {
             console.log('Produto não encontrado');
           }
@@ -523,7 +520,6 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     let DescontoPercent = (document.getElementById('descontoPercent') as HTMLSelectElement).value;
     let clienteID = (document.getElementById('inputClienteID') as HTMLSelectElement).value;
 
-    console.log(formaPagamento);
 
     // Lista de campos obrigatórios que precisam estar preenchidos
     let camposObrigatorios = [];
@@ -587,7 +583,6 @@ export class SalesComponent implements OnInit, AfterContentChecked {
       // Se chegou até aqui, todos os campos estão preenchidos corretamente
       // Exibir alerta de confirmação
       if (confirm('Deseja finalizar a venda?')) {
-        console.log(this.dadosDaVenda);
         this.finalizarVenda();
         // this.gerarCupomFiscal();
       }
@@ -798,8 +793,6 @@ export class SalesComponent implements OnInit, AfterContentChecked {
       // Atualiza a lista de produtos no HTML
       this.atualizarListaProdutos();
 
-      // Exibir o produto no console para verificar se os valores estão corretos
-      console.log(this.listaProdutos);
     }
   }
 
@@ -867,11 +860,10 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     this.salesService.addVenda(this.dadosDaVenda).subscribe(
       (res) => {
         // Manipular a resposta do backend, se necessário
-        console.log('Venda finalizada com sucesso:', res);
+        // console.log('Venda finalizada com sucesso:', res);
 
         // Exibir o modal com o cupom fiscal
         this.gerarCupomFiscal();
-        console.log('Rodou!');
       },
       (err) => {
         console.error('Erro ao finalizar venda:', err);

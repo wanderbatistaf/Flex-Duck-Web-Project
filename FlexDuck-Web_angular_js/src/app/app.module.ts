@@ -35,6 +35,7 @@ import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/me
 import {CustomHttpInterceptor} from "@app/_services";
 import { SkeletonTableDisplay } from './_share/skeleton-table';
 import {ConfigurationComponent} from "@app/configuration/configuration.component";
+import {NgxPaginationModule} from "ngx-pagination";
 
 
 @NgModule({
@@ -51,6 +52,7 @@ import {ConfigurationComponent} from "@app/configuration/configuration.component
     AnQrcodeModule,
     NgbModule,
     NgbModalModule,
+    NgxPaginationModule
   ],
   declarations: [
     AppComponent,
@@ -75,7 +77,7 @@ import {ConfigurationComponent} from "@app/configuration/configuration.component
     FilterPipeP,
     FilterPipeV,
     FilterPipeC,
-    SkeletonTableDisplay,
+    SkeletonTableDisplay
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

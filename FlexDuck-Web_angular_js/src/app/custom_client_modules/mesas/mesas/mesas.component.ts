@@ -116,8 +116,9 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   DescontoValor: number = 0;
   DescontoPercent: number = 0;
   Parcelamento: number = 0;
+  numeroMesa:string = '0';
   CfiscalDataHora: string | undefined;
-  formaPagamento: string = '0';
+  formaPagamento: number = 0;
   valorParcela: number = 1;
   ultimoNumeroCF: number = 0;
   proximoNumeroCF: string = '000000000';
@@ -130,33 +131,34 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   company?: Company[];
   companyInfo?: Company;
   formComp: FormGroup;
+  dadosDaVenda: any;
 
-  dadosDaVenda = {
-    cliente_id: this.SelectedClienteId,
-    vendedor: this.vendorName,
-    cliente: this.ClienteName,
-    cpf_cnpj: this.ClienteCPF_CNPJ,
-    telefone: this.telefone,
-    forma_pagamento_id: this.formaPagamento,
-    bandeira_id: this.bandeira,
-    parcelamento: this.parcelamento,
-    subtotal: this.SubTotal,
-    desconto: this.DescontoValor,
-    valor_total: this.Total,
-    valor_total_pago: this.valorPago,
-    troco: (this.valorPago - this.total).toFixed(2),
-    quantidade_itens: this.listaProdutos.length,
-    numero_cupom_fiscal: this.proximoNumeroCF,
-    imposto_estadual: 6, // Insira o valor do imposto estadual, caso possua
-    imposto_federal: 10, // Insira o valor do imposto federal, caso possua
-    itens_vendidos: this.listaProdutos.map((produto) => ({
-      produto: produto.nome,
-      codigo_produto: produto.codigo,
-      quantidade: produto.quantidade,
-      preco_unitario: produto.preco,
-      subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2)),
-    })),
-  };
+  // dadosDaVenda = {
+  //   cliente_id: 'Q1', // Cliente Anônimo
+  //   vendedor: 'Presencial',
+  //   cliente: this.ClienteName,
+  //   cpf_cnpj: '', // Deixando em branco
+  //   telefone: this.telefone,
+  //   forma_pagamento_id: this.formaPagamento,
+  //   bandeira_id: this.bandeira,
+  //   parcelamento: this.parcelamento,
+  //   subtotal: this.SubTotal,
+  //   desconto: this.DescontoValor,
+  //   valor_total: this.Total,
+  //   valor_total_pago: this.valorPago,
+  //   troco: (this.valorPago - this.total).toFixed(2),
+  //   quantidade_itens: this.listaProdutos.length,
+  //   numero_cupom_fiscal: this.proximoNumeroCF,
+  //   imposto_estadual: 6, // Insira o valor do imposto estadual, caso possua
+  //   imposto_federal: 10, // Insira o valor do imposto federal, caso possua
+  //   itens_vendidos: this.listaProdutos.map((produto) => ({
+  //     produto: produto.nome,
+  //     codigo_produto: produto.codigo,
+  //     quantidade: produto.quantidade,
+  //     preco_unitario: produto.preco,
+  //     subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2)),
+  //   })),
+  // };
 
 
   constructor(private productService: ProductService,
@@ -216,6 +218,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       (numero) => !numerosMesasAbertas.includes(numero)
     );
     this.atualizarNumerosMesasDisponiveis();
+
     // Exibir o modal para abrir uma nova mesa
     this.modalNovaMesaVisivel = true;
   }
@@ -228,21 +231,20 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     this.alertDesconto = '';
   }
 
+
   criarNovaMesa(): any {
     if (!this.novoNumeroMesa || this.novoNumeroMesa <= 0) {
-      // alert('Selecione um número de mesa válido.');
       this.alertMesa = true;
       return 'Selecione um número de mesa válido.';
     }
     this.alertMesa = false;
     if (this.mesasAbertas.some((mesa) => mesa.numero === this.novoNumeroMesa)) {
-      // alert('Essa mesa já está aberta.');
       this.alertMesa = true;
       return 'Essa mesa já está aberta.';
     }
 
     const novaMesa: Mesa = {
-      id: this.id_mesa++,
+      id: this.id_mesa++, // Certifique-se de atualizar o ID adequadamente
       numero: this.novoNumeroMesa,
       nome: this.novoCliente.nome,
       telefoneResponsavel: this.novoCliente.telefone,
@@ -252,7 +254,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
       tempoAberta: new Date(),
       iniciado: true,
       tempoInicial: 0,
-      tempoTotal: 0
+      tempoTotal: 0,
     };
     this.mesasAbertas.push(novaMesa);
 
@@ -271,9 +273,10 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     return this.mesasAbertas.some((mesa) => mesa.numero === numeroMesa);
   }
 
+
   finalizarMesaSelecionada(mesa: Mesa, abrirModal: boolean): void {
     this.mesaSelecionada = mesa;
-    this.calcularSubtotal(mesa); // Atualizar o subtotal quando a mesa é selecionada
+    this.calcularSubtotal(mesa);
     this.calcularTotalAPagar(mesa);
     this.aplicarDesconto();
 
@@ -447,6 +450,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
           preco: this.produtoSelecionado.preco,
         };
         this.mesaSelecionada.produtosConsumidos.push(produtoParaAdicionar);
+        this.atualizarLocalStorage();
       }
 
       // Calcula o total a pagar e realiza outras ações necessárias
@@ -532,8 +536,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     this.cupomFiscalModalAberto = true;
 
     this.gerarCupomFiscal();
-
-    // Remova a chamada para calcularSubtotal e aplicarDesconto aqui, pois já foram feitas no finalizarMesaSelecionada
   }
 
   fecharModalProdutosConsumidos(): void {
@@ -573,7 +575,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
             preco: Number(produto.preco_venda), // Converte o preço para número
           }));
           this.loading = false;
-          console.log(this.produtos);
         },
         // Quando ocorrer um erro na resposta
         (error) => {
@@ -613,7 +614,6 @@ export class MesasComponent implements OnInit, AfterContentChecked {
           nome: paytype.descricao,
         }));
         this.loading = false;
-        console.log(this.paytypes);
       },
       (error) => {
         console.log('Ocorreu um erro ao solicitar os tipos de pagamento.');
@@ -648,10 +648,85 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   validarCamposVenda() {
-    if (this.mesaSelecionada) {
-      this.removerMesaFinalizada(this.mesaSelecionada);
+    let formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
+    let bandeira = (document.getElementById('bandeira') as HTMLSelectElement).value;
+
+    // Lista de campos obrigatórios que precisam estar preenchidos
+    let camposObrigatorios = [];
+    if (this.listaProdutos.length === 0) camposObrigatorios.push('Pelo menos um produto na lista');
+    if (formaPagamento === '' || formaPagamento === 'select') camposObrigatorios.push('Forma de pagamento');
+    if (bandeira === '' || bandeira === 'select') camposObrigatorios.push('Bandeira do cartão');
+
+    // Verificar se todos os campos obrigatórios estão preenchidos
+    if (camposObrigatorios.length === 0) {
+      // Verificar o valor pago se a forma de pagamento for "Dinheiro"
+      if (formaPagamento === '1') {
+        let valorPagoElement = document.getElementById('valorPago') as HTMLInputElement;
+        let valorPago = valorPagoElement ? parseFloat(valorPagoElement.value) : NaN;
+
+        if (isNaN(valorPago) || valorPago <= 0) {
+          // O campo "Valor Pago" não foi preenchido corretamente, exibir alerta de erro
+          alert('Por favor, informe um valor válido maior que zero no campo "Valor Pago" antes de finalizar a venda.');
+          return; // Retorna sem finalizar a venda
+        }
+        this.valorPago = valorPago;
+      } else {
+        this.valorPago = this.total;
+      }
+
+      // Preencher os dados da venda antes de finalizar
+      this.dadosDaVenda = {
+        cliente_id: 'Q1', // Cliente Anônimo
+        vendedor: 'Presencial',
+        cliente: this.ClienteName,
+        cpf_cnpj: '', // Deixando em branco, pois você mencionou que não tem esse dado
+        telefone: this.telefone,
+        forma_pagamento_id: (document.getElementById('formaPagamento') as HTMLSelectElement).value,
+        bandeira_id: (document.getElementById('bandeira') as HTMLSelectElement).value,
+        parcelamento: this.parcelamento,
+        subtotal: this.subtotal,
+        desconto: this.DescontoValor,
+        valor_total: this.Total,
+        valor_total_pago: this.valorPago,
+        troco: (this.valorPago - this.total).toFixed(2),
+        quantidade_itens: this.listaProdutos.length,
+        numero_cupom_fiscal: this.proximoNumeroCF,
+        imposto_estadual: 6, // Insira o valor do imposto estadual, caso possua
+        imposto_federal: 10, // Insira o valor do imposto federal, caso possua
+        itens_vendidos: this.listaProdutos.map((produto) => ({
+          produto: produto.nome,
+          codigo_produto: produto.codigo,
+          quantidade: produto.quantidade,
+          preco_unitario: produto.preco,
+          subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2)),
+        })),
+      };
+
+      // Se chegou até aqui, todos os campos estão preenchidos corretamente
+      // Exibir alerta de confirmação
+      if (confirm('Deseja finalizar a venda?')) {
+        // Após finalizar a venda com sucesso, remover a mesa selecionada da lista de mesas abertas
+        if (this.mesaSelecionada) {
+          this.removerMesaFinalizada(this.mesaSelecionada);
+        }
+        this.modalFinalizarMesaVisivel = false;
+        this.finalizarVenda();
+        this.gerarCupomFiscal();
+
+      } else {
+        // Alguns campos não estão preenchidos, exibir alerta de erro com os campos obrigatórios faltantes
+        let mensagemErro = 'Por favor, preencha os seguintes campos antes de finalizar a venda:\n\n';
+        mensagemErro += camposObrigatorios.join('\n');
+        alert(mensagemErro);
+      }
     }
-    this.modalFinalizarMesaVisivel = false;
+  }
+
+  // validarCamposVenda() {
+    // if (this.mesaSelecionada) {
+    //   this.removerMesaFinalizada(this.mesaSelecionada);
+    // }
+    // this.modalFinalizarMesaVisivel = false;
     // let formaPagamento = (document.getElementById('formaPagamento') as HTMLSelectElement).value;
     // let bandeira = (document.getElementById('bandeira') as HTMLSelectElement).value;
     // let vendorID = (document.getElementById('inputVendedorID') as HTMLSelectElement).value;
@@ -736,7 +811,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     //   mensagemErro += camposObrigatorios.join('\n');
     //   alert(mensagemErro);
     // }
-  }
+  // }
 
   buscarUltimoNumeroCF() {
     this.salesService.getCFN().subscribe(
@@ -755,113 +830,194 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     );
   }
 
-  finalizarVenda(): void {
-    this.salesService.addVenda(this.dadosDaVenda).subscribe(
-      (res) => {
-        // Manipular a resposta do backend, se necessário
-        console.log('Venda finalizada com sucesso:', res);
-
-        // Exibir o modal com o cupom fiscal
-        this.gerarCupomFiscal();
-        console.log('Rodou!');
-      },
-      (err) => {
-        console.error('Erro ao finalizar venda:', err);
-      }
-    );
-  }
-
   gerarCupomFiscal() {
-    this.formaPagamento = (
-      document.getElementById('formaPagamento') as HTMLSelectElement
-    ).value;
-    let dataAtual = new Date();
-    dataAtual.setUTCHours(dataAtual.getUTCHours() - 3);
+    const mesasAbertasStr = localStorage.getItem('mesasAbertas'); // Recupera os dados do localStorage
+    if (mesasAbertasStr) {
+      const mesasAbertas = JSON.parse(mesasAbertasStr);
+      const mesaSelecionada = mesasAbertas.find((mesa: { numero: number | undefined; }) => mesa.numero === this.mesaSelecionada?.numero);
 
-    // Formatar a data e hora no formato (DD/MM/AAAA - HH:mm:ss)
-    this.CfiscalDataHora = `${dataAtual
-      .getUTCDate()
-      .toString()
-      .padStart(2, '0')}/${(dataAtual.getUTCMonth() + 1)
-      .toString()
-      .padStart(2, '0')}/${dataAtual.getUTCFullYear()} - ${dataAtual
-      .getUTCHours()
-      .toString()
-      .padStart(2, '0')}:${dataAtual
-      .getUTCMinutes()
-      .toString()
-      .padStart(2, '0')}:${dataAtual
-      .getUTCSeconds()
-      .toString()
-      .padStart(2, '0')}`;
+      if (mesaSelecionada) {
+        // Acesse todos os campos da mesaSelecionada
+        const {
+          id,
+          numero,
+          nome,
+          telefoneResponsavel,
+          produtosConsumidos,
+          totalAPagar,
+          abertura,
+          tempoAberta,
+          iniciado,
+          tempoInicial
+        } = mesaSelecionada;
 
-    // Atualizar os valores das variáveis
-    this.Total = parseFloat(
-      (document.getElementById('total') as HTMLSelectElement).value.replace(
-        /[^0-9.-]/g,
-        ''
-      )
-    );
-    this.DescontoValor = parseFloat(
-      (
-        document.getElementById('descontoValor') as HTMLSelectElement
-      ).value.replace(/[^0-9.-]/g, '')
-    );
-    this.DescontoPercent = parseFloat(
-      (
-        document.getElementById('descontoPercent') as HTMLSelectElement
-      ).value.replace(/[^0-9.-]/g, '')
-    );
-    this.Parcelamento = parseInt(
-      (document.getElementById('parcelamento') as HTMLSelectElement).value,
-      10
-    );
+        const momentoFechamento = new Date().getTime();
 
-    this.ClienteName = (
-      document.getElementById('inputCliente') as HTMLSelectElement
-    ).value;
-    this.ClienteCPF_CNPJ = (
-      document.getElementById('inputCpf') as HTMLSelectElement
-    ).value;
-    this.vendorName = (
-      document.getElementById('inputVendedor') as HTMLSelectElement
-    ).value;
-    this.SubTotal = parseFloat(
-      (document.getElementById('subtotal') as HTMLSelectElement).value.replace(
-        /[^0-9.-]/g,
-        ''
-      )
-    );
+        const tempoInicialMesa = tempoInicial;
 
-    let bandeiraElement = document.getElementById(
-      'bandeira'
-    ) as HTMLSelectElement;
-    this.bandeira = (
-      document.getElementById('bandeira') as HTMLSelectElement
-    ).selectedOptions[0].text;
+        const diferencaMilissegundos = momentoFechamento - tempoInicialMesa;
 
-    // Verificar se a forma de pagamento é parcelada
-    if (this.parcelamento !== 0) {
-      let parcelamento = this.Parcelamento;
-      let total = this.calcularTotal();
-      // Define o valor por parcela
-      this.valorParcela = total / parcelamento;
+        const tempoTotalSegundos = Math.floor(diferencaMilissegundos / 1000);
+
+        const dadosDaVenda = {
+          numero_mesa: numero,
+          nome_mesa: nome,
+          telefone_responsavel: telefoneResponsavel,
+          forma_pagamento_id: (document.getElementById('formaPagamento') as HTMLSelectElement).value,
+          abertura: abertura,
+          tempo_aberta: tempoAberta,
+          iniciado: iniciado,
+          tempo_inicial: tempoInicial,
+          tempoTotal: tempoTotalSegundos,
+          bandeira_id: this.bandeira,
+          parcelamento: this.parcelamento,
+          subtotal: this.Total,
+          desconto: this.DescontoValor,
+          valor_total: this.Total,
+          valor_total_pago: this.valorPago,
+          troco: (this.valorPago - this.total).toFixed(2),
+          quantidade_itens: produtosConsumidos.length,
+          numero_cupom_fiscal: this.proximoNumeroCF,
+          imposto_estadual: 6, // Insira o valor do imposto estadual, se aplicável
+          imposto_federal: 10, // Insira o valor do imposto federal, se aplicável
+          itens_vendidos: produtosConsumidos.map((produto: any) => ({
+            produto: produto.nome,
+            codigo_produto: produto.codigo,
+            quantidade: produto.quantidade,
+            preco_unitario: produto.preco,
+            subtotal_item: Number((produto.preco * produto.quantidade).toFixed(2)),
+          })),
+        };
+
+        this.dadosDaVenda = dadosDaVenda;
+      } else {
+        console.error('A mesa selecionada não foi encontrada nas mesas abertas.');
+      }
+    } else {
+      console.error('Os dados das mesas abertas não foram encontrados.');
     }
-
-    // Verificar se o desconto é zero e calcular com base no Subtotal e no Total
-    if (this.DescontoPercent === 0) {
-      let subtotal = this.calcularSubtotal(this.mesaSelecionada!);
-      let total = this.calcularTotal();
-      let descontoValor = subtotal - total;
-
-      // Define o valor do desconto em R$ e em percentual
-      this.DescontoValor = descontoValor;
-      this.DescontoPercent = (descontoValor / subtotal) * 100;
-    }
-
-    // Show the modal
-    // this.abrirCupomFiscalModal();
   }
+
+
+  finalizarVenda(): void {
+    this.gerarCupomFiscal();
+
+    if (this.mesaSelecionada) {
+      // Chama o serviço para adicionar a venda (substitua 'this.salesService.addMesasVenda' conforme necessário)
+      this.salesService.addMesasVenda(this.dadosDaVenda).subscribe(
+        (res) => {
+          console.log('Venda finalizada com sucesso:', res);
+
+          // Usar a assertiva de tipo para garantir que TypeScript saiba que this.mesaSelecionada não é nulo
+          this.removerMesaFinalizada(this.mesaSelecionada!);
+
+          // Feche o modal de finalização da mesa
+          this.fecharModalFinalizarMesa();
+        },
+        (err) => {
+          console.error('Erro ao finalizar venda:', err);
+        }
+      );
+    } else {
+      console.error('Mesa não selecionada. Não é possível finalizar a venda.');
+    }
+  }
+
+
+
+
+
+  // gerarCupomFiscal() {
+  //   this.formaPagamento = (
+  //     document.getElementById('formaPagamento') as HTMLSelectElement
+  //   ).value;
+  //   let dataAtual = new Date();
+  //   dataAtual.setUTCHours(dataAtual.getUTCHours() - 3);
+  //
+  //   // Formatar a data e hora no formato (DD/MM/AAAA - HH:mm:ss)
+  //   this.CfiscalDataHora = `${dataAtual
+  //     .getUTCDate()
+  //     .toString()
+  //     .padStart(2, '0')}/${(dataAtual.getUTCMonth() + 1)
+  //     .toString()
+  //     .padStart(2, '0')}/${dataAtual.getUTCFullYear()} - ${dataAtual
+  //     .getUTCHours()
+  //     .toString()
+  //     .padStart(2, '0')}:${dataAtual
+  //     .getUTCMinutes()
+  //     .toString()
+  //     .padStart(2, '0')}:${dataAtual
+  //     .getUTCSeconds()
+  //     .toString()
+  //     .padStart(2, '0')}`;
+  //
+  //   // Atualizar os valores das variáveis
+  //   this.Total = parseFloat(
+  //     (document.getElementById('total') as HTMLSelectElement).value.replace(
+  //       /[^0-9.-]/g,
+  //       ''
+  //     )
+  //   );
+  //   this.DescontoValor = parseFloat(
+  //     (
+  //       document.getElementById('descontoValor') as HTMLSelectElement
+  //     ).value.replace(/[^0-9.-]/g, '')
+  //   );
+  //   this.DescontoPercent = parseFloat(
+  //     (
+  //       document.getElementById('descontoPercent') as HTMLSelectElement
+  //     ).value.replace(/[^0-9.-]/g, '')
+  //   );
+  //   this.Parcelamento = parseInt(
+  //     (document.getElementById('parcelamento') as HTMLSelectElement).value,
+  //     10
+  //   );
+  //   this.numeroMesa = (
+  //     document.getElementById('numeroMesa') as HTMLSelectElement
+  //   ).value;
+  //
+  //   this.ClienteName = (
+  //     document.getElementById('nomeCliente') as HTMLSelectElement
+  //   ).value;
+  //   this.telefone = (
+  //     document.getElementById('telefoneCliente') as HTMLSelectElement
+  //   ).value;
+  //   this.SubTotal = parseFloat(
+  //     (document.getElementById('subtotal') as HTMLSelectElement).value.replace(
+  //       /[^0-9.-]/g,
+  //       ''
+  //     )
+  //   );
+  //
+  //   let bandeiraElement = document.getElementById(
+  //     'bandeira'
+  //   ) as HTMLSelectElement;
+  //   this.bandeira = (
+  //     document.getElementById('bandeira') as HTMLSelectElement
+  //   ).selectedOptions[0].text;
+  //
+  //   // Verificar se a forma de pagamento é parcelada
+  //   if (this.parcelamento !== 0) {
+  //     let parcelamento = this.Parcelamento;
+  //     let total = this.calcularTotal();
+  //     // Define o valor por parcela
+  //     this.valorParcela = total / parcelamento;
+  //   }
+  //
+  //   // Verificar se o desconto é zero e calcular com base no Subtotal e no Total
+  //   if (this.DescontoPercent === 0) {
+  //     let subtotal = this.calcularSubtotal(this.mesaSelecionada!);
+  //     let total = this.calcularTotal();
+  //     let descontoValor = subtotal - total;
+  //
+  //     // Define o valor do desconto em R$ e em percentual
+  //     this.DescontoValor = descontoValor;
+  //     this.DescontoPercent = (descontoValor / subtotal) * 100;
+  //   }
+  //
+  //   // Show the modal
+  //   // this.abrirCupomFiscalModal();
+  // }
 
   buscarBandTypes() {
     this.paytypeService.getAllBandsTypes().subscribe(
@@ -883,11 +1039,18 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   }
 
   removerMesaFinalizada(mesa: Mesa): void {
-    const index = this.mesasAbertas.indexOf(mesa);
+    // Verifique se a mesa está na lista de mesas abertas
+    const index = this.mesasAbertas.findIndex(m => m.id === mesa.id);
+
     if (index !== -1) {
+      // Remova a mesa da lista de mesas abertas
       this.mesasAbertas.splice(index, 1);
+
+      // Atualize o localStorage para refletir a nova lista de mesas abertas
+      localStorage.setItem('mesasAbertas', JSON.stringify(this.mesasAbertas));
     }
   }
+
 
   formatarTelefone(telefone: string): string {
     // Remove todos os caracteres não numéricos
@@ -957,6 +1120,38 @@ export class MesasComponent implements OnInit, AfterContentChecked {
 
     // Aplicando a formatação: 2732446491 -> (27) 3244-6491
     return `(${numericTelefone.slice(0, 2)}) ${numericTelefone.slice(2, 6)}-${numericTelefone.slice(6)}`;
+  }
+
+
+  deleteSavedTables() {
+    const confirmDelete = window.confirm('Tem certeza de que deseja limpar todas as mesas abertas?');
+
+    if (confirmDelete) {
+      localStorage.removeItem('mesasAbertas');
+      this.mesasAbertas = []; // Limpa o array mesasAbertas
+
+      // Salva a lista vazia no localStorage
+      this.mesasLocalStorage.mesasAbertas = this.mesasAbertas;
+      // ou
+      localStorage.setItem('mesasAbertas', JSON.stringify(this.mesasAbertas));
+    }
+  }
+
+  atualizarLocalStorage(): void {
+    // Verifica se a mesaSelecionada está definida
+    if (this.mesaSelecionada) {
+      // Obtém todas as mesas do localStorage (supondo que você já tenha as informações no localStorage)
+      const mesasAbertas: Mesa[] = JSON.parse(localStorage.getItem('mesasAbertas') || '[]');
+
+      // Encontra a mesa correspondente e atualiza-a
+      const mesaIndex = mesasAbertas.findIndex((mesa) => mesa.numero === this.mesaSelecionada?.numero);
+      if (mesaIndex !== -1) {
+        // Atualiza a mesa no array de mesas
+        mesasAbertas[mesaIndex] = this.mesaSelecionada;
+        // Atualiza o localStorage com as mesas atualizadas
+        localStorage.setItem('mesasAbertas', JSON.stringify(mesasAbertas));
+      }
+    }
   }
 
 

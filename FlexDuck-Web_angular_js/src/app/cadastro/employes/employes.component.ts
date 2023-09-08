@@ -34,6 +34,14 @@ export class EmployesComponent implements OnInit {
     { value: 10, name: 'Supervisor' },
     { value: 5, name: 'Vendedor' },
   ];
+  pageSize: number = 10; // Tamanho da página (quantidade de itens por página)
+  currentPage: number = 1; // Página atual
+  totalItems: number = 0;
+  itemsPerPage: number = 10; // Substitua pelo número de itens por página desejado
+  maxPages: number = Math.ceil(this.totalItems / this.itemsPerPage);
+  pages: number[] = Array.from({ length: this.maxPages }, (_, i) => i + 1);
+  currentUserLvl: any;
+  savingModalVisible: boolean = false;
 
   constructor(private usersService: UserService,
               private fb: FormBuilder,
@@ -78,7 +86,9 @@ export class EmployesComponent implements OnInit {
       if (token) {
         const decodedToken: any = jwt_decode(token);
         const user_id = decodedToken.sub.user_id;
+        const level = decodedToken.sub.level;
         this.currentUser = user_id;
+        this.currentUserLvl = level;
       }
     } catch (error) {
       console.error('Failed to decode token:', error);
@@ -87,7 +97,6 @@ export class EmployesComponent implements OnInit {
     this.filterUser(this.searchText);
     this.getCurrentUser(); // Call the method to get the current user
     const currentUrl = this.router.url; // Obtém a URL atual
-    console.log(currentUrl);
 
     if (currentUrl.endsWith('/consulta')) {
       this.getUser();
@@ -107,7 +116,6 @@ export class EmployesComponent implements OnInit {
           level: user[8],
           last_login: user[7]
         };
-        console.log(this.selectedUser);
 
         // Preenche os campos do formulário com os dados do usuário atual
         this.formEdit.patchValue({
@@ -186,7 +194,7 @@ export class EmployesComponent implements OnInit {
           this.loading = false;
           // Render the users
           this.filterUser('');
-          console.log(users);
+          this.totalItems = users.length;
         },
         // When an error occurs in the response
         (error) => {
@@ -213,7 +221,7 @@ export class EmployesComponent implements OnInit {
       this.usersService.deleteUserById(user_id).subscribe(
         // If the request is successful, remove the user from the list and update the filtered list
         () => {
-          console.log(`Usuário de ID ${user_id} foi deletado.`);
+          this.savingModalVisible = true;
           this.users = this.users.filter((user) => user.user_id !== user_id);
           this.filterUser(this.searchText);
         },
@@ -234,7 +242,6 @@ export class EmployesComponent implements OnInit {
         const user_id = decodedToken.sub.user_id;
 
         this.currentUser = user_id;
-        console.log(this.currentUser);
       } else {
         console.log('Token not found in LocalStorage.');
       }
@@ -256,16 +263,14 @@ export class EmployesComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-    console.log(this.formCad.controls);
-    console.log(this.formCad.value);
 
     // Se o formulário for inválido, retorne
     if (this.formCad.invalid) {
-      console.log('Deu ruim 06!');
       return;
     }
 
     this.usersService.addUser(this.formCad.value).subscribe((newUser) => {
+      this.savingModalVisible = true;
       this.users.push(newUser);
       this.formCad.reset();
 
@@ -290,7 +295,6 @@ export class EmployesComponent implements OnInit {
   editUser(user: any) {
     this.selectedUser = user;
     this.setActiveTab('edicao');
-    console.log(this.selectedUser);
     this.formEdit.patchValue({
       user_id: this.selectedUser.user_id, // Use the correct property name 'user_id'
       username: this.selectedUser.username, // Use the correct property name 'username'
@@ -318,14 +322,12 @@ export class EmployesComponent implements OnInit {
     if (confirmUpdate) {
       this.usersService.updateUserById(userId, updatedUser).subscribe(
         (response) => {
-          console.log('Usuário atualizado com sucesso', response);
-          console.log(updatedUser);
+          this.savingModalVisible = true;
           alert('Usuário atualizado com sucesso!');
           this.setActiveTab('consulta');
         },
         (error) => {
           console.log('Erro ao atualizar o usuário', error);
-          console.log(updatedUser);
           // Implemente aqui o que deve acontecer em caso de erro
         }
       );
@@ -341,19 +343,86 @@ export class EmployesComponent implements OnInit {
     if (confirmUpdate) {
       this.usersService.updateUserById(userId, updatedUser).subscribe(
         (response) => {
-          console.log('Usuário atualizado com sucesso', response);
-          console.log(updatedUser);
+          this.savingModalVisible = true;
           alert('Usuário atualizado com sucesso!');
           this.redirectToHome();
         },
         (error) => {
           console.log('Erro ao atualizar o usuário', error);
-          console.log(updatedUser);
           // Implemente aqui o que deve acontecer em caso de erro
         }
       );
     }
   }
+
+  onPageChange(pageNumber: number): void {
+    this.currentPage = pageNumber;
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.maxPages) {
+      this.currentPage = page;
+    }
+  }
+
+  canSelectAdminLevel(): boolean {
+    // Verifica se o usuário logado tem permissão de administrador (nível 22)
+    return this.currentUserLvl === 22;
+  }
+
+  canEditUser(user: User): boolean {
+    const currentUserLevel = this.currentUserLvl;
+    const userLevel = user.level;
+    const currentUserId = this.currentUser;
+
+    if (currentUserLevel === 22 /* Admin */) {
+      return true;
+    } else if (currentUserLevel === 15 /* Gerente */) {
+      // Gerente pode editar supervisores (10) e vendedores (5), mas não outros gerentes (15)
+      return userLevel === 10 || userLevel === 5 || user.user_id === currentUserId;
+    } else if (currentUserLevel === 10 /* Supervisor */) {
+      // Supervisor pode editar vendedores (5), mas não outros supervisores (10)
+      return userLevel === 5 || user.user_id === currentUserId;
+    } else {
+      return false; // Outros níveis não podem editar ninguém
+    }
+  }
+
+  canEditOrDeleteUser(user: User): boolean {
+    const currentUserLevel = this.currentUserLvl; // Suponha que você já tenha essa informação
+    const userLevel = user.level;
+
+    if (currentUserLevel === 22 /* Admin */) {
+      return true;
+    } else if (currentUserLevel === 15 /* Gerente */) {
+      // Gerente pode editar/excluir supervisores (10) e vendedores (5)
+      return userLevel === 10 || userLevel === 5;
+    } else if (currentUserLevel === 10 /* Supervisor */) {
+      // Supervisor pode editar/excluir vendedores (5)
+      return userLevel === 5;
+    } else {
+      return false; // Outros níveis não podem editar/excluir ninguém
+    }
+  }
+
+
+
 
 
 }

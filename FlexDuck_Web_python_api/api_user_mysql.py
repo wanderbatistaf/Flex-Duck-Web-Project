@@ -235,12 +235,9 @@ def buscar_senha_user(password):
     # Obtém o subdomínio a partir da requisição Flask
     subdomain = request.headers.get('X-Subdomain')
 
-    # Configura a conexão com o banco de dados MySQL
-    db = get_db_connection(subdomain)
-
 
     try:
-        conn = get_db_connection()
+        conn = get_db_connection(subdomain)
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM usuarios WHERE password=%s LIMIT 1", (password,))
         result = cursor.fetchone()

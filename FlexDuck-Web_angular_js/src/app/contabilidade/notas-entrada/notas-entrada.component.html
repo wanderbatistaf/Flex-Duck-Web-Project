@@ -79,7 +79,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let notas of nfnotes | filter: pesquisaNotas">
+      <tr *ngFor="let notas of nfnotes | filter: pesquisaNotas | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
         <td>{{ notas.numeroNF }}</td>
         <td style="text-align: center;">
     {{ notas.mostrarChaveAcesso ? notas.chaveAcesso : '********************************************' }}
@@ -121,6 +121,28 @@
       </tbody>
     </table>
   </div>
+    <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+      <!-- Adicione os controles de páginação -->
+      <section class="pagination pagination-left">
+        <button id="pg-button-prev" type="button" class="pagination__button" (click)="previousPage()" [disabled]="currentPage === 1">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+
+        <ul class="pagination__list">
+          <li class="pagination__item pagination__item--1">
+            <button id="pg-button-1" type="button" (click)="goToPage(1)" [class.active]="currentPage === 1">1</button>
+          </li>
+          <li class="pagination__item pagination__item--2">
+            <button id="pg-button-2" type="button" (click)="goToPage(2)" [class.active]="currentPage === 2">2</button>
+          </li>
+          <!-- Adicione mais botões de página conforme necessário -->
+        </ul>
+
+        <button id="pg-button-next" type="button" class="pagination__button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          <i class="fa fa-chevron-right"></i>
+        </button>
+      </section>
+    </nav>
   </div>
 </div>
 

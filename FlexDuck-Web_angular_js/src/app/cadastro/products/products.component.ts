@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, Pipe, PipeTransform, ViewChild} from '@angular/core';
 import { JwtHelperService } from "@auth0/angular-jwt";
 import {Products, Suppliers, User} from "@app/_models";
 import {FormBuilder, FormControl, FormGroup, Validators, ɵElement} from "@angular/forms";
@@ -10,7 +10,27 @@ import { HttpClient } from "@angular/common/http";
 import {environment} from "@environments/environment";
 import * as pdfMake from 'pdfmake/build/pdfmake'
 import { PageOrientation, TDocumentDefinitions } from 'pdfmake/interfaces';
+import { Location } from '@angular/common';
 import html2canvas from "html2canvas";
+
+
+@Pipe({
+  name: 'filter'
+})
+export class FilterPipeProd implements PipeTransform {
+  transform(items: any[], searchText: string): any[] {
+    if (!items || !searchText || !searchText.trim()) {
+      return items;
+    }
+
+    searchText = searchText.toLowerCase();
+
+    return items.filter((item) => {
+      const keys = Object.keys(item);
+      return keys.some((key) => item[key] && item[key].toString().toLowerCase().includes(searchText));
+    });
+  }
+}
 
 
 
@@ -47,6 +67,7 @@ export class ProductsComponent implements OnInit {
   ];
   fornecedores: any[] = [];
   currentLevel: any;
+  pesquisaNotas: string = '';
   public form: FormGroup<{
     [K in keyof { margem_lucro: any[]; preco_venda: any[]; preco_custo: any[] }]: ɵElement<{
       margem_lucro: any[];
@@ -59,7 +80,14 @@ export class ProductsComponent implements OnInit {
   sizes = ['P', 'M', 'G', 'GG'];
   isGrade = false;
   productVariations: any[] = []; // Aqui você pode usar uma interface para definir a estrutura dos dados
-
+  pageSize: number = 10; // Tamanho da página (quantidade de itens por página)
+  currentPage: number = 1; // Página atual
+  totalItems: number = 0;
+  itemsPerPage: number = 10; // Substitua pelo número de itens por página desejado
+  maxPages: number = Math.ceil(this.totalItems / this.itemsPerPage);
+  pages: number[] = Array.from({ length: this.maxPages }, (_, i) => i + 1);
+  currentHost: string = window.location.host;
+  savingModalVisible: boolean = false;
 
 
 
@@ -69,7 +97,8 @@ export class ProductsComponent implements OnInit {
               private productService: ProductService,
               private suppliersService: SuppliersService,
               private http: HttpClient,
-              private formBuilder: FormBuilder) {
+              private formBuilder: FormBuilder,
+              private location: Location) {
 
     this.form = this.formBuilder.group({
       preco_custo: [],
@@ -194,7 +223,6 @@ export class ProductsComponent implements OnInit {
 
     this.productService.updateProductByIdShortCut(id, updateProduct).subscribe(
       (response) => {
-        console.log(response);
         this.getProduct();
         this.hideUpdateQtdConfirmationAfterDelay(2500);
         this.valor = 0; // Limpa o campo de input
@@ -217,7 +245,6 @@ export class ProductsComponent implements OnInit {
     this.productService.getLastCode(isProductDefault).subscribe((response: any) => {
       if (response && response.produto && response.produto[2]) {
         this.lastProductCode = response.produto[2];
-        console.log(this.lastProductCode);
       } else {
         this.lastProductCode = 'P000001';
       }
@@ -262,9 +289,9 @@ export class ProductsComponent implements OnInit {
           this.loading = false;
           // Renderiza os pagamentos
           this.filterProduct('');
-          console.log(products);
-          console.log(this.currentUser);
-          console.log();
+          // Suponha que nfnotes seja uma matriz de itens
+          this.totalItems = products.length;
+
         },
         // Quando ocorrer um erro na resposta
         error => {
@@ -292,7 +319,7 @@ export class ProductsComponent implements OnInit {
       this.productService.deleteProductById(id).subscribe(
         // If the request is successful, remove the user from the list and update the filtered list
         () => {
-          console.log(`Produto de Código ${id} foi deletado.`);
+          this.savingModalVisible = true;
           this.products = this.products.filter((products) => products.id !== id);
           this.filterProduct(this.searchText);
         },
@@ -315,8 +342,6 @@ export class ProductsComponent implements OnInit {
 
         this.currentUser = user_id;
         this.currentLevel = level;
-        console.log(this.currentUser);
-        console.log(this.currentLevel);
       } else {
         console.log('Token not found in LocalStorage.');
       }
@@ -340,7 +365,6 @@ export class ProductsComponent implements OnInit {
 
       const margemLucro = this.calculateMarginOfProfit(precoCusto, precoVenda);
       this.formCad.patchValue({ margem_lucro: margemLucro });
-      console.log(margemLucro);
     }
   }
 
@@ -392,16 +416,12 @@ export class ProductsComponent implements OnInit {
 
     // Se o formulário for inválido, retorne
     if (this.formCad.invalid) {
-      console.log(this.formCad.invalid);
-      console.log(this.formCad);
-      console.log('Deu ruim 06!');
       return;
     }
 
     this.productService.addProduct(this.formCad.value).subscribe((newProduct) => {
+      this.savingModalVisible = true;
       this.products.push(newProduct);
-      console.log(newProduct);
-      console.log(this.formCad.value);
       this.formCad.reset();
 
       // Redireciona para a página de consulta
@@ -425,7 +445,6 @@ export class ProductsComponent implements OnInit {
   editProduct(product: any) {
     this.selectedProduct = product;
     this.setActiveTab('edicao');
-    console.log(this.selectedProduct);
 
     this.formEdit.patchValue({
       nome: this.selectedProduct.nome,
@@ -456,15 +475,13 @@ export class ProductsComponent implements OnInit {
     if (confirmUpdate) {
       this.productService.updateProductById(productId, updatedProduct).subscribe(
         (response) => {
-          console.log('Produto atualizado com sucesso', response);
-          console.log(updatedProduct);
+          this.savingModalVisible = true;
           alert('Produto atualizado com sucesso!');
           this.getProduct();
           this.setActiveTab('consulta');
         },
         (error) => {
           console.log('Erro ao atualizar o produto', error);
-          console.log(updatedProduct);
           // Implemente aqui o que deve acontecer em caso de erro
         }
       );
@@ -479,13 +496,13 @@ export class ProductsComponent implements OnInit {
     const preco = this.formCad.get('preco_venda')?.value;
 
     const qrCodeValue = `Código: ${codigo}\nNome: ${nome}\nQuantidade: ${quantidade}\nPreço: ${preco}\n\nDescrição: ${descricao}`;
-    const urlproduct: string =  `${environment.webUrl}/products/qrscan/${codigo}`
+    const urlProduct: string = `https://www.${this.currentHost}/products/qrscan/${codigo}`;
 
     this.formCad.get('qrcode')?.setValue(qrCodeValue);
     // Redireciona para a página "products/qrscan"
     // this.router.navigate(['products/qrscan'], { state: { urlproduct } });
 
-    return urlproduct;
+    return urlProduct;
   }
 
   generateQRCodeValueEdit(): string {
@@ -496,7 +513,7 @@ export class ProductsComponent implements OnInit {
     const preco = this.formEdit.get('preco_venda')?.value;
 
     const qrCodeValue = `Código: ${codigo}\nNome: ${nome}\nQuantidade: ${quantidade}\nPreço: ${preco}\n\nDescrição: ${descricao}`;
-    const urlproduct: string =  `${environment.webUrl}/products/qrscan/${codigo}`
+    const urlproduct: string =  `https://www.${this.currentHost}/products/qrscan/${codigo}`
 
     this.formEdit.get('qrcode')?.setValue(qrCodeValue);
     // Redireciona para a página "products/qrscan"
@@ -514,7 +531,6 @@ export class ProductsComponent implements OnInit {
           // Mapeie apenas as propriedades necessárias (nome e id) dos fornecedores
           this.fornecedores = suppliers.map((supplier: Suppliers) => ({ id: supplier.id, nome: supplier.nome }));
           this.loading = false;
-          console.log(this.fornecedores);
         },
         (error) => {
           console.log('Ocorreu um erro ao solicitar os fornecedores.');
@@ -614,11 +630,9 @@ export class ProductsComponent implements OnInit {
     if (typeof productCode === "string") {
       navigator.clipboard.writeText(productCode)
         .then(() => {
-          console.log(productCode);
           this.hideCopyConfirmationAfterDelay(2500); // Ocultar após 2,5 segundos
         })
         .catch((error) => {
-          console.log(productCode);
           console.error('Erro ao copiar o código do produto:', error);
         });
     }
@@ -666,7 +680,6 @@ export class ProductsComponent implements OnInit {
     const gradeForm = this.formCad.get('sizes');
 
     if (gradeForm) {
-      console.log('Sizes group:', gradeForm.value);
 
       const sizes = ['P', 'M', 'G', 'GG'];
 
@@ -721,7 +734,6 @@ export class ProductsComponent implements OnInit {
     // Exemplo fictício (substitua pelo método ou endpoint correto da sua API)
     this.productService.addVariations(variationsToAdd).subscribe(
       (newProducts) => {
-        console.log('Variações cadastradas com sucesso:', newProducts);
         this.formCad.reset();
         this.setActiveTab('consulta');
         this.getProduct();
@@ -775,6 +787,32 @@ export class ProductsComponent implements OnInit {
   //     totalGradeQuantityControl.setValue(total);
   //   }
   // }
+
+  onPageChange(pageNumber: number): void {
+    this.currentPage = pageNumber;
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.maxPages) {
+      this.currentPage = page;
+    }
+  }
 
 
 
