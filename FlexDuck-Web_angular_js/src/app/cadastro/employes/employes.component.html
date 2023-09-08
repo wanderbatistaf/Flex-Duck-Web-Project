@@ -1,3 +1,17 @@
+<!-- Modal de salvamento -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': savingModalVisible}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-loading">
+        <div class="caption">Salvando as informações...</div>
+        <div class="animation"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="savingModalVisible"></div>
+
 <h1 class="mt-4">Funcionários</h1>
 <ol class="breadcrumb mb-4">
     <li class="breadcrumb-item active">Cadastro | Consulta</li>
@@ -212,9 +226,10 @@
               <div class="form-group col-md-2">
                 <label class="form-control-label" for="level">Level <em>*</em></label>
                 <select class="form-control custom-select" formControlName="level" id="level" name="level">
-                  <option *ngFor="let level of levels" [ngValue]="level.value">{{ level.name }}</option>
+                  <option *ngFor="let level of levels" [ngValue]="level.value" [disabled]="!canSelectAdminLevel() && getLevelName(level.value) === 'Admin'">{{ level.name }}</option>
                 </select>
               </div>
+
               <div>
                 <br>
                 <button type="button" class="btn btn-secondary mr-2"
@@ -308,13 +323,14 @@
                                 </div>
 
                                 <!-- LEVEL -->
-                                <div class="form-group col-md-2">
-                                    <label class="form-control-label" for="level">Level <em>*</em></label>
-                                    <select class="form-control custom-select" formControlName="level" id="level" name="level">
-                                        <option *ngFor="let level of levels" [ngValue]="level.value">{{ level.name }}</option>
-                                    </select>
-                                </div>
-                                <div>
+                              <div class="form-group col-md-2">
+                                <label class="form-control-label" for="level">Level <em>*</em></label>
+                                <select class="form-control custom-select" formControlName="level" id="level" name="level">
+                                  <option *ngFor="let level of levels" [ngValue]="level.value" [disabled]="!canSelectAdminLevel() && getLevelName(level.value) === 'Admin'">{{ level.name }}</option>
+                                </select>
+                              </div>
+
+                              <div>
                                     <br>
                                     <button type="button" class="btn btn-secondary mr-2" (click)="formReset()">Limpar</button>
                                     <button type="submit" class="btn btn-primary" (click)="onSubmit()">Cadastrar</button>
@@ -351,7 +367,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let user of users">
+                        <tr *ngFor="let user of users | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
                             <td>{{ user.user_id }}</td>
                             <td>{{ user.username }}</td>
                             <td>{{ user.name }}</td>
@@ -365,12 +381,23 @@
                             <td>{{ getLevelName(user.level) }}</td>
                             <td>
 
-                              <button type="button" class="btn btn-sm btn-outline-info btn-block" (click)="editUser(user); setActiveTab('edicao')">
+                              <button type="button" class="btn btn-sm btn-outline-info btn-block"
+                                      *ngIf="canEditUser(user); else currentEditUserButton"
+                                      (click)="editUser(user); setActiveTab('edicao')">
                                 Editar
                               </button>
 
+                              <ng-template #currentEditUserButton>
+                                <button type="button" class="btn btn-sm btn-outline-info btn-block" disabled>
+                                  Editar
+                                </button>
+                              </ng-template>
+
+
+
+
                               <button type="button" class="btn btn-sm btn-outline-danger btn-block"
-                                      *ngIf="currentUser !== user.user_id && getLevelName(user.level) !== 'Admin'; else currentUserButton"
+                                      *ngIf="canEditOrDeleteUser(user); else currentUserButton"
                                       (click)="deleteUser(user.user_id ? user.user_id : 0)">
                                 Deletar
                               </button>
@@ -386,10 +413,33 @@
 
 
 
+
                             </td>
                         </tr>
                     </tbody>
                 </table>
+                  <!--Botões de paginação-->
+                  <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+                    <section class="pagination pagination-left">
+                      <button id="pg-button-prev" type="button" class="pagination__button" (click)="previousPage()" [disabled]="currentPage === 1">
+                        <i class="fa fa-chevron-left"></i>
+                      </button>
+
+                      <ul class="pagination__list">
+                        <li class="pagination__item pagination__item--1">
+                          <button id="pg-button-1" type="button" (click)="goToPage(1)" [class.active]="currentPage === 1">1</button>
+                        </li>
+                        <li class="pagination__item pagination__item--2">
+                          <button id="pg-button-2" type="button" (click)="goToPage(2)" [class.active]="currentPage === 2">2</button>
+                        </li>
+                      </ul>
+
+                      <button id="pg-button-next" type="button" class="pagination__button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+                        <i class="fa fa-chevron-right"></i>
+                      </button>
+                    </section>
+
+                  </nav>
                 </div>
             </div>
         </div>

@@ -39,7 +39,6 @@ export class LoginComponent implements OnInit {
 
     this.authenticationService.user.subscribe((user) => {
       this.isActive = user?.active || false; // Assign the value of 'active' to the isActive property
-      console.log('isActive:', this.isActive);
 
       if (user) {
         this.router.navigateByUrl('/home'); // Redirecionar para '/home'

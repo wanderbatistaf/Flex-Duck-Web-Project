@@ -1,3 +1,17 @@
+<!-- Modal de salvamento -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': savingModalVisible}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-loading">
+        <div class="caption">Salvando as informações...</div>
+        <div class="animation"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="savingModalVisible"></div>
+
 <h1 class="mt-4">Fornecedores</h1>
 <ol class="breadcrumb mb-4">
   <li class="breadcrumb-item active">Cadastro | Consulta</li>
@@ -63,20 +77,25 @@
               <input type="text" class="form-control" formControlName="contato" id="contato" placeholder="Ex: Renan da Silva" maxlength="60">
             </div>
 
-            <!-- Detalhes Pagamento -->
-            <div class="form-group col-md-3">
-              <label class="form-control-label" for="detalhes_pagamento">Detalhes do Pagamento <em>*</em></label>
-              <div class="password-input">
-                <input type="text" class="form-control" formControlName="detalhes_pagamento" id="detalhes_pagamento" placeholder="Selecione...">
-              </div>
-            </div>
           </div>
 
           <div class="row">
+            <!-- Detalhes Pagamento -->
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="detalhes_pagamento_c">Detalhes do Pagamento <em>*</em></label>
+              <select class="form-control" formControlName="detalhes_pagamento" id="detalhes_pagamento_c">
+                <option value="">Selecione os detalhes de pagamento:</option>
+                <option *ngFor="let paymentType of defaultPaymentTypes" [value]="paymentType">{{ paymentType }}</option>
+              </select>
+            </div>
+
             <!-- PRAZO DE ENTREGA -->
-            <div class="form-group col-md-6">
-              <label class="form-control-label" for="prazo_entrega">Prazo de Entrega <em>*</em></label>
-              <input type="date" class="form-control" formControlName="prazo_entrega" id="prazo_entrega" placeholder="Selecione...">
+            <div class="form-group col-md-4">
+              <label class="form-control-label" for="prazo_entrega_e">Prazo de Entrega <em>*</em></label>
+              <select class="form-control" formControlName="prazo_entrega" id="prazo_entrega_e">
+                <option value="">Selecione o prazo de entrega:</option>
+                <option *ngFor="let deliveryTime of defaultDeliveryTimes" [value]="deliveryTime">{{ deliveryTime }} dias</option>
+              </select>
             </div>
 
             <div>
@@ -151,46 +170,66 @@
     <div *ngIf="loading">
       <skeleton-table-display *ngIf="loading"></skeleton-table-display>
     </div>
-  </div>
+
   <!--Consulta renderiza aqui-->
   <div class="table-responsive" *ngIf="!loading && activeTab === 'consulta'">
-    <table class="table table-condensed table-hover">
-    <thead>
-    <tr>
-      <th>ID</th>
-      <th>Nome</th>
-      <th>Contato</th>
-      <th>Detalhes</th>
-      <th>Entrega</th>
-      <th>Ações</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let supplier of suppliers">
-      <td>{{ supplier.id }}</td>
-      <td>{{ supplier.nome }}</td>
-      <td>{{ supplier.contato }}</td>
-      <td>{{ supplier.detalhes_pagamento }}</td>
-      <td>{{ supplier.prazo_entrega }} dias</td>
-      <td>
-        <button type="button" class="btn btn-sm btn-outline-info btn-block" (click)="editSupplier(supplier); setActiveTab('edicao')">
-          Editar
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-danger btn-block"
-                *ngIf="getLevelName(getCurrentLevel()) === 'Admin'; else currentUserButton"
-                (click)="deleteSupplier(supplier.id ? supplier.id : 0)">
-          Deletar
-        </button>
+      <table class="table table-condensed table-hover">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Contato</th>
+          <th>Detalhes</th>
+          <th>Entrega</th>
+          <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let supplier of suppliers | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
+          <td>{{ supplier.id }}</td>
+          <td>{{ supplier.nome }}</td>
+          <td>{{ supplier.contato }}</td>
+          <td>{{ supplier.detalhes_pagamento }}</td>
+          <td>{{ supplier.prazo_entrega }} dias</td>
+          <td>
+            <button type="button" class="btn btn-outline-info" (click)="editSupplier(supplier); setActiveTab('edicao')">
+              Editar
+            </button>
+            <button type="button" class="btn btn-outline-danger"
+                    *ngIf="getLevelName(getCurrentLevel()) === 'Admin'; else currentUserButton"
+                    (click)="deleteSupplier(supplier.id ? supplier.id : 0)">
+              Deletar
+            </button>
+            <ng-template #currentUserButton>
+              <button type="button" class="btn btn-outline-danger" disabled>
+                Deletar
+              </button>
+            </ng-template>
+          </td>
+        </tr>
+        </tbody>
+      </table>
 
-        <ng-template #currentUserButton>
-          <button type="button" class="btn btn-sm btn-outline-danger btn-block" disabled>
-            Deletar
-          </button>
-        </ng-template>
-
-      </td>
-    </tr>
-    </tbody>
-  </table>
-</div>
+      <!-- Adicione os controles de páginação -->
+    <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+      <section class="pagination pagination-left">
+        <button id="pg-button-prev" type="button" class="pagination__button" (click)="previousPage()" [disabled]="currentPage === 1">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        <ul class="pagination__list">
+          <li class="pagination__item">
+            <button id="pg-button-1" type="button" (click)="goToPage(1)" [class.active]="currentPage === 1">1</button>
+          </li>
+          <li class="pagination__item">
+            <button id="pg-button-2" type="button" (click)="goToPage(2)" [class.active]="currentPage === 2">2</button>
+          </li>
+          <!-- Adicione mais botões de página conforme necessário -->
+        </ul>
+        <button id="pg-button-next" type="button" class="pagination__button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          <i class="fa fa-chevron-right"></i>
+        </button>
+      </section>
+    </nav>
+    </div>
+  </div>
 </div>

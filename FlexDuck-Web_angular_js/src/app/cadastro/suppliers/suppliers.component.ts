@@ -32,6 +32,13 @@ export class SuppliersComponent implements OnInit {
   ];
   defaultPaymentTypes = ['Dinheiro', 'Cartão de Credito', 'TED', 'Cartão de Débito', 'PIX', 'Boleto', 'Outros'];
   defaultDeliveryTimes = [7, 15, 30, 90, 120];
+  pageSize: number = 10; // Tamanho da página (quantidade de itens por página)
+  currentPage: number = 1; // Página atual
+  totalItems: number = 0;
+  itemsPerPage: number = 10; // Substitua pelo número de itens por página desejado
+  maxPages: number = Math.ceil(this.totalItems / this.itemsPerPage);
+  pages: number[] = Array.from({ length: this.maxPages }, (_, i) => i + 1);
+  savingModalVisible: boolean = false;
 
   constructor(private suppliersService: SuppliersService, private fb: FormBuilder) {
     const currentDate = new Date();
@@ -101,7 +108,7 @@ export class SuppliersComponent implements OnInit {
           this.loading = false;
           // Render the users
           this.filterSupplier('');
-          console.log(suppliers);
+          this.totalItems = suppliers.length;
         },
         // When an error occurs in the response
         (error) => {
@@ -122,7 +129,8 @@ export class SuppliersComponent implements OnInit {
   // Method to delete a supplier
   deleteSupplier(id: number) {
     // Display a confirmation to the supplier before proceeding
-    if (confirm('Tem certeza que deseja deletar este usuário?')) {
+    if (confirm('Tem certeza que deseja deletar este fornecedor?')) {
+      this.savingModalVisible = true;
       // Make a request to delete the supplier with the specified ID
       this.suppliersService.deleteSupplierById(id).subscribe(
         // If the request is successful, remove the supplier from the list and update the filtered list
@@ -152,12 +160,9 @@ export class SuppliersComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-    console.log(this.formCad.controls);
-    console.log(this.formCad.value);
 
     // Se o formulário for inválido, retorne
     if (this.formCad.invalid) {
-      console.log('Deu ruim 06!');
       return;
     }
 
@@ -213,7 +218,6 @@ export class SuppliersComponent implements OnInit {
   editSupplier(supplier: any) {
     this.selectedSupplier = supplier;
     this.setActiveTab('edicao');
-    console.log(this.selectedSupplier);
 
     this.formEdit.patchValue({
       id: this.selectedSupplier.id, // Use the correct property name 'user_id'
@@ -233,19 +237,46 @@ export class SuppliersComponent implements OnInit {
     const confirmUpdate = confirm('Tem certeza que deseja atualizar as informações do fornecedor?');
 
     if (confirmUpdate) {
+      this.savingModalVisible = true;
       this.suppliersService.updateSupplierById(supplierId, updatedSupplier).subscribe(
         (response) => {
-          console.log('Usuário atualizado com sucesso', response);
-          console.log(updatedSupplier);
-          alert('Usuário atualizado com sucesso!');
+          alert('Fornecedor atualizado com sucesso!');
           this.setActiveTab('consulta');
         },
         (error) => {
-          console.log('Erro ao atualizar o usuário', error);
-          console.log(updatedSupplier);
+          console.log('Erro ao atualizar o fornecedor', error);
           // Implemente aqui o que deve acontecer em caso de erro
         }
       );
     }
   }
+
+
+  onPageChange(pageNumber: number): void {
+    this.currentPage = pageNumber;
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.maxPages) {
+      this.currentPage = page;
+    }
+  }
+
+
 }

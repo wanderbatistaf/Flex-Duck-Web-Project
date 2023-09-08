@@ -72,6 +72,13 @@ export class NotasEntradaComponent implements OnInit {
   loading: boolean = true;
   pesquisaNotas: string = '';
   notaSelecionada: any;
+  pageSize: number = 10; // Tamanho da página (quantidade de itens por página)
+  currentPage: number = 1; // Página atual
+  totalItems: number = 0;
+  itemsPerPage: number = 10; // Substitua pelo número de itens por página desejado
+  maxPages: number = Math.ceil(this.totalItems / this.itemsPerPage);
+  pages: number[] = Array.from({ length: this.maxPages }, (_, i) => i + 1);
+
 
 
   produtos: Produto[] = [];
@@ -265,11 +272,9 @@ export class NotasEntradaComponent implements OnInit {
     const produtos: Produto[] = [];
     const detElements = xmlDoc.querySelectorAll('det');
     detElements.forEach((detElement, index) => {
-      console.log(`Parsing details for product ${index + 1}`);
 
       const prodElement = detElement.querySelector('prod');
       if (prodElement) {
-        console.log('Product element found:', prodElement);
 
         const produto: Produto = {
           cProd: prodElement.querySelector('cProd')?.textContent || '',
@@ -287,7 +292,6 @@ export class NotasEntradaComponent implements OnInit {
       }
     });
 
-    console.log('Extracted products:', produtos);
     this.preencherCNPJSeVazio();
 
     // Preencher os campos da tabela com os detalhes dos produtos
@@ -357,7 +361,6 @@ export class NotasEntradaComponent implements OnInit {
         let productCodeToUse = ''; // Inicializar com um valor vazio
 
         this.productService.suggestPrice(this.modalSelectedProduto.xProd).subscribe((suggestResponse: any) => {
-          console.log('suggestResponse:', suggestResponse);
 
           if (suggestResponse && suggestResponse.mensagem === "Produto localizado com sucesso!") {
             if (typeof suggestResponse.suggested_price === 'number') {
@@ -385,15 +388,9 @@ export class NotasEntradaComponent implements OnInit {
             this.categoriaValue = this.modalSelectedProduto.category_suggested;
           }
 
-          console.log('Código do produto alterado para:', productCodeToUse);
-          console.log('Categoria sugerida:', this.modalSelectedProduto.category_suggested);
 
           // Armazena o productCodeToUse no modalSelectedProduto somente para o modal
           this.modalSelectedProduto.modalCProd = productCodeToUse;
-
-          console.log('Updated modalSelectedProduto:', this.modalSelectedProduto);
-          console.log('precoVendaValue:', this.precoVendaValue);
-          console.log('categoriaValue:', this.categoriaValue);
 
           $('#produtoModal').modal('show');
           this.loadingPageModalVisible = false;
@@ -454,8 +451,6 @@ export class NotasEntradaComponent implements OnInit {
                         processNextProduct(index + 1); // Processar o próximo produto
                     });
                 } else {
-                    console.log('Modal produtos (Multiple):', this.modalProdutosMultiple);
-                    console.log('precoVendaValue (Multiple):', this.precoVendaValueMultiple);
 
                     $('#produtoModalTodos').modal('show');
                     this.loadingPageModalVisible = false;
@@ -493,7 +488,6 @@ export class NotasEntradaComponent implements OnInit {
 
       // Insere o item na lista de itens inseridos
       this.itensInseridos.push(this.modalSelectedProduto);
-      console.log(this.itensInseridos);
     }
     // Feche o modal ou realize outras ações necessárias
     this.loadingPageModalVisible = false;
@@ -507,8 +501,6 @@ export class NotasEntradaComponent implements OnInit {
             const precoVendaInput = document.getElementById(precoVendaInputId) as HTMLInputElement;
             const categoriaInput = document.getElementById(categoriaInputId) as HTMLInputElement;
 
-            console.log(`ID do campo de preço de venda: ${precoVendaInputId}`);
-            console.log(`ID do campo de categoria: ${categoriaInputId}`);
 
             if (!this.produtoJaInserido(produto)) {
                 // Verifica se o preço de venda e a categoria estão definidos
@@ -534,7 +526,6 @@ export class NotasEntradaComponent implements OnInit {
         // Defina isTodosOsProdutosInseridos como true após a inserção dos produtos
         this.isTodosOsProdutosInseridos = true;
 
-        console.log(this.itensInseridos);
         this.fecharModal()
     }
 
@@ -613,14 +604,10 @@ export class NotasEntradaComponent implements OnInit {
     }
 
     salvarNota() {
-        // Exibir as informações extraídas no console
-        // console.log('Dados extraídos:', this.extractedData);
-        // console.log('Itens a inserir:', this.itensInseridos);
       this.savingModalVisible = true;
 
         this.contabilService.addNotes(this.extractedData, this.itensInseridos).subscribe(
             (response) => {
-                console.log('API Response:', response);
             },
             (error) => {
                 console.error('API Error:', error);
@@ -636,6 +623,7 @@ export class NotasEntradaComponent implements OnInit {
     this.contabilService.getAllNotes().subscribe(
       (data) => {
         this.nfnotes = data.items; // Assumindo que os dados são armazenados em data.items
+        this.totalItems = data.length;
       },
       (error) => {
         console.error('Erro ao carregar notas de entrada:', error);
@@ -652,11 +640,33 @@ export class NotasEntradaComponent implements OnInit {
     this.notaSelecionada = nota;
     this.notaSelecionada.produtos = JSON.parse(this.notaSelecionada.produtos);
     this.activeTab = 'cadastro'; // Ative a página de detalhes
-    console.log(this.notaSelecionada);
-    console.log(this.notaSelecionada.produtos)
   }
 
+  onPageChange(pageNumber: number): void {
+    this.currentPage = pageNumber;
+  }
 
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.maxPages) {
+      this.currentPage = page;
+    }
+  }
 
 
 

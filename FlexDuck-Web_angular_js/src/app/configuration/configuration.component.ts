@@ -125,13 +125,11 @@ export class ConfigurationComponent implements OnInit {
       const moduloMesas = modulos.find((modulo: any) => modulo.modulo === 'Mesas');
       if (moduloMesas) {
         this.formMod.get('moduloMesas')?.setValue(moduloMesas.status === 'true');
-        console.log(moduloMesas);
       }
 
       const moduloVarejo = modulos.find((modulo: any) => modulo.modulo === 'Varejo');
       if (moduloVarejo) {
         this.formMod.get('moduloVarejo')?.setValue(moduloVarejo.status === 'true');
-        console.log(moduloVarejo);
       }
 
       this.loadingPageModalVisible = false;
@@ -147,7 +145,6 @@ export class ConfigurationComponent implements OnInit {
       if (cepValidate.test(cep)) {
         this.viaCepService.getAddress(cep).subscribe(
             res => {
-              console.log(res); // adiciona essa linha para imprimir a resposta no console
               if (!(res.hasOwnProperty('erro'))) {
                 this.populateAddress(res);
                 this.formCad.controls['cep'].setErrors(null);
@@ -259,7 +256,6 @@ export class ConfigurationComponent implements OnInit {
     this.CompanySettingsService.updateCompanyInfos(companyId, updateCompany)
       .subscribe(
         updatedCompany => {
-          console.log('Informações da empresa atualizadas:', updatedCompany);
           this.formCad.disable();
           this.toggleEditMode(); // Volte para o modo de edição após salvar
         },
@@ -279,7 +275,6 @@ export class ConfigurationComponent implements OnInit {
       this.CompanySettingsService.updateCompanyInfos(companyId, updateCompany)
         .subscribe(
           updatedCompany => {
-            console.log('Informações da empresa atualizadas:', updatedCompany);
             this.formCad.disable();
             this.savingModalVisible = false; // Esconder o modal de salvamento após o sucesso
           },

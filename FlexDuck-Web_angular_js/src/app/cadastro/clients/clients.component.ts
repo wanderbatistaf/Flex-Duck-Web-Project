@@ -29,11 +29,8 @@ export class ClientsComponent implements OnInit {
   itemsPerPage = 10;
   // Página atual
   cPage = 1;
-  // Total de páginas
-  totalPages = 100;
   // Armazena os números de cada página. Definindo o intervalo de páginas a ser exibido.
   // Anterior [Numeral] Proximo
-  pages: number[] = [];
   // Variável para armazenar o texto da busca
   searchText = '';
   // Objeto de busca
@@ -81,6 +78,12 @@ export class ClientsComponent implements OnInit {
   // Define status do filtro
   inativoFilter: boolean = false;
   pessoaFisicaFilter: boolean = false;
+  pageSize: number = 10; // Tamanho da página (quantidade de itens por página)
+  currentPage: number = 1; // Página atual
+  totalItems: number = 0;
+  maxPages: number = Math.ceil(this.totalItems / this.itemsPerPage);
+  pages: number[] = Array.from({ length: this.maxPages }, (_, i) => i + 1);
+
 
 
   constructor(private clientsService: ClientsService,
@@ -184,17 +187,6 @@ export class ClientsComponent implements OnInit {
   }
 
 
-  // Define a página atual como a página informada pelo usuário
-  goToPage(page: number) {
-    this.cPage = page;
-    // Pagina os resultados
-    this.paginateClients();
-    // Filtra os resultados de acordo com o valor de pesquisa atual
-    this.filterClients(this.searchText);
-    this.updatePageList();
-  }
-
-
   updatePageList() {
     this.pages = [];
     // Quantidade de paginas a serem exibidas na row
@@ -236,7 +228,7 @@ export class ClientsComponent implements OnInit {
           this.loading = false;
           // Renderiza os pagamentos
           this.filterClients('');
-          console.log(clients);
+          this.totalItems = clients.length;
         },
         // Quando ocorrer um erro na resposta
         error => {
@@ -291,8 +283,6 @@ searchClients() {
   // Define a página atual como 1 para exibir os primeiros resultados
   this.cPage = 1;
 
-  // Calcula o número de páginas e paginates os resultados
-  this.totalPages = Math.ceil(this.filteredClients.length / this.itemsPerPage);
   this.paginateClients();
 }
 
@@ -396,7 +386,6 @@ changePage(page: number) {
       if (cepValidate.test(cep)) {
         this.viaCepService.getAddress(cep).subscribe(
           res => {
-            console.log(res); // adiciona essa linha para imprimir a resposta no console
             if (!(res.hasOwnProperty('erro'))) {
               this.populateAddress(res);
               this.formCad.controls['cep'].setErrors(null);
@@ -424,8 +413,6 @@ changePage(page: number) {
 
   onSubmit() {
     this.submitted = true;
-    console.log(this.formCad.controls);
-    console.log(this.formCad.value);
 
     if (this.formCad.value.natural_person) {
       const firstname = this.formCad.value.firstname;
@@ -480,7 +467,6 @@ changePage(page: number) {
   editClients(client: any) {
     this.selectedClient = client;
     this.setActiveTab('edicao');
-    console.log(this.selectedClient);
 
     this.formEdit.patchValue({
       business_name: this.selectedClient.business_name,
@@ -519,14 +505,12 @@ changePage(page: number) {
       this.clientsService.updateClientById(clientId, updatedClient).subscribe(
         (response) => {
           console.log('Cliente atualizado com sucesso', response);
-          console.log(updatedClient);
           // Redireciona para a aba de consulta
           this.router.navigate(['/clients']);
           this.activeTab = 'consulta';
         },
         (error) => {
           console.log('Erro ao atualizar o cliente', error);
-          console.log(updatedClient);
           // Implemente aqui o que deve acontecer em caso de erro
         }
       );
@@ -564,6 +548,32 @@ changePage(page: number) {
   this.filteredClients.forEach(client => client.filtered = true);
 
 }
+
+  onPageChange(pageNumber: number): void {
+    this.currentPage = pageNumber;
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.maxPages) {
+      this.currentPage = page;
+    }
+  }
 
 
 

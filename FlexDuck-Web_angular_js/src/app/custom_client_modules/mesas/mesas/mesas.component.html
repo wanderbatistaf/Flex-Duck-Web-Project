@@ -84,6 +84,11 @@
                       <td style="text-align: right;" class="total">R$ {{ (produto.preco * produto.quantidade).toFixed(2) }}</td>
                     </tr>
                   </ng-container>
+                  <hr>
+                  <tr class="ttn">
+                    <td colspan="2" style="text-align: left;">Total</td>
+                    <td class="total" align="right"><b>R$ {{ Total.toFixed(2) }}</b></td>
+                  </tr>
                   </tbody>
                   <tfoot>
                   <br/>
@@ -187,7 +192,7 @@
           <!-- Modal Footer -->
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" (click)="fecharModalFinalizarMesa()">Cancelar</button>
-            <button type="button" class="btn btn-primary" (click)="validarCamposVenda();">Finalizar Venda</button>
+            <button type="button" class="btn btn-primary" (click)="finalizarVenda();">Finalizar Venda</button>
 
           </div><!-- End Modal Footer -->
       </div> <!-- End modal body div -->
@@ -240,8 +245,13 @@
   </ol>
 
   <nav class="navbar navbar-light justify-content-between">
-    <button type="button" class="btn btn-primary mb-3" (click)="abrirNovaMesa()">Abrir Nova Mesa</button>
+    <div class="btn-group">
+      <button type="button" class="btn btn-primary" (click)="abrirNovaMesa()">Abrir Nova Mesa</button>
+      <button type="button" class="btn btn-outline-danger" (click)="deleteSavedTables()"><i class="fas fa-trash"></i></button>
+    </div>
   </nav>
+
+
 
   <div class="container">
     <div class="row">

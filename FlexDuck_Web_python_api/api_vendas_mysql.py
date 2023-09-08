@@ -332,7 +332,7 @@ def buscar_vendas_mesas():
 
 
 
-# Rota para inserir as vendas realizadas via modulo de mesas
+# Rota para inserir as vendas realizadas via módulo de mesas
 @api_vendas.route('/vendas/mesas/add', methods=['POST'])
 @jwt_required()  # Protege a rota com JWT
 def inserir_venda_mesas():
@@ -349,13 +349,17 @@ def inserir_venda_mesas():
     try:
         dados = request.json
         data_venda = datetime.now()
+        print(dados)
 
         # Dados da venda
-        cliente_id = dados['cliente_id']
-        vendedor = dados['vendedor']
-        cliente = dados['cliente']
-        cpf_cnpj = dados['cpf_cnpj']
-        telefone = dados['telefone']
+        numero_mesa = dados['numero_mesa']
+        nome_mesa = dados['nome_mesa']
+        telefone_responsavel = dados['telefone_responsavel']
+        abertura = data_venda
+        tempo_aberta = datetime.strptime(dados['tempo_aberta'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d %H:%M:%S')
+        iniciado = dados['iniciado']
+        tempo_inicial = dados['tempo_inicial']
+        tempo_total = dados['tempoTotal']
         forma_pagamento_id = dados['forma_pagamento_id']
         bandeira_id = dados['bandeira_id']
         parcelamento = dados['parcelamento']
@@ -368,7 +372,6 @@ def inserir_venda_mesas():
         numero_cupom_fiscal = dados['numero_cupom_fiscal']
         imposto_estadual = dados['imposto_estadual']
         imposto_federal = dados['imposto_federal']
-        origem = 'Mesas'
 
         # Itens vendidos
         itens_vendidos = dados['itens_vendidos']
@@ -376,43 +379,40 @@ def inserir_venda_mesas():
         conn = conn
         cursor = conn.cursor()
 
-        # Inserir a venda na tabela vendas
+        # Inserir a venda na tabela mesas
         sql_venda = '''
-            INSERT INTO vendas (
-                cliente_id, data_venda, vendedor, cliente, cpf_cnpj, telefone, forma_pagamento_id,
-                bandeira_id, parcelamento, subtotal, desconto, valor_total,
+            INSERT INTO mesas (
+                numero, nome, telefoneResponsavel, abertura, tempoAberta, iniciado, tempoInicial, tempoTotal,
+                forma_pagamento_id, bandeira_id, parcelamento, subtotal, desconto, valor_total,
                 valor_total_pago, troco, quantidade_itens,
-                numero_cupom_fiscal, imposto_estadual, imposto_federal, origem
+                numero_cupom_fiscal, imposto_estadual, imposto_federal
             ) VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
             )
         '''
         val_venda = (
-            cliente_id, data_venda, vendedor, cliente, cpf_cnpj,
-            telefone, forma_pagamento_id, bandeira_id,
-            parcelamento, subtotal, desconto, valor_total,
+            numero_mesa, nome_mesa, telefone_responsavel, abertura, tempo_aberta, iniciado, tempo_inicial, tempo_total,
+            forma_pagamento_id, bandeira_id, parcelamento, subtotal, desconto, valor_total,
             valor_total_pago, troco, quantidade_itens,
-            numero_cupom_fiscal, imposto_estadual,
-            imposto_federal, origem
+            numero_cupom_fiscal, imposto_estadual, imposto_federal
         )
         cursor.execute(sql_venda, val_venda)
 
         # Obter o ID da venda recém-inserida
-        venda_id = cursor.lastrowid
+        mesa_id = cursor.lastrowid
 
-        # Inserir os itens vendidos na tabela itens_venda
+        # Inserir os itens vendidos na tabela mesas_consumidos
         sql_itens_vendas = '''
-            INSERT INTO mesas_consumidos (venda_id, produto, codigo_produto, quantidade, preco_unitario, subtotal_item)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO mesas_consumidos (mesa_id, codigo_produto, nome_produto, quantidade, preco)
+            VALUES (%s, %s, %s, %s, %s)
         '''
 
         for item in itens_vendidos:
-            produto = item['produto']
             codigo_produto = item['codigo_produto']
+            produto = item['produto']
             quantidade = item['quantidade']
             preco_unitario = item['preco_unitario']
-            subtotal_item = item['subtotal_item']
-            val_item_vendido = (venda_id, produto, codigo_produto, quantidade, preco_unitario, subtotal_item)
+            val_item_vendido = (mesa_id, codigo_produto, produto, quantidade, preco_unitario)
             cursor.execute(sql_itens_vendas, val_item_vendido)
 
             # Atualizar a quantidade de produtos vendidos no estoque em produtos_servicos
@@ -435,6 +435,7 @@ def inserir_venda_mesas():
         conn.rollback()
         print(str(e))
         return jsonify({'erro': str(e)}), 500
+
 
 
 

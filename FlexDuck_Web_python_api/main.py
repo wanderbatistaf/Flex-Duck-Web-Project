@@ -122,6 +122,10 @@ app.register_blueprint(api_company_settings)
 from api_modulos_mysql import api_modulos
 app.register_blueprint(api_modulos)
 
+# Adiciona as rotas de dados dos ceps
+from api_cep import viacep
+app.register_blueprint(viacep)
+
 
 @app.route('/server/status/check-connection', methods=['GET'])
 def check_connection():

@@ -12,7 +12,6 @@ export class UserService {
   // Cria o método para requisitar todos os users
   getAll(): Observable<User[]> {
     return this.http.get<User[]>(`${environment.apiUrl}/users`).pipe(
-      tap((users: User[]) => console.log('API Response:', users)),
       catchError((error) => {
         console.log('Error in API call:', error);
         return throwError('Houve um erro na chamada à API');
@@ -48,7 +47,6 @@ export class UserService {
   // Cria o método para obter o último ID de usuário
   getLastUserId(): Observable<number> {
     return this.http.get<number>(`${environment.apiUrl}/users/lastUserId`).pipe(
-      tap((lastUserId: number) => console.log('API Response:', lastUserId)),
       catchError((error) => {
         console.log('Error in API call:', error);
         return throwError('Houve um erro na chamada à API');

@@ -71,7 +71,6 @@ export class ProdutoModalComponent implements OnInit {
           // Define os pagamentos recuperados na propriedade da classe
           this.produtos = produtos;
           this.loading = false;
-          console.log(produtos);
         },
         // Quando ocorrer um erro na resposta
         error => {
@@ -92,9 +91,6 @@ export class ProdutoModalComponent implements OnInit {
     }
     this.sharedService.selectedProduto.codigo = String(produto.codigo?.toString());
 
-
-    console.log(produto.codigo);
-    console.log(produto.nome);
 
     // Fecha o modal
     this.activeModal.close();
