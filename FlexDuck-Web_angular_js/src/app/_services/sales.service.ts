@@ -11,8 +11,8 @@ export class SalesService {
   constructor(private http: HttpClient) { }
 
   // Cria o método para requisitar todos os produtos
-  getAllProducts(): Observable<Products[]> {
-    return this.http.get<Products[]>(`${environment.apiUrl}/vendas`);
+  getAllVendas(): Observable<Sales[]> {
+    return this.http.get<Sales[]>(`${environment.apiUrl}/vendas`);
   }
 
   // Cria o método para adicionar um novo produto

@@ -26,7 +26,7 @@ import { ContabilidadeComponent } from './contabilidade/contabilidade/contabilid
 import { NotasEntradaComponent } from './contabilidade/notas-entrada/notas-entrada.component';
 import { NotasSaidaComponent } from './contabilidade/notas-saida/notas-saida.component';
 import { SalesComponent } from "@app/sales/sales.component";
-import {NgbModalModule, NgbModule} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModalModule, NgbModule, NgbDatepickerModule} from "@ng-bootstrap/ng-bootstrap";
 import { FilterPipeC, ClienteModalComponent } from './modals/cliente-modal/cliente-modal.component';
 import { FilterPipeV, VendedorModalComponent } from './modals/vendedor-modal/vendedor-modal.component';
 import { FilterPipeP, ProdutoModalComponent } from './modals/produto-modal/produto-modal.component';
@@ -36,6 +36,13 @@ import {CustomHttpInterceptor} from "@app/_services";
 import { SkeletonTableDisplay } from './_share/skeleton-table';
 import {ConfigurationComponent} from "@app/configuration/configuration.component";
 import {NgxPaginationModule} from "ngx-pagination";
+import {DashboardComponent} from "@app/dashboard/dashboard.component";
+import {NgxChartsModule} from "@swimlane/ngx-charts";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {NgxDatatableModule} from "@swimlane/ngx-datatable";
+import {MatNativeDateModule} from "@angular/material/core";
+import {MatDatepickerModule} from "@angular/material/datepicker";
+import {MatInputModule} from "@angular/material/input";
 
 
 @NgModule({
@@ -52,7 +59,14 @@ import {NgxPaginationModule} from "ngx-pagination";
     AnQrcodeModule,
     NgbModule,
     NgbModalModule,
-    NgxPaginationModule
+    NgbDatepickerModule,
+    NgxPaginationModule,
+    NgxChartsModule,
+    BrowserAnimationsModule,
+    NgxDatatableModule,
+    MatDatepickerModule,
+    MatInputModule,
+    MatNativeDateModule
   ],
   declarations: [
     AppComponent,
@@ -77,7 +91,8 @@ import {NgxPaginationModule} from "ngx-pagination";
     FilterPipeP,
     FilterPipeV,
     FilterPipeC,
-    SkeletonTableDisplay
+    SkeletonTableDisplay,
+    DashboardComponent,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

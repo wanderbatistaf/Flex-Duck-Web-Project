@@ -14,7 +14,7 @@ export class Sales {
   valor_total_pago?: number;
   valor_em_aberto?: number;
   quantidade_itens?: number;
-  lucro?: number;
+  troco?: number;
   numero_cupom_fiscal?: number;
   imposto_estadual?: number;
   imposto_federal?: number;

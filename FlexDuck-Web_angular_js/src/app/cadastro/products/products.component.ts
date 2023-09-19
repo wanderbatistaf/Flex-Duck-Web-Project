@@ -234,10 +234,6 @@ export class ProductsComponent implements OnInit {
   }
 
 
-
-
-
-
   getLastProductCode() {
     const isProductDefault = 1; // Define o valor de is_product para produtos como true
 
