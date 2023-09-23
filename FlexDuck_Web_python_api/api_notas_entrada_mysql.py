@@ -67,8 +67,8 @@ def buscar_notas_entrada():
             'especificacaoVolumes': row[13],
             'produtos': json.loads(row[14]),
             'informacoesAdicionais': row[15],
-            'total': row[16],
-            'valorImpostos': row[17],
+            'total': float(row[16]),
+            'valorImpostos': float(row[17]),
             'impostosDetalhados': row[18],
             'dataEmissao': row[19]
         }
