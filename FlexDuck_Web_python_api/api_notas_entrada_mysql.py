@@ -14,10 +14,17 @@ from Controller.db_connection import get_db_connection
 api_notas_entrada = Blueprint('api_notas_entrada', __name__)
 
 
+# Função para converter objetos Decimal em float
+def decimal_default(obj):
+    if isinstance(obj, decimal.Decimal):
+        return float(obj)
+    raise TypeError
+
+
 # API NOTAS ENTRADA #
 # Define a rota GET para buscar dados das notas de entrada
 @api_notas_entrada.route('/notas-entrada', methods=['GET'])
-@jwt_required() # Protege a rota com JWT
+@jwt_required()  # Protege a rota com JWT
 def buscar_notas_entrada():
     current_user = get_jwt_identity()
     if not current_user:
@@ -43,7 +50,8 @@ def buscar_notas_entrada():
         except mysql.connector.errors.OperationalError:
             current_attempt += 1
             if current_attempt == max_attempts:
-                print("Erro de conexão com o banco de dados após várias tentativas. Verifique a conexão e tente novamente mais tarde.")
+                print(
+                    "Erro de conexão com o banco de dados após várias tentativas. Verifique a conexão e tente novamente mais tarde.")
                 return jsonify({'mensagem': 'Erro de conexão com o banco de dados.'}), 500
             else:
                 time.sleep(2)  # Pausa de 2 segundos antes de tentar novamente
@@ -67,17 +75,21 @@ def buscar_notas_entrada():
             'especificacaoVolumes': row[13],
             'produtos': json.loads(row[14]),
             'informacoesAdicionais': row[15],
-            'total': row[16],
-            'valorImpostos': row[17],
-            'impostosDetalhados': row[18],
+            'total': float(row[16]),  # Converter Decimal para float
+            'valorImpostos': float(row[17]),  # Converter Decimal para float
+            'impostosDetalhados': json.loads(row[18]),
             'dataEmissao': row[19]
         }
         items.append(item)
+
     response = {
         "totalPage": 1,
         "items": items
     }
-    return jsonify(response)
+
+    # Usar a função de conversão personalizada para converter Decimal em float
+    return jsonify(response, default=decimal_default)
+
 
 # Define a rota POST para inserir dados de notas de entrada no banco de dados
 @api_notas_entrada.route('/notas-entrada/add', methods=['POST'])
