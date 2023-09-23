@@ -65,7 +65,7 @@ def buscar_notas_entrada():
             'modoFrete': row[11],
             'quantidadeVolumes': row[12],
             'especificacaoVolumes': row[13],
-            'produtos': row[14],
+            'produtos': json.loads(row[14]),
             'informacoesAdicionais': row[15],
             'total': row[16],
             'valorImpostos': row[17],

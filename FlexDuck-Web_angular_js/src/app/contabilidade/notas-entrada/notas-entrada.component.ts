@@ -626,12 +626,13 @@ export class NotasEntradaComponent implements OnInit {
       (data) => {
         this.nfnotes = data.items; // Assumindo que os dados são armazenados em data.items
         this.totalItems = data.length;
+        this.loading = false; // Move esta linha para dentro da função de callback de sucesso
       },
       (error) => {
         console.error('Erro ao carregar notas de entrada:', error);
+        this.loading = false; // Certifique-se de que 'loading' seja definido como falso em caso de erro também
       }
     );
-    this.loading = false;
   }
 
   toggleMostrarChaveAcesso(nota: any) {
@@ -640,9 +641,23 @@ export class NotasEntradaComponent implements OnInit {
 
   selecionarNota(nota: any): void {
     this.notaSelecionada = nota;
-    this.notaSelecionada.produtos = JSON.parse(this.notaSelecionada.produtos);
-    this.activeTab = 'cadastro'; // Ative a página de detalhes
+
+    // Verificar se this.notaSelecionada.produtos é uma string
+    if (typeof this.notaSelecionada.produtos === 'string') {
+      try {
+        // Tentar analisar a string como JSON
+        this.notaSelecionada.produtos = JSON.parse(this.notaSelecionada.produtos);
+      } catch (error) {
+        console.error('Erro ao analisar JSON:', error);
+        // Se ocorrer um erro ao analisar, você pode tratar o erro aqui
+        // Por exemplo, definindo this.notaSelecionada.produtos como um valor padrão
+        this.notaSelecionada.produtos = [];
+      }
+    }
+
+    this.activeTab = 'detalhes'; // Ative a página de detalhes
   }
+
 
   onPageChange(pageNumber: number): void {
     this.currentPage = pageNumber;
