@@ -56,95 +56,95 @@
     </form>
   </nav>
 
-<div class="card table-responsive mt-4" *ngIf="activeTab === 'consulta'">
-  <div class="card-body">
-    <div class="text-center" *ngIf="loading">
-      <!-- <div class="spinner-border spinner-border-sm"></div> -->
-      <skeleton-table-display *ngIf="loading"></skeleton-table-display>
+  <div class="card table-responsive mt-4" *ngIf="activeTab === 'consulta'">
+    <div class="card-body">
+      <div class="text-center" *ngIf="loading">
+        <!-- <div class="spinner-border spinner-border-sm"></div> -->
+        <skeleton-table-display *ngIf="loading"></skeleton-table-display>
+      </div>
+
+      <!--Consulta renderiza aqui-->
+      <div class="table-responsive" *ngIf="activeTab === 'consulta'">
+        <table class="table table-condensed table-hover">
+          <thead>
+          <tr>
+            <th style="text-align: center;">Código</th>
+            <th style="text-align: center;">Chave de Acesso</th>
+            <th style="text-align: center;">Emitente</th>
+            <th style="text-align: center;">CNPJ</th>
+            <th style="text-align: center;">Total</th>
+            <th style="text-align: center;">Impostos</th>
+            <th style="text-align: center;">Emissão</th>
+            <th style="text-align: center;">Ações</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let notas of nfnotes | filter: pesquisaNotas | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
+            <td>{{ notas.numeroNF }}</td>
+            <td style="text-align: center;">
+              {{ notas.mostrarChaveAcesso ? notas.chaveAcesso : '********************************************' }}
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                *ngIf="!notas.mostrarChaveAcesso; else hideIcon"
+                (click)="toggleMostrarChaveAcesso(notas)"
+              >
+                <i class="fa" [ngClass]="{'fa-eye': !notas.mostrarChaveAcesso, 'fa-eye-slash': notas.mostrarChaveAcesso}" aria-hidden="true"></i>
+              </button>
+
+              <ng-template #hideIcon>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="toggleMostrarChaveAcesso(notas)"
+                >
+                  <i class="fa" [ngClass]="{'fa-eye': !notas.mostrarChaveAcesso, 'fa-eye-slash': notas.mostrarChaveAcesso}" aria-hidden="true"></i>
+                </button>
+              </ng-template>
+            </td>
+
+            <td style="text-align: center;">{{ notas.nomeEmitente }}</td>
+            <td style="text-align: center;">{{ notas.cnpjEmitente }}</td>
+            <td style="text-align: center;">R$ {{ notas.total }}</td>
+            <td style="text-align: center;">R$ {{ notas.valorImpostos }}</td>
+            <td style="text-align: center;">{{ notas.dataEmissao | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td style="text-align: center;">
+
+              <button type="button" class="btn btn-sm btn-outline-primary btn-block" (click)="selecionarNota(notas); setActiveTab('detalhes')">
+                Detalhes
+              </button>
+
+
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+        <!-- Adicione os controles de páginação -->
+        <section class="pagination pagination-left">
+          <button id="pg-button-prev" type="button" class="pagination__button" (click)="previousPage()" [disabled]="currentPage === 1">
+            <i class="fa fa-chevron-left"></i>
+          </button>
+
+          <ul class="pagination__list">
+            <li class="pagination__item pagination__item--1">
+              <button id="pg-button-1" type="button" (click)="goToPage(1)" [class.active]="currentPage === 1">1</button>
+            </li>
+            <li class="pagination__item pagination__item--2">
+              <button id="pg-button-2" type="button" (click)="goToPage(2)" [class.active]="currentPage === 2">2</button>
+            </li>
+            <!-- Adicione mais botões de página conforme necessário -->
+          </ul>
+
+          <button id="pg-button-next" type="button" class="pagination__button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <i class="fa fa-chevron-right"></i>
+          </button>
+        </section>
+      </nav>
     </div>
-
-  <!--Consulta renderiza aqui-->
-  <div class="table-responsive" *ngIf="activeTab === 'consulta'">
-    <table class="table table-condensed table-hover">
-      <thead>
-      <tr>
-        <th style="text-align: center;">Código</th>
-        <th style="text-align: center;">Chave de Acesso</th>
-        <th style="text-align: center;">Emitente</th>
-        <th style="text-align: center;">CNPJ</th>
-        <th style="text-align: center;">Total</th>
-        <th style="text-align: center;">Impostos</th>
-        <th style="text-align: center;">Emissão</th>
-        <th style="text-align: center;">Ações</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let notas of nfnotes | filter: pesquisaNotas | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
-        <td>{{ notas.numeroNF }}</td>
-        <td style="text-align: center;">
-    {{ notas.mostrarChaveAcesso ? notas.chaveAcesso : '********************************************' }}
-
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-primary"
-            *ngIf="!notas.mostrarChaveAcesso; else hideIcon"
-            (click)="toggleMostrarChaveAcesso(notas)"
-          >
-            <i class="fa" [ngClass]="{'fa-eye': !notas.mostrarChaveAcesso, 'fa-eye-slash': notas.mostrarChaveAcesso}" aria-hidden="true"></i>
-          </button>
-
-          <ng-template #hideIcon>
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-primary"
-              (click)="toggleMostrarChaveAcesso(notas)"
-            >
-              <i class="fa" [ngClass]="{'fa-eye': !notas.mostrarChaveAcesso, 'fa-eye-slash': notas.mostrarChaveAcesso}" aria-hidden="true"></i>
-            </button>
-          </ng-template>
-        </td>
-
-        <td style="text-align: center;">{{ notas.nomeEmitente }}</td>
-        <td style="text-align: center;">{{ notas.cnpjEmitente }}</td>
-        <td style="text-align: center;">R$ {{ notas.total }}</td>
-        <td style="text-align: center;">R$ {{ notas.valorImpostos }}</td>
-        <td style="text-align: center;">{{ notas.dataEmissao | date:'dd/MM/yyyy HH:mm' }}</td>
-        <td style="text-align: center;">
-
-          <button type="button" class="btn btn-sm btn-outline-primary btn-block" (click)="selecionarNota(notas); setActiveTab('detalhes')">
-            Detalhes
-          </button>
-
-
-        </td>
-      </tr>
-      </tbody>
-    </table>
   </div>
-    <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
-      <!-- Adicione os controles de páginação -->
-      <section class="pagination pagination-left">
-        <button id="pg-button-prev" type="button" class="pagination__button" (click)="previousPage()" [disabled]="currentPage === 1">
-          <i class="fa fa-chevron-left"></i>
-        </button>
-
-        <ul class="pagination__list">
-          <li class="pagination__item pagination__item--1">
-            <button id="pg-button-1" type="button" (click)="goToPage(1)" [class.active]="currentPage === 1">1</button>
-          </li>
-          <li class="pagination__item pagination__item--2">
-            <button id="pg-button-2" type="button" (click)="goToPage(2)" [class.active]="currentPage === 2">2</button>
-          </li>
-          <!-- Adicione mais botões de página conforme necessário -->
-        </ul>
-
-        <button id="pg-button-next" type="button" class="pagination__button" (click)="nextPage()" [disabled]="currentPage === totalPages">
-          <i class="fa fa-chevron-right"></i>
-        </button>
-      </section>
-    </nav>
-  </div>
-</div>
 
   <!-- Detalhes renderiza aqui! -->
   <div *ngIf="activeTab === 'detalhes'" class="container mt-4">
@@ -400,7 +400,7 @@
               <!-- CNPJ DO DESTINATARIO -->
               <div class="form-group col-md-4 text-center">
                 <label class="form-control-label">CNPJ do Destinatário</label>
-<!--                <input #destinatarioCNPJField type="text" class="form-control" placeholder="CNPJ do Destinatário" readonly>-->
+                <!--                <input #destinatarioCNPJField type="text" class="form-control" placeholder="CNPJ do Destinatário" readonly>-->
                 <input #destinatarioField type="text" class="form-control" [value]="destinatario" placeholder="CNPJ ou CPF do Destinatário" readonly>
               </div>
 
@@ -443,39 +443,39 @@
             <h4>Produtos</h4>
             <div class="card p-4">
               <div class="card-body">
-            <div class="col-md-12">
-              <table class="table">
-                <thead>
-                <tr>
-                  <th>Código do Produto</th>
-                  <th>Descrição do Produto</th>
-                  <th>Quantidade</th>
-                  <th>Valor Unitário</th>
-                  <th>Valor Total</th>
-                  <th>CFOP</th>
-                  <th>Ações</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr *ngFor="let produto of produtos">
-                  <td>{{ produto.cProd }}</td>
-                  <td>{{ produto.xProd }}</td>
-                  <td>{{ Number(produto.qCom) }}</td>
-                  <td>{{ Number(produto.vUnCom).toFixed(2) }}</td>
-                  <td>{{ produto.vProd }}</td>
-                  <td>{{ produto.cfop }}</td>
-                  <td><button
-                    type="submit"
-                    class="btn btn-outline-primary"
-                    [disabled]="produtoJaInserido(produto) || isTodosOsProdutosInseridos"
-                    (click)="openModal(produto)"
-                  >Inserir</button></td>
-                </tr>
-                <br/>
-                <button type="submit" class="btn btn-primary" [disabled]="isTodosOsProdutosInseridos" (click)="abrirModalTodos()">Inserir Todos</button>
-                </tbody>
-              </table>
-            </div>
+                <div class="col-md-12">
+                  <table class="table">
+                    <thead>
+                    <tr>
+                      <th>Código do Produto</th>
+                      <th>Descrição do Produto</th>
+                      <th>Quantidade</th>
+                      <th>Valor Unitário</th>
+                      <th>Valor Total</th>
+                      <th>CFOP</th>
+                      <th>Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let produto of produtos">
+                      <td>{{ produto.cProd }}</td>
+                      <td>{{ produto.xProd }}</td>
+                      <td>{{ Number(produto.qCom) }}</td>
+                      <td>{{ Number(produto.vUnCom).toFixed(2) }}</td>
+                      <td>{{ produto.vProd }}</td>
+                      <td>{{ produto.cfop }}</td>
+                      <td><button
+                        type="submit"
+                        class="btn btn-outline-primary"
+                        [disabled]="produtoJaInserido(produto) || isTodosOsProdutosInseridos"
+                        (click)="openModal(produto)"
+                      >Inserir</button></td>
+                    </tr>
+                    <br/>
+                    <button type="submit" class="btn btn-primary" [disabled]="isTodosOsProdutosInseridos" (click)="abrirModalTodos()">Inserir Todos</button>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
 
@@ -537,33 +537,33 @@
         <div class="card table-responsive mt-4">
           <div class="card-body">
             <table class="table">
-        <thead>
-        <tr>
-          <th>Código do Produto</th>
-          <th>Descrição do Produto</th>
-          <th>Quantidade</th>
-          <th>Valor Unitário</th>
-          <th>Preço de Venda</th>
-          <th>Categoria</th>
-          <th>Valor Total</th>
-          <th>CFOP</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td>{{ modalSelectedProduto?.modalCProd }}</td>
-        <td>{{ modalSelectedProduto?.xProd }}</td>
-        <td>{{ Number(modalSelectedProduto?.qCom) }}</td>
-        <td>{{ Number(modalSelectedProduto?.vUnCom).toFixed(2) }}</td>
-        <td><input type="number" class="form-control" formControlName="preco_venda" id="preco_venda" placeholder="" [value]="precoVendaValue"></td>
-        <td><input type="text" class="form-control" formControlName="categoria" id="categoria" placeholder="" [value]="categoriaValue"></td>
-        <td>{{ modalSelectedProduto?.vProd }}</td>
-        <td>{{ modalSelectedProduto?.cfop }}</td>
-        <!-- Adicione mais informações do produto aqui -->
-        </tr>
-        </tbody>
+              <thead>
+              <tr>
+                <th>Código do Produto</th>
+                <th>Descrição do Produto</th>
+                <th>Quantidade</th>
+                <th>Valor Unitário</th>
+                <th>Preço de Venda</th>
+                <th>Categoria</th>
+                <th>Valor Total</th>
+                <th>CFOP</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>{{ modalSelectedProduto?.modalCProd }}</td>
+                <td>{{ modalSelectedProduto?.xProd }}</td>
+                <td>{{ Number(modalSelectedProduto?.qCom) }}</td>
+                <td>{{ Number(modalSelectedProduto?.vUnCom).toFixed(2) }}</td>
+                <td><input type="number" class="form-control" formControlName="preco_venda" id="preco_venda" placeholder="" [value]="precoVendaValue"></td>
+                <td><input type="text" class="form-control" formControlName="categoria" id="categoria" placeholder="" [value]="categoriaValue"></td>
+                <td>{{ modalSelectedProduto?.vProd }}</td>
+                <td>{{ modalSelectedProduto?.cfop }}</td>
+                <!-- Adicione mais informações do produto aqui -->
+              </tr>
+              </tbody>
             </table>
-      </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -578,6 +578,7 @@
     </div>
   </div>
 </div>
+
 
 
 <!-- Modal para exibir todos os produtos -->
@@ -612,9 +613,8 @@
                 <td>{{ produto.xProd }}</td>
                 <td>{{ Number(produto.qCom) }}</td>
                 <td>{{ Number(produto.vUnCom).toFixed(2) }}</td>
-                <td><input type="number" class="form-control" placeholder="" class="form-control" [formControlName]="'preco_venda_' + produto.cProd" [id]="'preco_venda_' + produto.cProd" [value]="precoVendaValueMultiple"></td>
-                <td><input type="text" class="form-control" placeholder="" class="form-control" [formControlName]="'categoria_' + produto.cProd" [id]="'categoria_' + produto.cProd" [value]="categoriaValueMultiple"></td>
-                <td>{{ produto.vProd }}</td>
+                <td><input type="number" class="form-control" placeholder="" [(ngModel)]="produto.precoVenda" [id]="'preco_venda_' + produto.cProd"></td>
+                <td><input type="text" class="form-control" placeholder="" [(ngModel)]="produto.category_suggested" [id]="'categoria_' + produto.cProd"></td>                <td>{{ produto.vProd }}</td>
                 <td>{{ produto.cfop }}</td>
               </tr>
               </tbody>
@@ -636,6 +636,3 @@
     </div>
   </div>
 </div>
-
-
-

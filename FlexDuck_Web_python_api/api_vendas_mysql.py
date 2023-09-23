@@ -437,9 +437,122 @@ def inserir_venda_mesas():
         return jsonify({'erro': str(e)}), 500
 
 
+# Rota para buscar todas as vendas incluindo mesas (reports)
+@api_vendas.route('/vendas/reports', methods=['GET'])
+@jwt_required()  # Protege a rota com JWT
+def buscar_todas_vendas_reports():
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
 
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
 
+    # Configura a conexão com o banco de dados MySQL
+    conn = get_db_connection(subdomain)
 
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            WITH xablau AS (WITH vendas_t AS (SELECT 
+    *
+FROM vendas AS A
+LEFT JOIN (select venda_id, produto, preco_unitario, quantidade, subtotal_item, codigo_produto from itens_vendas) AS B ON A.id = B.venda_id),
+
+mesas_t AS (
+SELECT 
+    *
+FROM mesas AS A
+LEFT JOIN (SELECT mesa_id, codigo_produto, nome_produto, quantidade, preco from mesas_consumidos) AS B ON A.id = B.mesa_id)
+
+SELECT DISTINCT id,
+data_venda,
+cliente,
+vendedor,
+forma_pagamento_id,
+bandeira_id,
+parcelamento,
+ROUND(subtotal,2) AS subtotal,
+ROUND(desconto,2) AS desconto,
+ROUND(valor_total,2) AS valor_total, 
+ROUND(valor_total_pago,2) AS valor_total_pago,
+ROUND(troco,2) AS troco,
+quantidade_itens,
+codigo_produto,
+ROUND(preco_unitario,2) AS preco_unitario,
+quantidade FROM vendas_t
+
+UNION
+
+SELECT DISTINCT CONCAT('M-', id) AS id,
+abertura,
+nome,
+'Mesa',
+forma_pagamento_id,
+bandeira_id,
+parcelamento,
+ROUND(subtotal,2) AS subtotal,
+ROUND(desconto,2) AS desconto,
+ROUND(valor_total,2) AS valor_total,
+ROUND(valor_total_pago,2) AS valor_total_pago,
+ROUND(troco,2) AS troco,
+quantidade_itens,
+codigo_produto,
+ROUND(preco,2) AS preco,
+quantidade FROM mesas_t )
+
+SELECT A.*, B.nome, B.preco_custo, B.estoque FROM xablau AS A LEFT JOIN (select nome, codigo, preco_custo, quantidade AS estoque from produtos_servicos) AS B ON A.codigo_produto = B.codigo
+        ''')
+        resultados = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        vendas_agrupadas = {}
+
+        for row in resultados:
+            venda_id = row[0]
+
+            if venda_id not in vendas_agrupadas:
+                vendas_agrupadas[venda_id] = {
+                    "id": venda_id,
+                    "data_venda": row[1],
+                    "cliente": row[2],
+                    "vendedor": row[3],
+                    "forma_pagamento_id": row[4],
+                    "bandeira_id": row[5],
+                    "parcelamento": row[6],
+                    "subtotal": float(row[7]),
+                    "desconto": float(row[8]),
+                    "valor_total": float(row[9]),
+                    "valor_total_pago": float(row[10]),
+                    "troco": float(row[11]),
+                    "quantidade_itens": row[12],
+                    "produtos": []  # Inicializa um array para os produtos desta venda
+                }
+
+            # Verifica se há informações de produtos válidas na linha
+            if row[13] and row[14] and row[15] and row[16] and row[17] and row[18]:
+                produto = {
+                    "codigo_produto": row[13],
+                    "produto": row[16],
+                    "preco_custo": float(row[17]),
+                    "preco_unitario": float(row[14]),
+                    "quantidade": row[15],
+                    "estoque": row[18]
+                }
+                vendas_agrupadas[venda_id]["produtos"].append(produto)
+
+        # Converta o dicionário em uma lista de vendas agrupadas
+        vendas = list(vendas_agrupadas.values())
+
+        return jsonify({
+            "table": "vendas",
+            "rows": vendas
+        })
+
+    except Exception as e:
+        print("Erro ao buscar vendas:", str(e))
+        return jsonify({'mensagem': 'Erro ao buscar vendas.'}), 500
 
 
 

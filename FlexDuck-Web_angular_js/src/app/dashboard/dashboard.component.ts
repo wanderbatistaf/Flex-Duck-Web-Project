@@ -20,6 +20,9 @@ export class DashboardComponent implements OnInit {
   barChart: any;
   vendasTotal: number = 0;
   filteredSales: Sales[] = [];
+  topProducts?: [string, number][];
+  distinctCustomerCount: any;
+  averagePrice?: number;
 
   constructor(private salesService: SalesService) {}
 
@@ -30,7 +33,7 @@ export class DashboardComponent implements OnInit {
 
   getAllSales(): void {
     this.salesService
-      .getAllVendas()
+      .getAllVendasReport()
       .pipe(map((response: any) => response.rows as Sales[]))
       .subscribe(
         (sales: Sales[]) => {
@@ -45,6 +48,8 @@ export class DashboardComponent implements OnInit {
 
           // Calcule a soma total das vendas aqui
           this.calculateTotalSales();
+          // Calcule a os top produtos vendidos aqui
+          this.calculateTopProducts();
 
           // Filtrar as vendas com base nos critérios iniciais
           this.filterSales();
@@ -195,7 +200,7 @@ export class DashboardComponent implements OnInit {
     this.vendasTotal = somaTotalVendas;
 
     this.chart = new Chart(ctx, {
-      type: 'bar',
+      type: 'bar', // Tipo de gráfico de barras
       data: {
         labels: labels,
         datasets: [
@@ -205,25 +210,34 @@ export class DashboardComponent implements OnInit {
             backgroundColor: 'rgba(255, 99, 132, 0.2)',
             borderColor: 'rgba(255, 99, 132, 1)',
             borderWidth: 1,
+            yAxisID: 'quantidade', // Eixo Y para a quantidade de vendas
           },
           {
             label: 'Valor Total de Vendas',
             data: valorTotalVendas,
+            type: 'line', // Tipo de gráfico de linha
             backgroundColor: 'rgba(54, 162, 235, 0.2)',
             borderColor: 'rgba(54, 162, 235, 1)',
             borderWidth: 1,
+            yAxisID: 'valor', // Eixo Y para o valor total de vendas
           },
         ],
       },
       options: {
         scales: {
-          y: {
+          quantidade: {
+            position: 'left',
+            beginAtZero: true,
+          },
+          valor: {
+            position: 'right',
             beginAtZero: true,
           },
         },
       },
     });
   }
+
 
   createBarChart(): void {
     // Recupere as datas selecionadas (startDate e endDate)
@@ -343,7 +357,183 @@ export class DashboardComponent implements OnInit {
 
     this.createChart();
     this.createBarChart();
+    this.calculateTopProducts();
+    this.calculateDistinctCustomerCount();
+    this.calculateAveragePrice();
   }
+
+  calculateTopProducts(): void {
+    const startDate = this.startDate ? new Date(this.startDate) : null;
+    const endDate = this.endDate ? new Date(this.endDate) : null;
+    const selectedVendedor =
+      this.selectedVendedor === 'Todos os Vendedores'
+        ? ''
+        : this.selectedVendedor;
+
+    const filteredSales = this.sales.filter((sale) => {
+      if (sale.data_venda) {
+        const saleDate = new Date(sale.data_venda);
+
+        // Imprima informações de depuração no console
+        console.log('Venda:', sale);
+        console.log('startDate:', startDate);
+        console.log('endDate:', endDate);
+        console.log('selectedVendedor:', selectedVendedor);
+
+        // Verifica se a data da venda está dentro do intervalo selecionado
+        if (
+          (!startDate || saleDate >= startDate) &&
+          (!endDate || saleDate <= endDate)
+        ) {
+          // Verifica se o vendedor selecionado é vazio ou corresponde ao vendedor da venda
+          if (
+            !selectedVendedor ||
+            sale.vendedor === selectedVendedor
+          ) {
+            return true;
+          }
+        }
+      }
+      return false;
+    });
+
+    // Agora, você pode trabalhar com o array de vendas filtradas.
+    const productQuantities: { [key: string]: number } = {};
+    const productPrices: { [key: string]: number } = {};
+
+    filteredSales.forEach((sale) => {
+      sale.produtos.forEach((produto: { codigo_produto: string; quantidade: number; preco_unitario: number; }) => {
+        const productCode = produto.codigo_produto || 'P000000';
+        const quantitySold = produto.quantidade || 0;
+        const pricePerUnit = produto.preco_unitario || 0;
+
+        if (productQuantities.hasOwnProperty(productCode)) {
+          productQuantities[productCode] += quantitySold;
+        } else {
+          productQuantities[productCode] = quantitySold;
+        }
+
+        if (!productPrices.hasOwnProperty(productCode)) {
+          productPrices[productCode] = pricePerUnit;
+        }
+      });
+    });
+
+    const productSales: { [key: string]: number } = {};
+
+    for (const productCode in productQuantities) {
+      if (productQuantities.hasOwnProperty(productCode) && productPrices.hasOwnProperty(productCode)) {
+        const quantitySold = productQuantities[productCode];
+        const pricePerUnit = productPrices[productCode];
+        const totalSales = quantitySold * pricePerUnit;
+        productSales[productCode] = totalSales;
+      }
+    }
+
+    const productSalesArray: [string, number][] = Object.entries(productSales);
+
+    productSalesArray.sort((a, b) => b[1] - a[1]);
+
+    this.topProducts = productSalesArray.slice(0, 1);
+  }
+
+  calculateDistinctCustomerCount(): void {
+    const startDate = this.startDate ? new Date(this.startDate) : null;
+    const endDate = this.endDate ? new Date(this.endDate) : null;
+    const selectedVendedor =
+      this.selectedVendedor === 'Todos os Vendedores'
+        ? ''
+        : this.selectedVendedor;
+
+    const distinctCustomers = new Set<string>();
+
+    const filteredSales = this.sales.filter((sale) => {
+      if (sale.data_venda) {
+        const saleDate = new Date(sale.data_venda);
+
+        if (
+          (!startDate || saleDate >= startDate) &&
+          (!endDate || saleDate <= endDate)
+        ) {
+          if (
+            !selectedVendedor ||
+            sale.vendedor === selectedVendedor
+          ) {
+            if (sale.cliente != null) {
+              distinctCustomers.add(sale.cliente);
+            }
+            return true;
+          }
+        }
+      }
+      return false;
+    });
+
+    this.distinctCustomerCount = distinctCustomers.size;
+  }
+
+  calcularSomaCustoProdutos(venda: any): number {
+    if (venda.produtos && venda.produtos.length > 0) {
+      return venda.produtos.reduce((total: number, produto: any) => total + produto.preco_custo, 0);
+    } else {
+      return 0;
+    }
+  }
+
+  calcularLucroTotal(venda: any): number {
+    if (venda.produtos && venda.produtos.length > 0) {
+      const somaCustoProdutos = this.calcularSomaCustoProdutos(venda);
+      const valorTotal = parseFloat(venda.valor_total);
+
+      if (!isNaN(valorTotal)) {
+        return valorTotal - somaCustoProdutos;
+      }
+    }
+
+    return 0;
+  }
+
+  calculateAveragePrice(): void {
+    const startDate = this.startDate ? new Date(this.startDate) : null;
+    const endDate = this.endDate ? new Date(this.endDate) : null;
+    const selectedVendedor =
+      this.selectedVendedor === 'Todos os Vendedores'
+        ? ''
+        : this.selectedVendedor;
+
+    let totalValue = 0;
+    let totalQuantity = 0;
+
+    const filteredSales = this.sales.filter((sale) => {
+      if (sale.data_venda) {
+        const saleDate = new Date(sale.data_venda);
+
+        if (
+          (!startDate || saleDate >= startDate) &&
+          (!endDate || saleDate <= endDate)
+        ) {
+          if (
+            !selectedVendedor ||
+            sale.vendedor === selectedVendedor
+          ) {
+            for (const produto of sale.produtos) {
+              totalValue += produto.quantidade * produto.preco_unitario;
+              totalQuantity += produto.quantidade;
+            }
+            return true;
+          }
+        }
+      }
+      return false;
+    });
+
+    if (totalQuantity > 0) {
+      this.averagePrice = totalValue / totalQuantity;
+    } else {
+      this.averagePrice = 0;
+    }
+  }
+
 
   clearFilter(): void {
     this.startDate = '';
@@ -352,6 +542,10 @@ export class DashboardComponent implements OnInit {
     this.filteredSales = this.sales;
     this.createChart();
     this.createBarChart();
+    this.calculateTopProducts();
+    this.calculateDistinctCustomerCount();
+    this.calculateAveragePrice();
+
   }
 
 

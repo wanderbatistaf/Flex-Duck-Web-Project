@@ -40,5 +40,10 @@ export class SalesService {
     return this.http.delete<Products>(`${environment.apiUrl}/products/delete/${id}`)
   }
 
+  // Cria o método para requisitar todos os produtos para o reports
+  getAllVendasReport(): Observable<Sales[]> {
+    return this.http.get<Sales[]>(`${environment.apiUrl}/vendas/reports`);
+  }
+
 
 }

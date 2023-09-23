@@ -15,8 +15,16 @@
         </div>
         <div class="form-group">
           <label for="cpfCnpj">CPF/CNPJ:</label>
-          <input type="text" class="form-control" id="cpfCnpj" [(ngModel)]="cpfCnpj" (input)="cpfCnpj = formatarCpfCnpj(cpfCnpj)">
+          <input
+            type="text"
+            class="form-control"
+            id="cpfCnpj"
+            [(ngModel)]="cpfCnpj"
+            (input)="onCpfCnpjInput()"
+            maxlength="14"/>
+          <div *ngIf="cpfCnpjError" class="text-danger">CPF/CNPJ inválido. Por favor, verifique.</div>
         </div>
+
         <div class="form-group">
           <label for="telefone">Telefone:</label>
           <input type="text" class="form-control" id="telefone" [(ngModel)]="telefone" (input)="telefone = formatarTelefone(telefone)">

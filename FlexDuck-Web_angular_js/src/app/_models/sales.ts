@@ -20,4 +20,7 @@ export class Sales {
   imposto_federal?: number;
   cnpj?: string;
   cliente_id?: number;
+  codigo_produto?: string;
+  produtos: any;
+  preco_custo?: number;
 }

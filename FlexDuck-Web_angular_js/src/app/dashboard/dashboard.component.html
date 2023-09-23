@@ -28,11 +28,14 @@
           <i class="bi bi-lightning"></i>
         </button>
         <div class="dropdown-menu">
+          <a class="dropdown-item" (click)="filterToday()">Today</a>
+          <a class="dropdown-item" (click)="filterThisWeek()">This Week</a>
+          <a class="dropdown-item" (click)="filterLastWeek()">Last Week</a>
           <a class="dropdown-item" (click)="filterThisMonth()">This Month</a>
           <a class="dropdown-item" (click)="filterLastMonth()">Last Month</a>
           <a class="dropdown-item" (click)="filterThisYear()">This Year</a>
           <a class="dropdown-item" (click)="filterLastYear()">Last Year</a>
-          <a class="dropdown-item" (click)="filterToday()">Today</a>
+
         </div>
       </div>
       <input class="form-control mr-sm-2 flex-grow-1" type="date" id="startDate" [(ngModel)]="startDate">
@@ -52,15 +55,16 @@
     <div class="card bg-primary-custom">
       <div class="card-heading p-4">
         <div class="mini-stat-icon float-right">
-          <i class="mdi mdi-cube-outline bg-primary  text-white"></i>
+          <i class="mdi mdi-cube-outline bg-primary text-white"></i>
         </div>
         <div>
-          <h5 class="font-16">Active Sessions</h5>
+          <h5 class="font-16">Clientes Distintos</h5>
         </div>
-        <h3 class="mt-4">43,225</h3>
+        <h3 class="mt-4">{{ distinctCustomerCount }}</h3>
       </div>
     </div>
   </div>
+
   <div class="col-sm-6 col-xl-3">
     <div class="card bg-success-custom">
       <div class="card-heading p-4">
@@ -81,9 +85,9 @@
           <i class="mdi mdi-tag-text-outline bg-warning text-white"></i>
         </div>
         <div>
-          <h5 class="font-16">Average Price</h5>
+          <h5 class="font-16">Ticket Médio</h5>
         </div>
-        <h3 class="mt-4">447</h3>
+        <h3 class="mt-4">{{ averagePrice?.toFixed(2) | currency:'BRL':'symbol' }}</h3>
       </div>
     </div>
   </div>
@@ -94,12 +98,15 @@
           <i class="mdi mdi-buffer bg-danger text-white"></i>
         </div>
         <div>
-          <h5 class="font-16">Add to Card</h5>
+          <h5 class="font-16">Produto Mais Vendido</h5>
         </div>
-        <h3 class="mt-4">86%</h3>
+        <h3 class="mt-4" *ngFor="let product of topProducts">
+          {{ product[0] }} - {{ product[1] | currency:'BRL':'symbol' }}
+        </h3>
       </div>
     </div>
   </div>
+
 </div>
 
 <div class="my-4"></div>
@@ -151,6 +158,7 @@
                   <th>Valor Total</th>
                   <th>Total Pago</th>
                   <th>Troco</th>
+                  <th>Lucro</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -160,9 +168,18 @@
                   <td>{{ sale.cliente }}</td>
                   <td>{{ sale.vendedor }}</td>
                   <td>{{ sale.quantidade_itens }}</td>
-                  <td>{{ sale.valor_total?.toFixed(2)}}</td>
+                  <td>{{ sale.valor_total?.toFixed(2) }}</td>
                   <td>{{ sale.valor_total_pago?.toFixed(2) }}</td>
                   <td>{{ sale.troco?.toFixed(2) }}</td>
+                  <td>
+                    <ng-container *ngIf="sale.produtos?.length > 0; else noProducts">
+                      {{ calcularLucroTotal(sale).toFixed(2) }}
+                    </ng-container>
+                    <ng-template #noProducts>
+                      0
+                    </ng-template>
+                  </td>
+
                 </tr>
                 </tbody>
               </table>

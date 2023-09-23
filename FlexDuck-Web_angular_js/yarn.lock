@@ -1597,10 +1597,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/bootstrap@^5.2.6":
-  version "5.2.6"
-  resolved "https://registry.yarnpkg.com/@types/bootstrap/-/bootstrap-5.2.6.tgz#e861b3aa1f4a1434da0bf50fbaa372b6f7e64d2f"
-  integrity sha512-BlAc3YATdasbHoxMoBWODrSF6qwQO/E9X8wVxCCSa6rWjnaZfpkr2N6pUMCY6jj2+wf0muUtLySbvU9etX6YqA==
+"@types/bootstrap@^5.2.7":
+  version "5.2.7"
+  resolved "https://registry.yarnpkg.com/@types/bootstrap/-/bootstrap-5.2.7.tgz#a920df4ea82d8cc605751007f5c9744336842f30"
+  integrity sha512-vWs0HzobIB8Af2F0B1GXpaVLSVn1NWULDYgTIWp08Et/r2B3aAwwhFBeOs/rRFWJA38EZTXkWP3tepIjpQkpLg==
   dependencies:
     "@popperjs/core" "^2.9.2"
 
@@ -4512,10 +4512,10 @@ jest-worker@^27.4.5:
     merge-stream "^2.0.0"
     supports-color "^8.0.0"
 
-jquery@^3.6.3:
-  version "3.6.3"
-  resolved "https://registry.npmjs.org/jquery/-/jquery-3.6.3.tgz"
-  integrity sha512-bZ5Sy3YzKo9Fyc8wH2iIQK4JImJ6R0GWI9kL1/k7Z91ZBNgkRXE6U0JfHIizZbort8ZunhSI3jw9I6253ahKfg==
+jquery@^3.7.1:
+  version "3.7.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.7.1.tgz#083ef98927c9a6a74d05a6af02806566d16274de"
+  integrity sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==
 
 js-tokens@^4.0.0:
   version "4.0.0"
