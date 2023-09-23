@@ -11,8 +11,8 @@ export class SalesService {
   constructor(private http: HttpClient) { }
 
   // Cria o método para requisitar todos os produtos
-  getAllProducts(): Observable<Products[]> {
-    return this.http.get<Products[]>(`${environment.apiUrl}/vendas`);
+  getAllVendas(): Observable<Sales[]> {
+    return this.http.get<Sales[]>(`${environment.apiUrl}/vendas`);
   }
 
   // Cria o método para adicionar um novo produto
@@ -38,6 +38,11 @@ export class SalesService {
   // Cria o método para deletar um produto específico pelo ID
   deleteProductById(id: number): Observable<Products> {
     return this.http.delete<Products>(`${environment.apiUrl}/products/delete/${id}`)
+  }
+
+  // Cria o método para requisitar todos os produtos para o reports
+  getAllVendasReport(): Observable<Sales[]> {
+    return this.http.get<Sales[]>(`${environment.apiUrl}/vendas/reports`);
   }
 
 

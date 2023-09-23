@@ -14,10 +14,13 @@ export class Sales {
   valor_total_pago?: number;
   valor_em_aberto?: number;
   quantidade_itens?: number;
-  lucro?: number;
+  troco?: number;
   numero_cupom_fiscal?: number;
   imposto_estadual?: number;
   imposto_federal?: number;
   cnpj?: string;
   cliente_id?: number;
+  codigo_produto?: string;
+  produtos: any;
+  preco_custo?: number;
 }

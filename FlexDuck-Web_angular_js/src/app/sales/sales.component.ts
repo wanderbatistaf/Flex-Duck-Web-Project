@@ -96,6 +96,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
   loading_UpVenda = false;
   company?: Company[];
   companyInfo?: Company;
+  cpfCnpjError: boolean = false;
 
   dadosDaVenda = {
     cliente_id: this.SelectedClienteId,
@@ -464,7 +465,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
     // Remove todos os caracteres não numéricos
     const numeros = cpfCnpj.replace(/\D/g, '');
 
-    // Verifica se é um CPF ou CNPJ
+    // Verifica se é um CPF ou CNPJ e formata adequadamente
     if (numeros.length === 11) {
       return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     } else if (numeros.length === 14) {
@@ -473,6 +474,93 @@ export class SalesComponent implements OnInit, AfterContentChecked {
       return cpfCnpj; // Retorna o valor original se não for CPF nem CNPJ válido
     }
   }
+
+  onCpfCnpjInput(): void {
+    const cpfCnpj = this.formatarCpfCnpj(this.cpfCnpj);
+
+    if (this.validarCpfCnpj(cpfCnpj)) {
+      this.cpfCnpj = cpfCnpj;
+      this.cpfCnpjError = false;
+    } else {
+      this.cpfCnpjError = true;
+    }
+  }
+
+  validarCpfCnpj(cpfCnpj: string): boolean {
+    // Remove caracteres não numéricos
+    const numeros = cpfCnpj.replace(/\D/g, '');
+
+    // Valida CPF
+    if (numeros.length === 11) {
+      // Verifica se todos os dígitos são iguais (CPF inválido)
+      if (/^(\d)\1+$/.test(numeros)) {
+        return false;
+      }
+
+      // Calcula os dígitos verificadores
+      let soma = 0;
+      for (let i = 0; i < 9; i++) {
+        soma += parseInt(numeros.charAt(i), 10) * (10 - i);
+      }
+      const resto = soma % 11;
+      const digitoVerificador1 = resto < 2 ? 0 : 11 - resto;
+
+      soma = 0;
+      for (let i = 0; i < 10; i++) {
+        soma += parseInt(numeros.charAt(i), 10) * (11 - i);
+      }
+      const resto2 = soma % 11;
+      const digitoVerificador2 = resto2 < 2 ? 0 : 11 - resto2;
+
+      // Verifica se os dígitos verificadores estão corretos
+      if (
+        parseInt(numeros.charAt(9), 10) === digitoVerificador1 &&
+        parseInt(numeros.charAt(10), 10) === digitoVerificador2
+      ) {
+        return true; // CPF válido
+      } else {
+        return false; // CPF inválido
+      }
+    }
+
+    // Valida CNPJ
+    if (numeros.length === 14) {
+      // Verifica se todos os dígitos são iguais (CNPJ inválido)
+      if (/^(\d)\1+$/.test(numeros)) {
+        return false;
+      }
+
+      // Calcula os dígitos verificadores
+      const peso1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+      const peso2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+      let soma = 0;
+      for (let i = 0; i < 12; i++) {
+        soma += parseInt(numeros.charAt(i), 10) * peso1[i];
+      }
+      const digitoVerificador1 = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+
+      soma = 0;
+      for (let i = 0; i < 13; i++) {
+        soma += parseInt(numeros.charAt(i), 10) * peso2[i];
+      }
+      const digitoVerificador2 = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+
+      // Verifica se os dígitos verificadores estão corretos
+      if (
+        parseInt(numeros.charAt(12), 10) === digitoVerificador1 &&
+        parseInt(numeros.charAt(13), 10) === digitoVerificador2
+      ) {
+        return true; // CNPJ válido
+      } else {
+        return false; // CNPJ inválido
+      }
+    }
+
+    return false; // Tamanho inválido para CPF ou CNPJ
+  }
+
+
 
   formatarTelefone(telefone: string): string {
     // Remove todos os caracteres não numéricos

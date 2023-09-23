@@ -1,0 +1,197 @@
+<!--<head>-->
+<!--  &lt;!&ndash;Morris Chart CSS &ndash;&gt;-->
+<!--  <link rel="stylesheet" href="assets/css/morris.css">-->
+<!--  <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css">-->
+<!--  <link href="assets/css/metismenu.min.css" rel="stylesheet" type="text/css">-->
+<!--  <link href="assets/css/icons.css" rel="stylesheet" type="text/css">-->
+<!--  <link href="assets/css/style.css" rel="stylesheet" type="text/css">-->
+<!--  &lt;!&ndash; jQuery  &ndash;&gt;-->
+<!--  <script src="assets/js/jquery.min.js"></script>-->
+<!--  <script src="assets/js/bootstrap.bundle.min.js"></script>-->
+<!--  <script src="assets/js/metismenu.min.js"></script>-->
+<!--  <script src="assets/js/jquery.slimscroll.js"></script>-->
+<!--  <script src="assets/js/waves.min.js"></script>-->
+<!--  &lt;!&ndash;Morris Chart&ndash;&gt;-->
+<!--  <script src="assets/js/morris.min.js"></script>-->
+<!--  <script src="assets/js/raphael.min.js"></script>-->
+<!--  <script src="assets/js/dashboard.init.js"></script>-->
+<!--  &lt;!&ndash; App js &ndash;&gt;-->
+<!--  <script src="assets/js/app.js"></script>-->
+<!--</head>-->
+<div class="my-4"></div>
+
+<nav class="navbar navbar-light bg-light justify-content-between w-100">
+  <a class="navbar-brand"></a>
+    <div class="form-inline mr-auto">
+      <div class="btn-group">
+        <button class="btn btn-secondary btn-filter dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="bi bi-lightning"></i>
+        </button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" (click)="filterToday()">Today</a>
+          <a class="dropdown-item" (click)="filterThisWeek()">This Week</a>
+          <a class="dropdown-item" (click)="filterLastWeek()">Last Week</a>
+          <a class="dropdown-item" (click)="filterThisMonth()">This Month</a>
+          <a class="dropdown-item" (click)="filterLastMonth()">Last Month</a>
+          <a class="dropdown-item" (click)="filterThisYear()">This Year</a>
+          <a class="dropdown-item" (click)="filterLastYear()">Last Year</a>
+
+        </div>
+      </div>
+      <input class="form-control mr-sm-2 flex-grow-1" type="date" id="startDate" [(ngModel)]="startDate">
+      <input class="form-control mr-sm-2 flex-grow-1" type="date" id="endDate" [(ngModel)]="endDate">
+      <select class="form-control mr-sm-2 flex-grow-1" [(ngModel)]="selectedVendedor">
+        <option *ngFor="let vendedor of vendedores" [value]="vendedor">{{ vendedor }}</option>
+      </select>
+      <button class="btn btn-outline-success my-2 my-sm-0" (click)="filterSales()">Filtrar</button>
+      <button class="btn btn-outline-success my-2 my-sm-0" (click)="clearFilter()">Limpar</button>
+    </div>
+</nav>
+
+<div class="my-4"></div>
+
+<div class="row">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card bg-primary-custom">
+      <div class="card-heading p-4">
+        <div class="mini-stat-icon float-right">
+          <i class="mdi mdi-cube-outline bg-primary text-white"></i>
+        </div>
+        <div>
+          <h5 class="font-16">Clientes Distintos</h5>
+        </div>
+        <h3 class="mt-4">{{ distinctCustomerCount }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card bg-success-custom">
+      <div class="card-heading p-4">
+        <div class="mini-stat-icon float-right">
+          <i class="mdi mdi-briefcase-check bg-success text-white"></i>
+        </div>
+        <div>
+          <h5 class="font-16">Total Revenue</h5>
+        </div>
+        <h3 class="mt-4">{{ vendasTotal | currency:'BRL':'symbol':'1.2-2' }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card bg-warning-custom">
+      <div class="card-heading p-4">
+        <div class="mini-stat-icon float-right">
+          <i class="mdi mdi-tag-text-outline bg-warning text-white"></i>
+        </div>
+        <div>
+          <h5 class="font-16">Ticket Médio</h5>
+        </div>
+        <h3 class="mt-4">{{ averagePrice?.toFixed(2) | currency:'BRL':'symbol' }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card bg-danger-custom">
+      <div class="card-heading p-4">
+        <div class="mini-stat-icon float-right">
+          <i class="mdi mdi-buffer bg-danger text-white"></i>
+        </div>
+        <div>
+          <h5 class="font-16">Produto Mais Vendido</h5>
+        </div>
+        <h3 class="mt-4" *ngFor="let product of topProducts">
+          {{ product[0] }} - {{ product[1] | currency:'BRL':'symbol' }}
+        </h3>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="my-4"></div>
+
+<div class="row">
+  <div class="col-xl-8">
+    <div class="card m-b-30">
+      <div class="card-body">
+        <h4 class="mt-0 header-title mb-4">Chart</h4>
+        <div id="morris-area-example" class="morris-charts morris-chart-height" style="padding-bottom: 0px;">
+          <canvas id="salesChart" width="300" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end col -->
+  <div class="col-xl-4">
+    <div class="card m-b-30">
+      <div class="card-body">
+        <h4 class="mt-0 header-title mb-4">Chart</h4>
+        <div id="morris-donut-example" class="morris-charts morris-chart-height" style="padding-bottom: 0px;">
+            <canvas id="barChart" width="300" height="321"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end col -->
+</div>
+<!-- end row -->
+
+<div class="my-4"></div>
+
+
+<div class="row">
+  <div class="col-xl-12">
+    <div class="card m-b-30">
+      <div class="card-body">
+          <div class="card-body">
+            <h4 class="mt-0 header-title mb-12">Sales Analytics</h4>
+            <div class="table-responsive">
+              <table class="table table-condensed table-hover">
+                <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Data</th>
+                  <th>Cliente</th>
+                  <th>Vendedor</th>
+                  <th>Itens</th>
+                  <th>Valor Total</th>
+                  <th>Total Pago</th>
+                  <th>Troco</th>
+                  <th>Lucro</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let sale of filteredSales">
+                  <td>{{ sale.id }}</td>
+                  <td>{{ sale.data_venda | date:'dd-MM-yyyy HH:mm:ss' }}</td>
+                  <td>{{ sale.cliente }}</td>
+                  <td>{{ sale.vendedor }}</td>
+                  <td>{{ sale.quantidade_itens }}</td>
+                  <td>{{ sale.valor_total?.toFixed(2) }}</td>
+                  <td>{{ sale.valor_total_pago?.toFixed(2) }}</td>
+                  <td>{{ sale.troco?.toFixed(2) }}</td>
+                  <td>
+                    <ng-container *ngIf="sale.produtos?.length > 0; else noProducts">
+                      {{ calcularLucroTotal(sale).toFixed(2) }}
+                    </ng-container>
+                    <ng-template #noProducts>
+                      0
+                    </ng-template>
+                  </td>
+
+                </tr>
+                </tbody>
+              </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--<div class="container">-->
+<!--  <canvas id="salesChart" width="400" height="200"></canvas>-->
+<!--</div>-->
+

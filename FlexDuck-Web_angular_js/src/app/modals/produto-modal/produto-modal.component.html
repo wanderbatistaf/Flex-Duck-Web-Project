@@ -44,7 +44,7 @@
       <td class="text-center">{{ produto.marca }}</td>
       <td class="text-center">{{ produto.categoria }}</td>
       <td class="text-center">{{ produto.quantidade }}</td>
-      <td class="text-center">{{ produto.preco_venda }}</td>
+      <td class="text-center">{{ produto.preco_venda.toFixed(2) }}</td>
       <td class="text-center">
         <button class="btn btn-primary" (click)="selecionarProduto(produto)">Selecionar</button>
       </td>

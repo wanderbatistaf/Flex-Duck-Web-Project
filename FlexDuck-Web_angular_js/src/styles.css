@@ -3,6 +3,8 @@
 
 /* Importações de estilos */
 @import "bootstrap/dist/css/bootstrap.css";
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'open-iconic/font/css/open-iconic-bootstrap.css';
 /*!
 * Start Bootstrap - SB Admin v6.0.0 (https://startbootstrap.com/templates/sb-admin)
 * Copyright 2013-2020 Start Bootstrap

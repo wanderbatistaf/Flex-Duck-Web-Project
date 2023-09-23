@@ -1,6 +1,8 @@
 import {Component, OnInit, ElementRef, ViewChild, Pipe, PipeTransform} from '@angular/core';
 import {ContabilService, ProductService} from "@app/_services";
 import {FormBuilder, FormGroup} from "@angular/forms";
+import * as $ from 'jquery';
+import 'bootstrap';
 
 interface Produto {
   cProd: string;
@@ -13,7 +15,6 @@ interface Produto {
   category_suggested: string;
 }
 
-declare var $: any;
 
 @Pipe({
   name: 'filter'
@@ -94,9 +95,18 @@ export class NotasEntradaComponent implements OnInit {
 
   constructor( private productService: ProductService, private formBuilder: FormBuilder,
                private contabilService:ContabilService) {
-      this.formGroup = this.formBuilder.group({
-          preco_venda: ['']
+    {
+      this.formGroup = this.formBuilder.group({});
+
+      // Assuming this.produtos is an array of produtos
+      this.produtos.forEach((produto) => {
+        // Sanitize the control name by replacing invalid characters
+        const sanitizedControlName = produto.cProd.replace(/[^a-zA-Z0-9_]/g, '_');
+
+        this.formGroup.addControl(`preco_venda_${sanitizedControlName}`, this.formBuilder.control(''));
+        this.formGroup.addControl(`categoria_${sanitizedControlName}`, this.formBuilder.control(''));
       });
+    }
   }
 
   ngOnInit(): void {
@@ -298,28 +308,28 @@ export class NotasEntradaComponent implements OnInit {
     this.produtos = produtos;
 
     this.extractedData = {
-    chNFe,
-    cUF,
-    cNF,
-    natOp,
-    emitenteCNPJ,
-    emitenteNome,
-    emitenteEndereco,
-    destinatarioCNPJ,
-    destinatarioCPF,
-    destinatarioNome,
-    destinatarioEndereco,
-    modFrete,
-    qVol,
-    esp,
-    serie,
-    infAdic,
-    totalValorNF,
-    valorImpostos,
-    impostosDetalhados,
-    produtos, // Array de produtos
-    dataEmissao
-  };
+      chNFe,
+      cUF,
+      cNF,
+      natOp,
+      emitenteCNPJ,
+      emitenteNome,
+      emitenteEndereco,
+      destinatarioCNPJ,
+      destinatarioCPF,
+      destinatarioNome,
+      destinatarioEndereco,
+      modFrete,
+      qVol,
+      esp,
+      serie,
+      infAdic,
+      totalValorNF,
+      valorImpostos,
+      impostosDetalhados,
+      produtos, // Array de produtos
+      dataEmissao
+    };
   }
 
   preencherCNPJSeVazio() {
@@ -330,8 +340,8 @@ export class NotasEntradaComponent implements OnInit {
 
   openModal(produto: Produto) {
     this.loadingPageModalVisible = true;
-    this.modalSelectedProduto = produto; // Atualiza a propriedade modalSelectedProduto
-    this.getLastProductCode(); // Chama para obter o último código
+    this.modalSelectedProduto = produto;
+    this.getLastProductCode();
   }
 
 
@@ -400,71 +410,63 @@ export class NotasEntradaComponent implements OnInit {
   }
 
 
-    getLastProductCodeMultiple() {
-        const isProductDefault = 1;
+  getLastProductCodeMultiple() {
+    const isProductDefault = 1;
 
-        this.productService.getLastCode(isProductDefault).subscribe((response: any) => {
-            if (response && response.produto && response.produto[2]) {
-                this.lastProductCode = response.produto[2];
+    this.productService.getLastCode(isProductDefault).subscribe((response: any) => {
+      if (response && response.produto && response.produto[2]) {
+        this.lastProductCode = response.produto[2];
+      } else {
+        this.lastProductCode = 'P000001';
+      }
+
+      let nextNumericPart = parseInt(this.lastProductCode.substring(1), 10);
+
+      // Criar uma cópia dos produtos para o modal
+      this.modalProdutosMultiple = this.produtos.map(produto => ({ ...produto }));
+
+      const processNextProduct = (index: number) => {
+        if (index < this.modalProdutosMultiple.length) {
+          const currentProduct = this.modalProdutosMultiple[index];
+          this.productService.suggestPrice(currentProduct.xProd).subscribe((suggestResponse: any) => {
+            // Adicione a categoria sugerida ao produto
+            if (suggestResponse.category_suggested) {
+              currentProduct.category_suggested = suggestResponse.category_suggested;
             } else {
-                this.lastProductCode = 'P000001';
+              // Defina um valor padrão para a categoria sugerida em caso de erro
+              currentProduct.category_suggested = 'Categoria';
             }
 
-            let nextNumericPart = parseInt(this.lastProductCode.substring(1), 10);
+            // Atualize os valores de preço de venda e categoria individualmente
+            this.updatePrecoVendaAndCategoria(currentProduct, suggestResponse);
 
-            // Criar uma cópia dos produtos para o modal
-            this.modalProdutosMultiple = this.produtos.map(produto => ({ ...produto }));
+            processNextProduct(index + 1); // Processar o próximo produto
+          });
+        } else {
+          // Todos os produtos foram processados, agora você pode exibir o modal
+          $('#produtoModalTodos').modal('show');
+          this.loadingPageModalVisible = false;
+        }
+      };
 
-            const getProductCode = (suggestResponse: { mensagem: string; suggested_price: number; product_code: string; }) => {
-                if (suggestResponse && suggestResponse.mensagem === "Produto localizado com sucesso!") {
-                    this.precoVendaValueMultiple = suggestResponse.suggested_price.toFixed(2);
+      processNextProduct(0); // Iniciar o processamento do primeiro produto
+    });
+  }
 
-                    if (suggestResponse.product_code) {
-                        return suggestResponse.product_code;
-                    } else {
-                        nextNumericPart++;
-                        return `P${nextNumericPart.toString().padStart(6, '0')}`;
-                    }
-                } else {
-                    this.precoVendaValueMultiple = '0.00';
-                    nextNumericPart++;
-                    return `P${nextNumericPart.toString().padStart(6, '0')}`;
-                }
-            };
-
-            const processNextProduct = (index: number) => {
-                if (index < this.modalProdutosMultiple.length) {
-                    const currentProduct = this.modalProdutosMultiple[index];
-                    this.productService.suggestPrice(currentProduct.xProd).subscribe((suggestResponse: any) => {
-                        currentProduct.cProd = getProductCode(suggestResponse);
-
-                        // Adicione a categoria sugerida ao produto
-                        if (suggestResponse.category_suggested) {
-                            currentProduct.category_suggested = suggestResponse.category_suggested;
-                            this.categoriaValueMultiple = suggestResponse.category_suggested;
-                        } else {
-                            // Defina um valor padrão para a categoria sugerida em caso de erro
-                            currentProduct.category_suggested = 'Categoria';
-                            this.categoriaValueMultiple = 'Categoria';
-                        }
-
-                        processNextProduct(index + 1); // Processar o próximo produto
-                    });
-                } else {
-
-                    $('#produtoModalTodos').modal('show');
-                    this.loadingPageModalVisible = false;
-                }
-            };
-
-            processNextProduct(0); // Iniciar o processamento do primeiro produto
-        });
+// Função para atualizar preço de venda e categoria de um produto individual
+  private updatePrecoVendaAndCategoria(product: any, suggestResponse: any) {
+    if (suggestResponse && suggestResponse.mensagem === "Produto localizado com sucesso!") {
+      product.precoVenda = suggestResponse.suggested_price.toFixed(2);
+    } else {
+      product.precoVenda = '0.00';
     }
+  }
 
 
 
 
-    generateNextCode(): string {
+
+  generateNextCode(): string {
     const prefix = this.lastProductCode.charAt(0);
     const numericPart = parseInt(this.lastProductCode.substring(1), 10);
     const newNumericPart = numericPart + 1;
@@ -494,129 +496,129 @@ export class NotasEntradaComponent implements OnInit {
   }
 
 
-    inserirTodosOsProdutos() {
-        this.modalProdutosMultiple.forEach((produto: Produto) => {
-            const precoVendaInputId = `preco_venda_${produto.cProd}`;
-            const categoriaInputId = `categoria_${produto.cProd}`;
-            const precoVendaInput = document.getElementById(precoVendaInputId) as HTMLInputElement;
-            const categoriaInput = document.getElementById(categoriaInputId) as HTMLInputElement;
+  inserirTodosOsProdutos() {
+    this.modalProdutosMultiple.forEach((produto: Produto) => {
+      const precoVendaInputId = `preco_venda_${produto.cProd}`;
+      const categoriaInputId = `categoria_${produto.cProd}`;
+      const precoVendaInput = document.getElementById(precoVendaInputId) as HTMLInputElement;
+      const categoriaInput = document.getElementById(categoriaInputId) as HTMLInputElement;
 
 
-            if (!this.produtoJaInserido(produto)) {
-                // Verifica se o preço de venda e a categoria estão definidos
-                if (precoVendaInput && categoriaInput) {
-                    const precoVendaDigitado = precoVendaInput.value;
-                    const categoriaDigitada = categoriaInput.value;
+      if (!this.produtoJaInserido(produto)) {
+        // Verifica se o preço de venda e a categoria estão definidos
+        if (precoVendaInput && categoriaInput) {
+          const precoVendaDigitado = precoVendaInput.value;
+          const categoriaDigitada = categoriaInput.value;
 
-                    if (precoVendaDigitado) {
-                        const produtoComPreco = { ...produto }; // Crie uma cópia do produto
-                        produtoComPreco.preco_venda = precoVendaDigitado; // Defina o preço de venda na cópia
-                        produtoComPreco.category_suggested = categoriaDigitada; // Defina a categoria na cópia
-                        this.itensInseridos.push(produtoComPreco); // Adicione a cópia à lista de itens inseridos
-                    } else {
-                        // Trate a situação em que o preço de venda não foi digitado pelo usuário
-                        console.error(`O preço de venda não foi digitado para o produto ${produto.cProd}.`);
-                    }
-                } else {
-                    console.error(`Campo de preço de venda ou categoria não encontrado para o produto ${produto.cProd}.`);
-                }
-            }
-        });
+          if (precoVendaDigitado) {
+            const produtoComPreco = { ...produto }; // Crie uma cópia do produto
+            produtoComPreco.preco_venda = precoVendaDigitado; // Defina o preço de venda na cópia
+            produtoComPreco.category_suggested = categoriaDigitada; // Defina a categoria na cópia
+            this.itensInseridos.push(produtoComPreco); // Adicione a cópia à lista de itens inseridos
+          } else {
+            // Trate a situação em que o preço de venda não foi digitado pelo usuário
+            console.error(`O preço de venda não foi digitado para o produto ${produto.cProd}.`);
+          }
+        } else {
+          console.error(`Campo de preço de venda ou categoria não encontrado para o produto ${produto.cProd}.`);
+        }
+      }
+    });
 
-        // Defina isTodosOsProdutosInseridos como true após a inserção dos produtos
-        this.isTodosOsProdutosInseridos = true;
+    // Defina isTodosOsProdutosInseridos como true após a inserção dos produtos
+    this.isTodosOsProdutosInseridos = true;
 
-        this.fecharModal()
-    }
+    this.fecharModal()
+  }
 
 
-    produtoJaInserido(produto: Produto): boolean {
+  produtoJaInserido(produto: Produto): boolean {
     return this.itensInseridos.some(p => p.cProd === produto.cProd);
   }
 
 
   limparCampos() {
-        if (this.chNFeField) {
-            this.chNFeField.nativeElement.value = '';
-        }
-        if (this.cUFField) {
-            this.cUFField.nativeElement.value = '';
-        }
-        if (this.cNFField) {
-            this.cNFField.nativeElement.value = '';
-        }
-        if (this.natOpField) {
-            this.natOpField.nativeElement.value = '';
-        }
-        if (this.emitenteCNPJField) {
-            this.emitenteCNPJField.nativeElement.value = '';
-        }
-        if (this.emitenteNomeField) {
-            this.emitenteNomeField.nativeElement.value = '';
-        }
-        if (this.emitenteEnderecoField) {
-            this.emitenteEnderecoField.nativeElement.value = '';
-        }
-        if (this.destinatarioCNPJField) {
-            this.destinatarioCNPJField.nativeElement.value = '';
-        }
-        if (this.destinatarioCPFField) {
-            this.destinatarioCPFField.nativeElement.value = '';
-        }
-        if (this.destinatarioNomeField) {
-            this.destinatarioNomeField.nativeElement.value = '';
-        }
-        if (this.destinatarioEnderecoField) {
-            this.destinatarioEnderecoField.nativeElement.value = '';
-        }
-        if (this.totalValorNFField) {
-            this.totalValorNFField.nativeElement.value = '';
-        }
-        if (this.modFreteField) {
-            this.modFreteField.nativeElement.value = '';
-        }
-        if (this.qVolField) {
-            this.qVolField.nativeElement.value = '';
-        }
-        if (this.espField) {
-            this.espField.nativeElement.value = '';
-        }
-        if (this.infAdicField) {
-            this.infAdicField.nativeElement.value = '';
-        }
-        if (this.serieField) {
-            this.serieField.nativeElement.value = '';
-        }
-        if (this.impostosValor) {
-            this.impostosValor.nativeElement.value = '';
-        }
-        if (this.impostosDetalhadosField) {
-            this.impostosDetalhadosField.nativeElement.value = '';
-        }
-
-        // Limpe os detalhes dos produtos
-        this.produtos = [];
-
-        this.formGroup.reset();
-
-        this.destinatario = '';
-        this.activeTab = 'consulta'
+    if (this.chNFeField) {
+      this.chNFeField.nativeElement.value = '';
+    }
+    if (this.cUFField) {
+      this.cUFField.nativeElement.value = '';
+    }
+    if (this.cNFField) {
+      this.cNFField.nativeElement.value = '';
+    }
+    if (this.natOpField) {
+      this.natOpField.nativeElement.value = '';
+    }
+    if (this.emitenteCNPJField) {
+      this.emitenteCNPJField.nativeElement.value = '';
+    }
+    if (this.emitenteNomeField) {
+      this.emitenteNomeField.nativeElement.value = '';
+    }
+    if (this.emitenteEnderecoField) {
+      this.emitenteEnderecoField.nativeElement.value = '';
+    }
+    if (this.destinatarioCNPJField) {
+      this.destinatarioCNPJField.nativeElement.value = '';
+    }
+    if (this.destinatarioCPFField) {
+      this.destinatarioCPFField.nativeElement.value = '';
+    }
+    if (this.destinatarioNomeField) {
+      this.destinatarioNomeField.nativeElement.value = '';
+    }
+    if (this.destinatarioEnderecoField) {
+      this.destinatarioEnderecoField.nativeElement.value = '';
+    }
+    if (this.totalValorNFField) {
+      this.totalValorNFField.nativeElement.value = '';
+    }
+    if (this.modFreteField) {
+      this.modFreteField.nativeElement.value = '';
+    }
+    if (this.qVolField) {
+      this.qVolField.nativeElement.value = '';
+    }
+    if (this.espField) {
+      this.espField.nativeElement.value = '';
+    }
+    if (this.infAdicField) {
+      this.infAdicField.nativeElement.value = '';
+    }
+    if (this.serieField) {
+      this.serieField.nativeElement.value = '';
+    }
+    if (this.impostosValor) {
+      this.impostosValor.nativeElement.value = '';
+    }
+    if (this.impostosDetalhadosField) {
+      this.impostosDetalhadosField.nativeElement.value = '';
     }
 
-    salvarNota() {
-      this.savingModalVisible = true;
+    // Limpe os detalhes dos produtos
+    this.produtos = [];
 
-        this.contabilService.addNotes(this.extractedData, this.itensInseridos).subscribe(
-            (response) => {
-            },
-            (error) => {
-                console.error('API Error:', error);
-            }
-        );
-      this.limparCampos();
-      this.savingModalVisible = false;
-      this.activeTab = 'consulta';
-    }
+    this.formGroup.reset();
+
+    this.destinatario = '';
+    this.activeTab = 'consulta'
+  }
+
+  salvarNota() {
+    this.savingModalVisible = true;
+
+    this.contabilService.addNotes(this.extractedData, this.itensInseridos).subscribe(
+      (response) => {
+      },
+      (error) => {
+        console.error('API Error:', error);
+      }
+    );
+    this.limparCampos();
+    this.savingModalVisible = false;
+    this.activeTab = 'consulta';
+  }
 
   loadNotasEntrada() {
     this.loading = true;
