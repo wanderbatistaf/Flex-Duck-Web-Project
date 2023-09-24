@@ -271,15 +271,17 @@
             <!-- CPF -->
             <div class="form-group col-md-3" *ngIf="formCad?.get('natural_person')?.value">
               <label class="form-control-label" for="cnpj_cpf">Número do CPF <em>*</em></label>
-              <input type="text" class="form-control" formControlName="cnpj_cpf" id="cnpj_cpf" placeholder="Digite apenas números" [textMask]="{ mask: cpfMask }">
-               <div *ngIf="touchedVerify('cpf')" class="form-control-feedback">O cpf informado é invalido.</div>
+              <input type="text" class="form-control" formControlName="cnpj_cpf" id="cnpj_cpf" placeholder="Digite apenas números" [textMask]="{ mask: cpfMask }"
+                     [ngClass]="{'has-danger': touchedVerify('cnpj_cpf')}">
+               <div *ngIf="touchedVerify('cnpj_cpf')" class="form-control-feedback">O cpf informado é invalido.</div>
             </div>
 
             <!-- CNPJ -->
             <div class="form-group col-md-3" *ngIf="!formCad?.get('natural_person')?.value">
               <label class="form-control-label" for="cnpj_cpf">Número do CNPJ <em>*</em></label>
-              <input type="text" class="form-control" formControlName="cnpj_cpf" id="cnpj_cpf" placeholder="Digite apenas números" [textMask]="{ mask: cnpjMask }">
-               <div *ngIf="touchedVerify('cnpj')" class="form-control-feedback">O cnpj informado é invalido.</div>
+              <input type="text" class="form-control" formControlName="cnpj_cpf" id="cnpj_cpf" placeholder="Digite apenas números" [textMask]="{ mask: cnpjMask }"
+                     [ngClass]="{'has-danger': touchedVerify('cnpj_cpf')}">
+               <div *ngIf="touchedVerify('cnpj_cpf')" class="form-control-feedback">O cnpj informado é invalido.</div>
             </div>
 
 

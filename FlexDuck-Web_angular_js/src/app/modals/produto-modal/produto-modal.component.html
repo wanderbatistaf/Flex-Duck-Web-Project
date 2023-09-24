@@ -5,6 +5,10 @@
   </button>
 </div>
 <div class="modal-body">
+  <div class="text-center" *ngIf="isLoading">
+    <div class="spinner-border spinner-border-sm"></div>
+  </div>
+<div class="modal-body">
   <!-- Adicione o skeleton loading antes da tabela -->
   <div *ngIf="loading" class="skeleton-loading">
     <div class="skeleton-line"></div>

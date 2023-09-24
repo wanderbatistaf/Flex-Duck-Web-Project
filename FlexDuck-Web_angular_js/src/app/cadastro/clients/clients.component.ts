@@ -1,10 +1,10 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { JwtHelperService } from "@auth0/angular-jwt";
 import { Clients } from "@app/_models/clients";
 import { ClientsService } from "@app/_services";
 import { ViaCepService } from "@app/_services";
 import { map } from 'rxjs/operators';
-import { FormGroup, Validators, FormBuilder } from "@angular/forms";
+import {FormGroup, Validators, FormBuilder, FormControl} from "@angular/forms";
 import { Router } from '@angular/router';
 import jwt_decode from "jwt-decode";
 import {User} from "@app/_models";
@@ -14,7 +14,7 @@ import {User} from "@app/_models";
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.css']
 })
-export class ClientsComponent implements OnInit {
+export class ClientsComponent implements AfterViewInit, OnInit {
   jwtHelper: JwtHelperService = new JwtHelperService();
   level?: string;
   // Variável para indicar se a página está carregando
@@ -67,6 +67,7 @@ export class ClientsComponent implements OnInit {
   public cnpjMask = [/[0-9]/, /\d/, '.', /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '/', /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/];
   // Paterns
   cpfPattern = /^\d{3}.\d{3}.\d{3}-\d{2}$/;
+  cnpjPattern = /^\d{2}.\d{3}.\d{3}\/\d{4}-\d{2}$/;
   phonePattern = /^\(\d{2}\) \d{5}-\d{4}$/;
   zipCodePattern = /^\d{5}\\-\d{3}$/;
   // Variavel de genero
@@ -98,7 +99,7 @@ export class ClientsComponent implements OnInit {
       business_name: [''],
       firstname: ['', [Validators.required, Validators.minLength(1)]],
       lastname: ['', [Validators.required, Validators.minLength(1)]],
-      cnpj_cpf: ['', [Validators.required, Validators.pattern(this.cpfPattern)]],
+      cnpj_cpf: ['', [Validators.required, Validators.pattern(this.cpfPattern), Validators.pattern(this.cnpjPattern)]],
       state_registration: [''],
       municipal_registration: [''],
       telephone: ['', [Validators.required, Validators.pattern(this.phonePattern)]],
@@ -146,7 +147,6 @@ export class ClientsComponent implements OnInit {
 
   }
 
-
   ngOnInit(): void {
     const token = localStorage.getItem('token')
     const decodedToken = token ? this.jwtHelper.decodeToken(token) : null;
@@ -175,6 +175,40 @@ export class ClientsComponent implements OnInit {
     this.changeDetectorRef.detectChanges();
     this.filterClients(this.searchText);
   };
+
+
+  ngAfterViewInit() {
+    // Adicione um evento 'input' para detectar mudanças no campo CNPJ
+    const cnpjCpfControl = this.formCad.get('cnpj_cpf');
+    if (cnpjCpfControl) {
+      cnpjCpfControl.valueChanges.subscribe((value) => {
+        // Remova os caracteres especiais da máscara (pontos e barras)
+        const cnpj = value.replace(/\D/g, '');
+
+        if (this.isValidCnpj(cnpj)) {
+          cnpjCpfControl.setErrors(null); // CNPJ é válido, remova os erros
+        } else {
+          cnpjCpfControl.setErrors({ cnpjInvalido: true }); // CNPJ é inválido, defina um erro
+        }
+      });
+    }
+    // Adicione um evento 'input' para detectar mudanças no campo CPF
+    const cpfControl = this.formCad.get('cnpj_cpf');
+    if (cpfControl) {
+      cpfControl.valueChanges.subscribe((value) => {
+        // Remova os caracteres especiais da máscara (pontos e traços)
+        const cpf = value.replace(/\D/g, '');
+
+        if (this.isValidCpf(cpf)) {
+          cpfControl.setErrors(null); // CPF é válido, remova os erros
+        } else {
+          cpfControl.setErrors({ cpfInvalido: true }); // CPF é inválido, defina um erro
+        }
+      });
+    }
+  }
+
+
 
 
 
@@ -450,13 +484,7 @@ changePage(page: number) {
     }
   }
 
-  checkError(field:any) {
-    return {
-      'has-danger': this.touchedVerify(field)
-    };
-  }
-
-  touchedVerify(field:any) {
+  touchedVerify(field: any) {
     return !this.formCad.get(field)?.valid && this.formCad.get(field)?.touched;
   }
 
@@ -575,10 +603,18 @@ changePage(page: number) {
     }
   }
 
+  validateCnpjLength(control: FormControl) {
+    const value = control.value;
+    return value && value.length === 14 ? null : { cnpjTamanhoInvalido: true };
+  }
 
+  isValidCnpj(cnpj: string) {
+    return cnpj && cnpj.length === 14;
+  }
 
-
-
+  isValidCpf(cpf: string) {
+    return cpf && cpf.length === 11;
+  }
 
 
 

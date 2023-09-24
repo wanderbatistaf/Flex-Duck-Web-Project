@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit {
   topProducts?: [string, number][];
   distinctCustomerCount: any;
   averagePrice?: number;
+  loadingPageModalVisible: boolean = false;
 
   constructor(private salesService: SalesService) {}
 
@@ -32,6 +33,7 @@ export class DashboardComponent implements OnInit {
   }
 
   getAllSales(): void {
+    this.loadingPageModalVisible = true;
     this.salesService
       .getAllVendasReport()
       .pipe(map((response: any) => response.rows as Sales[]))
@@ -53,6 +55,8 @@ export class DashboardComponent implements OnInit {
 
           // Filtrar as vendas com base nos critérios iniciais
           this.filterSales();
+
+          this.loadingPageModalVisible = false;
         },
         (error) => {
           console.error('Erro ao buscar dados de vendas:', error);
