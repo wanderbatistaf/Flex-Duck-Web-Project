@@ -394,3 +394,7 @@ body {
   filter: blur(5px);
   transition: filter 0.3s ease; /* transição */
 }
+.has-danger {
+  border-color: #d9534f; /* Cor da borda quando há erro */
+  color: #d9534f; /* Cor do texto quando há erro */
+}

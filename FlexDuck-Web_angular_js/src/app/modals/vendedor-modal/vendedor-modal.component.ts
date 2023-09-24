@@ -39,6 +39,7 @@ export class VendedorModalComponent implements OnInit {
   private currentUser?: number;
   loading: boolean = true;
   pesquisaProduto: string = '';
+  isLoading: boolean = true;
   constructor(private modalService: NgbModal,
               public activeModal: NgbActiveModal,
               private usersService: UserService,

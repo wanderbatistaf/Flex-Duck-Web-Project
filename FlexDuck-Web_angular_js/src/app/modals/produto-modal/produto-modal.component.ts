@@ -36,6 +36,7 @@ export class ProdutoModalComponent implements OnInit {
   produtos: Products[] = [];
   loading: boolean = true;
   pesquisaProduto: string = '';
+  isLoading: boolean = true;
 
   constructor(private router: Router,
               private productService: ProductService,
