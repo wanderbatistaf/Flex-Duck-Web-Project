@@ -4,7 +4,6 @@ import subprocess
 import threading
 import time
 from datetime import timedelta
-from threading import Thread
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
@@ -15,7 +14,6 @@ from watchdog.events import FileSystemEventHandler
 from custom_logger import setup_logger
 from Controller.mysql_utils import AppContext
 from Controller.db_connection import get_db_connection
-from Controller.mysql_utils import create_db_pool
 
 # Cria a instância do contexto da aplicação
 app_context = AppContext()
