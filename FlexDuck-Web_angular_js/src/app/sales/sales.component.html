@@ -166,6 +166,7 @@
             <div class="col-md-12">
               <div class="card">
                 <div class="card-body">
+                  <div class="table-responsive">
                   <table class="table">
                     <thead>
                     <tr>
@@ -199,6 +200,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
 
     <div class="col-md-4">
@@ -334,7 +336,7 @@
           </tr>
           <tr>
             <th colspan="3">CNPJ: {{ companyInfo?.cnpj }}<br />
-            Tel: {{ companyInfo?.telephone }}</th>
+              Tel: {{ companyInfo?.telephone }}</th>
           </tr>
           <tr>
             <th colspan="3">{{ CfiscalDataHora }}<br />
@@ -430,7 +432,7 @@
     </div>
   </div>
 </div>
-    <!-- Fim do Modal -->
+<!-- Fim do Modal -->
 
 <!-- Modal de senha Valor -->
 <div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalSenhaVisivel_val}">

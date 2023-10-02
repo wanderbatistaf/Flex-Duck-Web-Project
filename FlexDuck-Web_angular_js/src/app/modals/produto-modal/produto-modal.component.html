@@ -4,11 +4,11 @@
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
-<div class="modal-body">
+<div class="modal-body-scroll">
   <div class="text-center" *ngIf="isLoading">
     <div class="spinner-border spinner-border-sm"></div>
   </div>
-<div class="modal-body">
+<div class="modal-body-scroll">
   <!-- Adicione o skeleton loading antes da tabela -->
   <div *ngIf="loading" class="skeleton-loading">
     <div class="skeleton-line"></div>
@@ -55,4 +55,5 @@
     </tr>
     </tbody>
   </table>
+</div>
 </div>

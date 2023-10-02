@@ -89,8 +89,10 @@ export class ClienteModalComponent implements OnInit {
         // Quando ocorrer um erro na resposta
         error => {
           console.log('Houve um erro ao requisitar os clientes.');
+          this.isLoading = false;
         }
       );
+    this.isLoading = false;
   }
 
   selecionarClient(cliente: Clients) {
