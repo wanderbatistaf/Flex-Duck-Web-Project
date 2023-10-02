@@ -145,6 +145,7 @@ export class SalesComponent implements OnInit, AfterContentChecked {
 
 // Executa ao inicializar o componente
   ngOnInit() {
+    this.cupomFiscalModalAberto = false;
     const token = localStorage.getItem('token');
     const decodedToken = token ? this.jwtHelper.decodeToken(token) : null;
     this.level = decodedToken?.level;

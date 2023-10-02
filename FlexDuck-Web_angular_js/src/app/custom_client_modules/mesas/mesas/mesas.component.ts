@@ -132,6 +132,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
   companyInfo?: Company;
   formComp: FormGroup;
   dadosDaVenda: any;
+  totalFinal = 0
 
   // dadosDaVenda = {
   //   cliente_id: 'Q1', // Cliente Anônimo
@@ -306,6 +307,7 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     });
 
     total -= this.descontoValor; // Subtrair o valor do desconto em R$ do total final
+
     return Number(total);
   }
 
@@ -1154,9 +1156,8 @@ export class MesasComponent implements OnInit, AfterContentChecked {
     }
   }
 
-
-
-
-
+  formatarTotal(): string {
+    return this.total.toFixed(2);
+  }
 
 }

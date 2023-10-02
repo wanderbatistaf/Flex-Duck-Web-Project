@@ -76,8 +76,10 @@ export class ProdutoModalComponent implements OnInit {
         // Quando ocorrer um erro na resposta
         error => {
           console.log('Houve um erro ao requisitar os produtos.');
+          this.isLoading = false;
         }
       );
+    this.isLoading = false;
   }
 
   selecionarProduto(produto: Products) {

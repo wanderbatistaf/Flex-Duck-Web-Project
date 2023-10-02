@@ -137,6 +137,15 @@ td.editing {
 .printer-ticket .last td {
   padding-bottom: 10px;
 }
+.cupom-custom-modal {
+  max-width: 90%; /* Defina a largura máxima desejada */
+  max-height: 80vh; /* Defina a altura máxima em relação à altura da viewport (80% da altura da viewport) */
+  overflow-y: auto; /* Adicione uma barra de rolagem vertical quando necessário */
+}
+.modal-body {
+  overflow-y: auto; /* Adicione uma barra de rolagem vertical quando necessário */
+  max-height: 80vh;
+}
 
 
 

@@ -126,6 +126,10 @@ app.register_blueprint(api_modulos)
 from api_cep import viacep
 app.register_blueprint(viacep)
 
+# Adiciona as rotas de dados das notificações
+from api_notify_mysql import notifys_api
+app.register_blueprint(notifys_api)
+
 
 @app.route('/server/status/check-connection', methods=['GET'])
 def check_connection():

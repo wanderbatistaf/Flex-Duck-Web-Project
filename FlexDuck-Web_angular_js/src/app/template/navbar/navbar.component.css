@@ -1,0 +1,22 @@
+.custom-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: #fff; /* Defina a cor de fundo desejada */
+  border: 1px solid #ccc; /* Adicione uma borda, se desejar */
+  border-radius: 3px;
+  box-shadow: 0 5px 10px 0 rgba(138, 155, 165, 0.15);
+  z-index: 1000; /* Aumente o índice z para garantir que fique acima de outros elementos */
+}
+
+.notification-count {
+  position: absolute;
+  top: 8px; /* Ajuste a posição vertical conforme necessário */
+  right: 10px; /* Ajuste a posição horizontal conforme necessário */
+  background-color: red;
+  color: white;
+  font-size: 10px;
+  border-radius: 50%;
+  padding: 2px 6px;
+}
+

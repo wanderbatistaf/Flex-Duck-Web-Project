@@ -10,4 +10,5 @@ export * from './http-interceptor.service';
 export * from './company_settings.service';
 export * from './mesas.localstorage.service';
 export * from './encryption.service';
-export * from './contabil.service'
+export * from './contabil.service';
+export * from './notifys_service';

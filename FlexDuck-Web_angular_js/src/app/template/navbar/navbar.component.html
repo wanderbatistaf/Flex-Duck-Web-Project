@@ -1,6 +1,32 @@
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-    <a class="navbar-brand" href="#"><img alt="FlexDuck ERP" src="../../../assets/nav_logo.png" /></a>
-    <button class="btn btn-link btn-sm order-1 order-lg-0" id="sidebarToggle" href="#">
-        <i class="fas fa-bars"></i>
-    </button>
+  <a class="navbar-brand" href="#"><img alt="FlexDuck ERP" src="../../../assets/nav_logo.png" /></a>
+  <button class="btn btn-link btn-sm order-1 order-lg-0" id="sidebarToggle" href="#">
+    <i class="fas fa-bars"></i>
+  </button>
+  <!-- Ícone de sino com base em uma condição -->
+  <ul class="navbar-nav ml-auto">
+    <li class="nav-item">
+      <a class="nav-link" href="#" (click)="toggleDropdown()">
+        <ng-container *ngIf="hasNotifications; else noNotifications">
+          <i class="bi bi-bell-fill"></i> <!-- Ícone de sino preenchido se houver notificações -->
+          <span *ngIf="notificationCount > 0" class="notification-count">{{ notificationCount }}</span>
+        </ng-container>
+        <ng-template #noNotifications>
+          <i class="bi bi-bell"></i> <!-- Ícone de sino vazio se não houver notificações -->
+        </ng-template>
+      </a>
+      <!-- Menu suspenso de notificações -->
+      <div *ngIf="showDropdown" class="custom-dropdown">
+        <h6 class="dropdown-header">Produtos com Alerta de Reposição:</h6>
+        <div *ngIf="alertProducts.length > 0; else noAlertProducts">
+          <div *ngFor="let product of alertProducts" class="dropdown-item">
+            {{ product.nome }} | Qtd: {{ product.quantidade }}
+          </div>
+        </div>
+        <ng-template #noAlertProducts>
+          <div class="dropdown-item">Não há produtos com estoque em alerta</div>
+        </ng-template>
+      </div>
+    </li>
+  </ul>
 </nav>

@@ -76,8 +76,10 @@ export class VendedorModalComponent implements OnInit {
       },
       (error) => {
         console.log('An error occurred while requesting users.');
+        this.isLoading = false;
       }
     );
+    this.isLoading = false;
   }
 
 // Helper method to get the level text based on the user level

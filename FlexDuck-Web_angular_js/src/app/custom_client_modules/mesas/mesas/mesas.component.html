@@ -36,7 +36,7 @@
       <div class="modal-body">
         <div class="row">
             <!-- left column -->
-            <div class="col-sm-6">
+            <div class="col-sm-6 modal-custom-height">
               <div class="modal-header">
                 <h5 class="modal-title">Cupom Fiscal</h5>
               </div>
@@ -136,7 +136,7 @@
                   <div class="col-md-12">
                     <div class="form-group">
                       <label for="total">Total:</label>
-                      <input type="text" class="form-control" id="total" [(ngModel)]="total" value="{{ total | number:'1.2-2' }}" readonly>
+                      <input type="text" class="form-control" id="total" [value]="formatarTotal()" readonly>
                     </div>
                   </div>
                 </div>

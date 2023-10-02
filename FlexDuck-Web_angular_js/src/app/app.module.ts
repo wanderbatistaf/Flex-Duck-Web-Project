@@ -17,7 +17,7 @@ import { JwtHelperService } from "@auth0/angular-jwt";
 import { EmployesComponent } from './cadastro/employes/employes.component';
 import { ClientsComponent } from "@app/cadastro/clients/clients.component";
 import { TextMaskModule } from "angular2-text-mask";
-import { NgOptimizedImage } from "@angular/common";
+import {HashLocationStrategy, LocationStrategy, NgOptimizedImage} from "@angular/common";
 import { SuppliersComponent } from "@app/cadastro/suppliers/suppliers.component";
 import { ProductsComponent } from "@app/cadastro/products/products.component";
 import { AnQrcodeModule } from "an-qrcode";
@@ -98,6 +98,7 @@ import {MatInputModule} from "@angular/material/input";
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: CustomHttpInterceptor, multi: true },
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
     JwtHelperService,
     SharedService
   ],

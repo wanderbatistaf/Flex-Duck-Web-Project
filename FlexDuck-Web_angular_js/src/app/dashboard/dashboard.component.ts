@@ -25,11 +25,12 @@ export class DashboardComponent implements OnInit {
   averagePrice?: number;
   loadingPageModalVisible: boolean = false;
 
-  constructor(private salesService: SalesService) {}
-
-  ngOnInit(): void {
+  constructor(private salesService: SalesService) {
     this.getAllSales();
     this.loadVendedores();
+  }
+
+  ngOnInit(): void {
   }
 
   getAllSales(): void {
