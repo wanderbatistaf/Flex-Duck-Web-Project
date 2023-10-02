@@ -1,10 +1,6 @@
-import json
-import logging
 import time
-from datetime import datetime
-
 import mysql.connector
-import decimal
+
 
 from flask import Blueprint, jsonify, request, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -72,3 +68,4 @@ def alerta_reposicao():
         "items": items
     }
     return jsonify(response)
+
