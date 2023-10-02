@@ -301,3 +301,4 @@ if __name__ == '__main__':
         observer.stop()
         observer.join()
         app.teardown_appcontext(fechar_conexao_db)
+

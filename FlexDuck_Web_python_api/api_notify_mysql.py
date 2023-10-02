@@ -68,3 +68,4 @@ def alerta_reposicao():
         "items": items
     }
     return jsonify(response)
+
