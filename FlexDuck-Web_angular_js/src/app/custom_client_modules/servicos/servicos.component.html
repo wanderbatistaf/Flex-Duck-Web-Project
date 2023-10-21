@@ -1,0 +1,469 @@
+<div fxLayout="column" fxLayout.gt-sm="row">
+  <h1 class="mt-4" xmlns="http://www.w3.org/1999/html">Serviços</h1>
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">Cadastro | Consulta</li>
+  </ol>
+
+  <!-- Abas de Navegação -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="isTabActive('cadastro')" style="cursor: pointer" (click)="setActiveTab('cadastro')">Cadastro</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="isTabActive('consulta')" style="cursor: pointer" (click)="setActiveTab('consulta')">Serviços</a>
+    </li>
+    <li class="nav-item" [hidden]="true">
+      <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('edicao')">Edição</a>
+    </li>
+    <li class="nav-item" [hidden]="true">
+      <a class="nav-link" [class.active]="isTabActive('detalhes')" (click)="setActiveTab('edicao')">Detalhes</a>
+    </li>
+  </ul>
+
+  <!--NavBar superior (Search+Adicionar)-->
+
+  <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+    <a class="navbar-brand"></a>
+    <form class="form-inline mr-auto">
+      <input class="form-control mr-sm-2 flex-grow-1" type="search" [(ngModel)]="pesquisaServicos" placeholder="Search" name="searchText">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit"
+              style="margin-right: 5px;">Buscar</button>
+      <button class="btn btn-outline-success my-2 my-sm-0" type="button">Limpar</button>
+    </form>
+  </nav>
+
+  <div class="card table-responsive mt-4">
+    <div class="card-body">
+
+        <div *ngIf="activeTab === 'cadastro'">
+
+          <div class="container">
+            <!-- Formulário de Cadastro de Serviços -->
+                <form (ngSubmit)="cadastrarServico()" class="row">
+                  <!-- Seção de Informações de Texto -->
+                  <div class="col-md-6">
+                    <div class="form-row">
+                      <div class="form-group col-md-4">
+                        <label for="numeroOrdem">Número de Ordem</label>
+                        <input type="text" id="numeroOrdem" class="form-control" [(ngModel)]="novoServico.numeroOrdem" name="numeroOrdem" readonly>
+                      </div>
+
+                      <div class="form-group col-md-8">
+                        <label for="servico">Nome do Serviço</label>
+                        <input type="text" id="servicoName" class="form-control" [(ngModel)]="novoServico.servico" name="servico" required>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <label for="inputVendedor">Responsavel:</label>
+                            <div class="input-group">
+                              <input type="text" class="form-control" id="inputVendedor" [(ngModel)]="selectedVendedor" (dblclick)="openVendorModal()">
+                              <div class="input-group-append">
+                                <span class="input-group-text" (click)="openVendorModal()" data-toggle="tooltip" title="Buscar Responsavel" style="cursor: pointer"><i class="fas fa-search"></i></span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <label for="inputCliente">Cliente:</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" id="inputCliente" [(ngModel)]="selectedClienteName" (dblclick)="openSearchClientModal()" data-toggle="tooltip" title="Buscar Cliente">
+                        <input type="hidden" id="inputClienteID" [(ngModel)]="SelectedClienteId">
+                        <div class="input-group-append">
+                          <span class="input-group-text" (click)="openSearchClientModal()" style="cursor: pointer" data-toggle="tooltip" title="Buscar Cliente"><i class="fas fa-search"></i></span>
+                          <span class="input-group-text" style="cursor: pointer" (click)="abrirModal()" data-toggle="tooltip" title="Adicionar Cliente"><i class="fas fa-plus"></i></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label for="inputTelefone">Telefone</label>
+                        <input type="text" id="inputTelefone" class="form-control" [(ngModel)]="selectedClienteTelephone" name="telefone">
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label for="inputCpf">CPF</label>
+                        <input type="text" id="inputCpf" class="form-control" [(ngModel)]="selectedClienteCPF_CNPJ" name="cpf">
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label for="modelo">Modelo do Aparelho</label>
+                        <input type="text" id="modelo" class="form-control" [(ngModel)]="novoServico.modelo" name="modelo">
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label for="imei">IMEI</label>
+                        <input type="text" id="imei" class="form-control" [(ngModel)]="novoServico.imei" name="imei">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="estadoAparelho">Estado do Aparelho</label>
+                      <input type="text" id="estadoAparelho" class="form-control" [(ngModel)]="novoServico.estadoAparelho" name="estadoAparelho">
+                    </div>
+                  </div>
+
+                  <!-- Seção de Checkbox -->
+                  <div class="col-md-6">
+                    <div class="form-row">
+                      <div class="form-group col-md-4">
+                        <label for="chip" style="text-align: center">Chip</label>
+                        <select id="chip" class="form-control" [(ngModel)]="novoServico.chip" name="chip">
+                          <option value="SIM">SIM</option>
+                          <option value="NÃO">NÃO</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group col-md-4">
+                        <label for="cartaoMemoria" style="text-align: center">Cartão de Memória</label>
+                        <select id="cartaoMemoria" class="form-control" [(ngModel)]="novoServico.cartaoMemoria" name="cartaoMemoria">
+                          <option value="SIM">SIM</option>
+                          <option value="NÃO">NÃO</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group col-md-4">
+                        <label for="pelicula" style="text-align: center">Pelicula</label>
+                        <select id="pelicula" class="form-control" [(ngModel)]="novoServico.pelicula" name="pelicula">
+                          <option value="SIM">SIM</option>
+                          <option value="NÃO">NÃO</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="defeitoRelatado">Defeito relatado</label>
+                      <textarea id="defeitoRelatado" class="form-control" [(ngModel)]="novoServico.defeitoRelatado" name="defeitoRelatado" rows="5"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="servicoARealizar">Serviço a ser realizado</label>
+                      <textarea id="servicoARealizar" class="form-control" [(ngModel)]="novoServico.servicoARealizar" name="servicoARealizar" style="height: 201px;"></textarea>
+                    </div>
+
+                    <!--          <div class="form-row">-->
+                    <!--          <div class="form-group col-md-8" style="text-align: right">-->
+                    <!--            <label for="valorInicial" style="text-align: right; margin-top: 7px;">Valor do Serviço:</label>-->
+                    <!--          </div>-->
+                    <!--            <div class="form-group col-md-4">-->
+                    <!--              <div class="input-group">-->
+                    <!--              <span class="input-group-text">R$</span>-->
+                    <!--            <input style="text-align: center" type="number" id="valorInicial" class="form-control" [(ngModel)]="novoServico.valorInicial" name="valorInicial" currency min="0">-->
+                    <!--              </div>-->
+                    <!--            </div>-->
+                    <!--          </div>-->
+                  </div>
+                </form>
+
+                <!-- Seção de Produtos -->
+                <div class="form-row">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="codigoProduto">Código:</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" id="codigoProduto" (keydown.enter)="onCodigoProdutoEnter($event)">
+                        <div class="input-group-append">
+                          <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="inputProduto">Produto:</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" id="inputProduto" (dblclick)="openProdutoModal()">
+                        <div class="input-group-append">
+                          <span class="input-group-text" (click)="openProdutoModal()" data-toggle="tooltip" title="Buscar Responsavel" style="cursor: pointer"><i class="fas fa-search"></i></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="inputQuantidade">Quantidade:</label>
+                      <input type="number" min="1" class="form-control" id="inputQuantidade">
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn btn-primary mr-2" id="btnAdicionar" (click)="adicionarProduto()" data-toggle="tooltip" title="Adicionar Produto">Adicionar</button>
+                <button class="btn btn-success mr-2" id="labor" (click)="adicionarMaodeObra()" data-toggle="tooltip" title="Adicionar Mão de Obra" [disabled]="isMaoDeObraInList()"><i class="bi bi-hand-index-fill"></i></button>
+                <button class="btn btn-danger" (click)="confirmarLimparLista()" data-toggle="tooltip" title="Limpar Lista"><i class="bi bi-trash3-fill"></i></button>
+                <hr>
+
+                <div class="row mt-4">
+                  <div class="col-md-12">
+                    <div class="card">
+                      <div class="card-body">
+                        <div class="table-responsive">
+                          <table class="table">
+                            <thead>
+                            <tr>
+                              <th class="text-center">CÓDIGO</th>
+                              <th class="text-center">NOME</th>
+                              <th class="text-center">PREÇO</th>
+                              <th class="text-center">DESCONTO</th>
+                              <th class="text-center">QUANTIDADE</th>
+                              <th class="text-center">TOTAL</th>
+                            </tr>
+                            </thead>
+                            <tbody id="listaProdutos">
+                            <tr *ngFor="let produto of listaProdutos">
+                              <td class="text-center">{{ produto.codigo }}</td>
+                              <td class="text-center">{{ produto.nome }}</td>
+                              <td class="text-center">
+                                <ng-container *ngIf="produto.codigo === 'S-000001'; else precoFixo">
+                                  <!-- Se for Mão de Obra (código 'S-000001') e não estiver editando o preço, exibe o preço fixo -->
+                                  <ng-container *ngIf="!editandoPrecoMaoDeObra">
+                                    <div (click)="iniciarEdicaoPrecoMaoDeObra()">
+                                      R$ {{ produto.preco.toFixed(2) }}
+                                    </div>
+                                  </ng-container>
+
+                                  <!-- Se estiver editando o preço, exibe um campo de entrada de preço -->
+                                  <ng-container *ngIf="editandoPrecoMaoDeObra">
+                                    <input type="number" [(ngModel)]="produto.preco" (ngModelChange)="atualizarPrecoMaoDeObra(produto, $event)" class="form-control"
+                                           (blur)="salvarPrecoMaoDeObra(produto.preco)">
+                                  </ng-container>
+                                </ng-container>
+                                <ng-template #precoFixo>
+                                  <!-- Se não for Mão de Obra, exibe o preço fixo -->
+                                  R$ {{ produto.preco.toFixed(2) }}
+                                </ng-template>
+                              </td>
+                              <td class="text-center">R$ {{ produto.desconto.toFixed(2) }}</td>
+                              <td class="text-center">
+                                <button class="btn btn-sm btn-danger" (click)="removerProduto(produto.codigo)">-</button>
+                                {{ produto.quantidade }}
+                                <button class="btn btn-sm btn-success" (click)="adicionarQuantidade(produto.codigo)" [disabled]="produto.codigo === 'S-000001'">
+                                  <i class="bi bi-plus"></i></button>
+                              </td>
+                              <td class="text-center">
+                                <ng-container *ngIf="produto.codigo === 'S-000001'; else totalFixo">
+                                  <!-- Se for Mão de Obra (código 'S-000001'), exibe um campo de entrada de preço -->
+                                  R$ {{ produto.preco.toFixed(2) }}
+                                </ng-container>
+                                <ng-template #totalFixo>
+                                  <!-- Se não for Mão de Obra, exibe o preço fixo -->
+                                  R$ {{ produto.total.toFixed(2) }}
+                                </ng-template>
+                              </td>
+                              <!--                    <td class="text-center">R$ {{ produto.total.toFixed(2) }}</td>-->
+                            </tr>
+                            </tbody>
+
+                          </table>
+                        </div>
+                      </div>
+                </div>
+
+                <form (ngSubmit)="cadastrarServico()" class="row">
+                  <!-- Seção de Valor -->
+                  <div class="col-md-6">
+                    <div class="form-row">
+                    </div>
+
+                    <div class="form-group">
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="form-group">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="input-group">
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                      </div>
+                      <div class="form-group col-md-6">
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                      </div>
+                      <div class="form-group col-md-6">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                    </div>
+                  </div>
+
+                  <!-- Seção de Valor -->
+                  <div class="col-md-6">
+                    <div class="form-row">
+                      <div class="form-group col-md-4">
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group col-md-8" style="text-align: right">
+                        <label for="valorInicial" style="text-align: right; margin-top: 7px;">Valor do Serviço:</label>
+                      </div>
+                      <div class="form-group col-md-4">
+                        <div class="input-group">
+                          <span class="input-group-text">R$</span>
+                          <input style="text-align: center" type="text" id="valorInicial" class="form-control" name="valorInicial"
+                                 currency min="0" disabled [value]="parseFloat(valorInicialFormatado).toFixed(2)">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+
+                <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#modalCadastro" (click)="cadastrarServico()">
+                  Cadastrar Serviço
+                </button>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <div class="table-responsive" *ngIf="activeTab === 'consulta'">
+        <!-- Lista de Serviços -->
+        <table class="table table-condensed table-hover">
+              <thead>
+              <tr>
+                <th style="text-align: center">Número de Ordem</th>
+                <th style="text-align: center">Serviço</th>
+                <th style="text-align: center">Cliente</th>
+                <th style="text-align: center">Telefone</th>
+                <th style="text-align: center">Responsavel</th>
+                <th style="text-align: center">Status</th>
+                <th style="text-align: center">Valor</th>
+                <th style="text-align: center">Ações</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let servico of servicos | filter: pesquisaServicos | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
+                <td style="text-align: center">{{ servico.numeroOrdem }}</td>
+                <td style="text-align: center">{{ servico.servico }}</td>
+                <td style="text-align: center">{{ servico.cliente }}</td>
+                <td style="text-align: center">{{ servico.telefone }}</td>
+                <td style="text-align: center">{{ servico.responsavel }}</td>
+                <td style="text-align: center" [ngClass]="{'highlighted-mustard': servico.status === 'Em andamento',
+                                           'highlighted-red': servico.status === 'Cancelado',
+                                           'highlighted-green': servico.status === 'Concluído'}">
+                  {{ servico.status }}
+                </td>
+                <td style="text-align: center" currency>
+                  <s *ngIf="servico.status === 'Cancelado'">R$ {{ servico.valorInicial }}</s>
+                  <span *ngIf="servico.status !== 'Cancelado'">R$ {{ servico.valorInicial }}</span>
+                </td>
+                <td style="text-align: center">
+                  <button class="btn btn-outline-secondary" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Editar">
+                    <span class="bi bi-pencil-fill"></span>
+                  </button>
+                  <button class="btn btn-outline-success" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Concluir" (click)="atualizarStatus(servico, 'Concluído')">
+                    <span class="bi bi-check-square-fill"></span>
+                  </button>
+                  <button class="btn btn-outline-warning" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Em andamento" (click)="atualizarStatus(servico, 'Em andamento')">
+                    <span class="bi bi-stopwatch-fill"></span>
+                  </button>
+                  <button class="btn btn-outline-danger" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Cancelar" (click)="cancelarServicoComConfirmacao(servico)">
+                    <span class="bi bi-x-circle-fill"></span>
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+      </div>
+      <nav class="navbar navbar-light bg-light justify-content-between w-100" *ngIf="activeTab === 'consulta'">
+        <!-- Adicione os controles de páginação -->
+        <section class="pagination pagination-left">
+          <button id="pg-button-prev" type="button" class="pagination__button" (click)="previousPage()" [disabled]="currentPage === 1">
+            <i class="fa fa-chevron-left"></i>
+          </button>
+
+          <ul class="pagination__list">
+            <li class="pagination__item pagination__item--1">
+              <button id="pg-button-1" type="button" (click)="goToPage(1)" [class.active]="currentPage === 1">1</button>
+            </li>
+            <li class="pagination__item pagination__item--2">
+              <button id="pg-button-2" type="button" (click)="goToPage(2)" [class.active]="currentPage === 2">2</button>
+            </li>
+            <!-- Adicione mais botões de página conforme necessário -->
+          </ul>
+
+          <button id="pg-button-next" type="button" class="pagination__button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <i class="fa fa-chevron-right"></i>
+          </button>
+        </section>
+      </nav>
+      </div>
+
+
+  <div class="modal fade" id="modalCadastro" tabindex="-1" role="dialog" aria-labelledby="modalCadastroLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCadastroLabel">Cadastro Realizado com Sucesso</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          O serviço foi cadastrado com sucesso!
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-primary" (click)="prepararParaImpressao();" data-toggle="modal" data-target="#modalImpressao">Imprimir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!-- Modal para o cadastro rápido -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalAberto}" (keydown.esc)="fecharModal()">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cadastro Rápido</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar" (click)="fecharModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="nome">Nome:</label>
+          <input type="text" class="form-control" id="nome" [(ngModel)]="nome">
+        </div>
+        <div class="form-group">
+          <label for="cpfCnpj">CPF/CNPJ:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="cpfCnpj"
+            [(ngModel)]="cpfCnpj"
+            (input)="onCpfCnpjInput()"
+            maxlength="14"/>
+          <div *ngIf="cpfCnpjError" class="text-danger">CPF/CNPJ inválido. Por favor, verifique.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="telefone">Telefone:</label>
+          <input type="text" class="form-control" id="telefone" [(ngModel)]="telefone" (input)="telefone = formatarTelefone(telefone)">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModal()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="cadastrar()">Cadastrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Fim do Modal -->
+</div>
+</div>

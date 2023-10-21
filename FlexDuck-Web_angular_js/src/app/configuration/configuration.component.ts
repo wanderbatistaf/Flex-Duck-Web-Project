@@ -85,7 +85,8 @@ export class ConfigurationComponent implements OnInit {
       modulo: [''],
       status: [''],
       moduloMesas: [''],
-      moduloVarejo: ['']
+      moduloVarejo: [''],
+      moduloServicos: ['']
     });
 
   }
@@ -130,6 +131,11 @@ export class ConfigurationComponent implements OnInit {
       const moduloVarejo = modulos.find((modulo: any) => modulo.modulo === 'Varejo');
       if (moduloVarejo) {
         this.formMod.get('moduloVarejo')?.setValue(moduloVarejo.status === 'true');
+      }
+
+      const moduloServicos = modulos.find((modulo: any) => modulo.modulo === 'Varejo');
+      if (moduloServicos) {
+        this.formMod.get('moduloServicos')?.setValue(moduloServicos.status === 'true');
       }
 
       this.loadingPageModalVisible = false;
@@ -198,6 +204,25 @@ export class ConfigurationComponent implements OnInit {
 
 
   toggleModuloVarejo() {
+    this.savingModalVisible = true; // Mostrar o modal de salvamento
+    this.ModulosService.toggleModuloVarejoStatus().subscribe((newModule: Modulo) => {
+      if (newModule) {
+        // Limpar informações do localStorage
+        localStorage.removeItem('modules');
+
+        // Recarregar o sidebar
+        this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+        this.router.navigate(['/sidebar'], { queryParams: { refresh: new Date().getTime() } });
+
+        // Aguardar um tempo para garantir que o sidebar seja recarregado
+        setTimeout(() => {
+          this.savingModalVisible = false; // Esconder o modal de salvamento após o sidebar ser recarregado
+        }, 1000); // 1000 milissegundos (1 segundo)
+      }
+    });
+  }
+
+  toggleModuloServicos() {
     this.savingModalVisible = true; // Mostrar o modal de salvamento
     this.ModulosService.toggleModuloVarejoStatus().subscribe((newModule: Modulo) => {
       if (newModule) {

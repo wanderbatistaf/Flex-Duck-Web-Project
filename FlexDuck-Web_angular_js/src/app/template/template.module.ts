@@ -4,6 +4,8 @@ import {Router, RouterModule} from "@angular/router";
 
 import { NavbarComponent } from "@app/template/navbar/navbar.component";
 import { SidebarComponent } from "@app/template/sidebar/sidebar.component";
+import {NgbPopoverModule} from "@ng-bootstrap/ng-bootstrap";
+import {FormsModule} from "@angular/forms";
 
 
 @NgModule({
@@ -13,7 +15,9 @@ import { SidebarComponent } from "@app/template/sidebar/sidebar.component";
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    NgbPopoverModule,
+    FormsModule
   ],
   exports: [
     NavbarComponent,

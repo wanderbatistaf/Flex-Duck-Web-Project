@@ -20,3 +20,304 @@
   padding: 2px 6px;
 }
 
+/* Estilo para o ícone e link de suporte */
+.support-link {
+  cursor: pointer;
+  color: #333; /* Cor do texto */
+  text-decoration: none;
+  display: inline-block;
+}
+
+.support-link i {
+  margin-right: 5px; /* Espaçamento entre o ícone e o texto */
+}
+
+/* Estilo para o menu suspenso de suporte */
+.custom-dropdown_chat {
+  max-width: 300px; /* Define a largura máxima da janela para 300 pixels */
+  background-color: #fff; /* Cor de fundo desejada */
+  border: 1px solid #ccc; /* Adicione uma borda, se desejar */
+  border-radius: 3px;
+  box-shadow: 0 5px 10px 0 rgba(138, 155, 165, 0.27);
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #212121;
+  padding: 10px; /* Espaçamento interno para o conteúdo */
+  margin: 0; /* Define as margens conforme necessário */
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+}
+
+.dropdown-header {
+  font-weight: bold; /* Texto em negrito para o cabeçalho */
+}
+
+.initial-message-container {
+  margin-top: 10px; /* Espaçamento superior */
+}
+
+.custom-textarea {
+  width: 100%; /* Largura total */
+  padding: 5px; /* Espaçamento interno */
+  border: 1px solid #ccc; /* Borda */
+  border-radius: 3px; /* Cantos arredondados */
+  min-height: 50px; /* Altura mínima */
+}
+
+.button-container {
+  margin-top: 10px; /* Espaçamento superior */
+  text-align: right; /* Alinhamento à direita */
+}
+
+.open-ticket-button {
+  background-color: #007bff; /* Cor de fundo do botão */
+  color: #fff; /* Cor do texto do botão */
+  border: none;
+  border-radius: 3px; /* Cantos arredondados do botão */
+  padding: 5px 10px; /* Espaçamento interno do botão */
+  cursor: pointer;
+}
+
+.open-ticket-button:hover {
+  background-color: #0056b3; /* Cor de fundo do botão ao passar o mouse */
+}
+
+h6.dropdown-header {
+  color: #333; /* Cor do cabeçalho */
+  font-size: 18px; /* Tamanho da fonte do cabeçalho */
+}
+
+p.welcome-message {
+  margin: 10px 0; /* Espaçamento vertical entre as mensagens de boas-vindas */
+  font-size: 14px; /* Tamanho da fonte das mensagens de boas-vindas */
+  line-height: 1.4; /* Altura da linha para melhor legibilidade */
+}
+
+textarea.custom-textarea {
+  width: 100%; /* Largura total do textarea */
+  padding: 8px; /* Espaçamento interno do textarea */
+  border: 1px solid #ccc; /* Borda do textarea */
+  border-radius: 3px; /* Borda arredondada */
+  resize: vertical; /* Permitir redimensionamento vertical */
+}
+
+button.open-ticket-button {
+  background-color: #007bff; /* Cor de fundo do botão */
+  color: #fff; /* Cor do texto do botão */
+  border: none; /* Remover borda do botão */
+  border-radius: 3px; /* Borda arredondada do botão */
+  padding: 8px 16px; /* Espaçamento interno do botão */
+  cursor: pointer; /* Alterar cursor para apontar */
+}
+
+button.open-ticket-button:hover {
+  background-color: #0056b3; /* Cor de fundo do botão ao passar o mouse */
+}
+
+/* Estilos para o suporte técnico dentro do header */
+header.custom-dropdown_chat h6.dropdown-header {
+  background-color: #343a40; /* Cor de fundo do cabeçalho */
+  margin: 0; /* Remover margens */
+  color: #fff; /* Cor do texto no cabeçalho */
+}
+
+/* Live Chat */
+
+@use postcss-preset-env; {
+  stage: 0;
+}
+
+body {
+  background: #e9e9e9;
+  color: #9a9a9a;
+  font-family: Droid Sans, sans-serif;
+  line-height: 1.5;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+h4,
+h5 {
+  line-height: 1.5em;
+  margin: 0;
+}
+
+hr {
+  background: #e9e9e9;
+  border: 0;
+  box-sizing: content-box;
+  height: 1px;
+  margin: 0;
+  min-height: 1px;
+}
+
+img {
+  border: 0;
+  display: block;
+  height: auto;
+  max-width: 100%;
+}
+
+input {
+  border: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: 100%;
+  line-height: normal;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.clearfix {
+  *zoom: 1;
+} /* For IE 6/7 */
+.clearfix:before,
+.clearfix:after {
+  content: "";
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
+
+/* ---------- LIVE-CHAT ---------- */
+
+#live-chat {
+  bottom: 0;
+  font-size: 12px;
+  right: 24px;
+  position: fixed;
+  width: 300px;
+  box-shadow: #1b1e21;
+}
+
+#live-chat header {
+  background: #293239;
+  border-radius: 5px 5px 0 0;
+  color: #fff;
+  cursor: pointer;
+  padding: 16px 24px;
+}
+
+#live-chat h4:before {
+  background: #1a8a34;
+  border-radius: 50%;
+  content: "";
+  display: inline-block;
+  height: 8px;
+  margin: 0 8px 0 0;
+  width: 8px;
+}
+
+#live-chat h4 {
+  font-size: 12px;
+}
+
+#live-chat h5 {
+  font-size: 10px;
+}
+
+#live-chat form {
+  padding: 24px;
+}
+
+#live-chat input[type="text"] {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 8px;
+  outline: none;
+  width: 234px;
+}
+
+.chat-message-counter {
+  background: #e62727;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  display: none;
+  font-size: 12px;
+  font-weight: bold;
+  height: 28px;
+  left: 0;
+  line-height: 28px;
+  margin: -15px 0 0 -15px;
+  position: absolute;
+  text-align: center;
+  top: 0;
+  width: 28px;
+}
+
+.chat-close {
+  background: #1b2126;
+  border-radius: 50%;
+  color: #fff;
+  display: block;
+  float: right;
+  font-size: 10px;
+  height: 16px;
+  line-height: 16px;
+  margin: 2px 0 0 0;
+  text-align: center;
+  width: 16px;
+}
+
+.chat {
+  background: #fff;
+}
+
+.chat-history {
+  height: 252px;
+  padding: 8px 24px;
+  overflow-y: scroll;
+}
+
+.chat-message {
+  margin: 16px 0;
+}
+
+.chat-message img {
+  border-radius: 50%;
+  float: left;
+}
+
+.chat-message-content {
+  margin-left: 56px;
+}
+
+.chat-time {
+  float: right;
+  font-size: 10px;
+}
+
+.chat-feedback {
+  font-style: italic;
+  margin: 0 0 0 80px;
+}
+
+/* Estilo para a janela de chat minimizada */
+.minimized-chat {
+  height: 40px; /* Defina a altura mínima desejada quando minimizado */
+  overflow: hidden; /* Esconda o conteúdo excedente quando minimizado */
+  transition: height 0.3s ease; /* Adicione uma transição suave */
+}
+
+/* Estilo para o header da janela de chat minimizada */
+.minimized-chat .chat-header {
+  cursor: pointer; /* Altere o cursor para indicar que é clicável */
+}
+
+
+

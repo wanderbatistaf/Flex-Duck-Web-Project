@@ -17,6 +17,7 @@ import {NotasSaidaComponent} from "@app/contabilidade/notas-saida/notas-saida.co
 import {MesasComponent} from "@app/custom_client_modules/mesas/mesas/mesas.component";
 import {ConfigurationComponent} from "@app/configuration/configuration.component";
 import {DashboardComponent} from "@app/dashboard/dashboard.component";
+import {ServicosComponent} from "@app/custom_client_modules/servicos/servicos.component";
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -47,11 +48,12 @@ const routes: Routes = [
       { path: 'notas-saida', component: NotasSaidaComponent },
       { path: 'configs', component: ConfigurationComponent },
       { path: 'dashboard', component: DashboardComponent },
+      { path: 'services', component: ServicosComponent }
     ]
   },
   { path: 'products/qrscan/:codigo', component: QrscanComponent },
   // otherwise redirect to home
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: 'home' }
 ];
 
 

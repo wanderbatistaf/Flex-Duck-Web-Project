@@ -1,9 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { SalesService } from '@app/_services';
-import { Sales } from '@app/_models';
+import {Modulo, Sales} from '@app/_models';
 import { map } from 'rxjs';
 import { Chart } from 'chart.js/auto';
 import { format } from 'date-fns';
+import {ModulosService} from "@app/_services/modulos.service";
+
+
+interface ApiResponse {
+  modulos: Modulo[];
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +22,8 @@ export class DashboardComponent implements OnInit {
   startDate: string = '';
   endDate: string = '';
   selectedVendedor: string = 'Todos os Vendedores';
+  modules?: Modulo[];
+  selectedModules: number = 0;
   vendedores: string[] = [];
   barChart: any;
   vendasTotal: number = 0;
@@ -25,12 +33,14 @@ export class DashboardComponent implements OnInit {
   averagePrice?: number;
   loadingPageModalVisible: boolean = false;
 
-  constructor(private salesService: SalesService) {
+  constructor(private salesService: SalesService, private moduloService:ModulosService) {
     this.getAllSales();
     this.loadVendedores();
+    this.getAllModules();
   }
 
   ngOnInit(): void {
+
   }
 
   getAllSales(): void {
@@ -63,6 +73,14 @@ export class DashboardComponent implements OnInit {
           console.error('Erro ao buscar dados de vendas:', error);
         }
       );
+  }
+
+  getAllModules() {
+    this.moduloService.getModules().subscribe((result: any) => {
+      this.modules = result.modulos;
+      // Adicione a opção "Todos os Módulos" como um objeto no início do array
+      this.modules?.unshift({ id: 0, modulo: 'Todos os Módulos' });
+    });
   }
 
   calculateTotalSales(): void {

@@ -57,7 +57,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="inputVendedorID" [(ngModel)]="selectedId" (dblclick)="openVendorModal()">
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="openVendorModal()"><i class="fas fa-search"></i></span>
+                    <span class="input-group-text" (click)="openVendorModal()" style="cursor: pointer"><i class="fas fa-search"></i></span>
                   </div>
                 </div>
               </div>
@@ -69,7 +69,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="inputVendedor" [(ngModel)]="selectedVendedor" (dblclick)="openVendorModal()">
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="openVendorModal()"><i class="fas fa-search"></i></span>
+                    <span class="input-group-text" (click)="openVendorModal()" data-toggle="tooltip" title="Buscar Vendedor" style="cursor: pointer"><i class="fas fa-search"></i></span>
                   </div>
                 </div>
               </div>
@@ -86,8 +86,8 @@
                   <input type="text" class="form-control" id="inputCliente" [(ngModel)]="selectedClienteName" (dblclick)="openSearchClientModal()">
                   <input type="hidden" id="inputClienteID" [(ngModel)]="SelectedClienteId">
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="openSearchClientModal()"><i class="fas fa-search"></i></span>
-                    <span class="input-group-text" style="cursor: pointer" (click)="abrirModal()"><i class="fas fa-plus"></i></span>
+                    <span class="input-group-text" (click)="openSearchClientModal()" data-toggle="tooltip" title="Buscar Cliente" style="cursor: pointer"><i class="fas fa-search"></i></span>
+                    <span class="input-group-text" style="cursor: pointer" (click)="abrirModal()" data-toggle="tooltip" title="Adicionar Cliente" style="cursor: pointer"><i class="fas fa-plus"></i></span>
                   </div>
                 </div>
               </div>
@@ -100,7 +100,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="inputCpf" [(ngModel)]="selectedClienteCPF_CNPJ" (dblclick)="openSearchClientModal()">
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="openSearchClientModal()"><i class="fas fa-search"></i></span>
+                    <span class="input-group-text" (click)="openSearchClientModal()" style="cursor: pointer"><i class="fas fa-search"></i></span>
                   </div>
                 </div>
               </div>
@@ -112,7 +112,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="inputTelefone" [(ngModel)]="selectedClienteTelephone" (dblclick)="openSearchClientModal()">
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="openSearchClientModal()"><i class="fas fa-search"></i></span>
+                    <span class="input-group-text" (click)="openSearchClientModal()" style="cursor: pointer"><i class="fas fa-search"></i></span>
                   </div>
                 </div>
               </div>
@@ -128,7 +128,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="codigoProduto" (keydown.enter)="onCodigoProdutoEnter($event)">
                   <div class="input-group-append">
-                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
                   </div>
                 </div>
               </div>
@@ -140,7 +140,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="inputProduto" (dblclick)="openProdutoModal()">
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="openProdutoModal()"><i class="fas fa-search"></i></span>
+                    <span class="input-group-text" (click)="openProdutoModal()" data-toggle="tooltip" title="Buscar Produtos" style="cursor: pointer"><i class="fas fa-search"></i></span>
                   </div>
                 </div>
               </div>
@@ -157,7 +157,7 @@
           <div class="row">
             <div class="col-md-12">
               <button class="btn btn-primary mr-2" id="btnAdicionar" (click)="adicionarProduto()">Adicionar</button>
-              <button class="btn btn-danger" (click)="confirmarLimparLista()">Limpar Lista</button>
+              <button class="btn btn-danger" (click)="confirmarLimparLista()" data-toggle="tooltip" title="Limpar Lista"><i class="bi bi-trash3-fill"></i></button>
             </div>
           </div>
 
@@ -223,7 +223,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="descontoValor" [(ngModel)]="descontoValor" (keyup)="atualizarDescontoValor()" readonly>
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="abrirModalSenha_valor()"><i class="fas fa-key"></i></span>
+                    <span class="input-group-text" (click)="abrirModalSenha_valor()" data-toggle="tooltip" title="Autorização" style="cursor: pointer"><i class="fas fa-key"></i></span>
                   </div>
                 </div>
               </div>
@@ -234,7 +234,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="descontoPercent" [(ngModel)]="descontoPercent" (input)="atualizarDescontoPercent()" readonly>
                   <div class="input-group-append">
-                    <span class="input-group-text" (click)="abrirModalSenha_percent()"><i class="fas fa-key"></i></span>
+                    <span class="input-group-text" (click)="abrirModalSenha_percent()" data-toggle="tooltip" title="Autorização" style="cursor: pointer"><i class="fas fa-key"></i></span>
                   </div>
                 </div>
               </div>
