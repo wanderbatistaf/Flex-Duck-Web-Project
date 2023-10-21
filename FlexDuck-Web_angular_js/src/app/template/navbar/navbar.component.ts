@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {ChatService, NotifyService} from '@app/_services';
+import {NotifyService} from '@app/_services';
 import { NotifyModel } from '@app/_models';
 
 interface ChatApiResponse {

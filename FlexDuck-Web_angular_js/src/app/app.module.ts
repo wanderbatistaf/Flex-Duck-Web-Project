@@ -32,7 +32,7 @@ import { FilterPipeV, VendedorModalComponent } from './modals/vendedor-modal/ven
 import { FilterPipeP, ProdutoModalComponent } from './modals/produto-modal/produto-modal.component';
 import {SharedService} from "@app/_services/SharedService";
 import {FilterPipe, MesasComponent} from './custom_client_modules/mesas/mesas/mesas.component';
-import {ChatService, CustomHttpInterceptor} from "@app/_services";
+import {CustomHttpInterceptor} from "@app/_services";
 import { SkeletonTableDisplay } from './_share/skeleton-table';
 import {ConfigurationComponent} from "@app/configuration/configuration.component";
 import {NgxPaginationModule} from "ngx-pagination";
@@ -43,7 +43,7 @@ import {NgxDatatableModule} from "@swimlane/ngx-datatable";
 import {MatNativeDateModule} from "@angular/material/core";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatInputModule} from "@angular/material/input";
-import {ChatRoomComponent} from "@app/template/navbar/support_chat/chat-room.component";
+// import {ChatRoomComponent} from "@app/template/navbar/support_chat/chat-room.component";
 // import {SocketIoConfig, SocketIoModule} from "ngx-socket-io";
 import {environment} from "@environments/environment";
 import { ServicosComponent } from './custom_client_modules/servicos/servicos.component';
@@ -100,7 +100,7 @@ import { ServicosComponent } from './custom_client_modules/servicos/servicos.com
     FilterPipeC,
     SkeletonTableDisplay,
     DashboardComponent,
-    ChatRoomComponent,
+    // ChatRoomComponent,
     ServicosComponent,
   ],
   providers: [
@@ -110,7 +110,7 @@ import { ServicosComponent } from './custom_client_modules/servicos/servicos.com
     { provide: LocationStrategy, useClass: HashLocationStrategy },
     JwtHelperService,
     SharedService,
-    ChatService
+    // ChatService
   ],
   bootstrap: [AppComponent]
 })
