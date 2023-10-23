@@ -4,7 +4,7 @@
       <div class="nav">
         <div class="sb-sidenav-menu-heading">Sistema</div>
         <a class="nav-link" routerLink="/home"
-        ><div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+        ><div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
           Home</a
         >
 
@@ -23,6 +23,10 @@
           <a class="nav-link collapsed" *ngIf="modulosAtivos['Varejo'] === 'true'" routerLink="/sales" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
             <div class="sb-nav-link-icon"><i class="fas fa-coins"></i></div>
             Vendas
+          </a>
+          <a class="nav-link collapsed" *ngIf="modulosAtivos['Servicos'] === 'true'" routerLink="/services" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+            <div class="sb-nav-link-icon"><i class="fas fa-hands"></i></div>
+            Serviços
           </a>
           <a class="nav-link collapsed" *ngIf="modulosAtivos['Mesas'] === 'true'" routerLink="/tables" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
             <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>

@@ -1,11 +1,19 @@
-from flask import Blueprint, make_response
+import datetime
+import hashlib
+import time
+import mysql.connector
+
+from flask import Blueprint, make_response, jsonify
 from flask_jwt_extended import jwt_required
 from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from io import BytesIO
 from flask import request
+from Controller.db_connection import get_db_connection
+
 
 reports = Blueprint('reports', __name__)
 
@@ -118,3 +126,199 @@ def gerar_pdf():
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=FlexDuckCF{numero_nf}.pdf'
     return response
+
+@reports.route('/reports/os-print', methods=['POST'])
+def gerar_os_pdf():
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+
+    # Número máximo de tentativas
+    max_attempts = 3
+    current_attempt = 0
+
+    while current_attempt < max_attempts:
+        try:
+            cursor = db.cursor()
+            cursor.execute('SELECT * FROM company_settings')
+            resultados = cursor.fetchall()
+            cursor.close()
+            break  # Sai do loop se a consulta foi bem-sucedida
+        except mysql.connector.errors.OperationalError:
+            current_attempt += 1
+            if current_attempt == max_attempts:
+                print(
+                    "Erro de conexão com o banco de dados após várias tentativas. Verifique a conexão e tente novamente mais tarde.")
+                return jsonify({'mensagem': 'Erro de conexão com o banco de dados.'}), 500
+            else:
+                time.sleep(2)  # Pausa de 2 segundos antes de tentar novamente
+
+    # Obtenha os dados da Ordem de Serviço a partir do JSON recebido
+    os_data = request.json
+
+    # Crie um buffer de bytes para armazenar o PDF gerado
+    buffer = BytesIO()
+
+    # Crie um documento PDF usando o ReportLab
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+    # Crie uma lista para armazenar os elementos do PDF
+    elements = []
+
+    # Estilo alinhado à esquerda para os cabeçalhos
+    header_style = ParagraphStyle(name='header', alignment=0, fontSize=14, textColor=colors.black, spaceBefore=3)
+
+    # Estilo alinhado à esquerda para o título
+    title_style = ParagraphStyle(name='title', alignment=0, fontSize=16, textColor=colors.black, spaceAfter=12)
+
+    # Estilo alinhado à esquerda para o título
+    title_style_names = ParagraphStyle(name='title', alignment=0, fontSize=16, textColor=colors.black, spaceAfter=5)
+
+    # Estilo alinhado à direita para o valor
+    value_style = ParagraphStyle(name='value', alignment=2, fontSize=14, textColor=colors.black, spaceBefore=12)
+
+    # Estilo alinhado à esquerda para o assinatura
+    line_style = ParagraphStyle(name='line', alignment=0, fontSize=14, textColor=colors.black, spaceBefore=12)
+    # Estilo alinhado à esquerda para o texto assinatura
+    line_style_txt = ParagraphStyle(name='line', alignment=0, fontSize=14, textColor=colors.black, spaceBefore=12,
+                                    leftIndent=90,  # Recuo à esquerda (ajuste conforme necessário)
+                                    rightIndent=20,  # Recuo à direita (ajuste conforme necessário)
+                                    )
+
+    # Adicione o número da nota fiscal ao cabeçalho (canto direito)
+    os_number = os_data.get('numeroOrdem', '')
+    os_paragraph_style = ParagraphStyle(name='os_number', alignment=2, fontSize=12, textColor=colors.black)
+    elements.append(Paragraph(f'Ordem de Serviço: {os_number}', os_paragraph_style))
+
+    # Obtém a data e hora atual
+    now = datetime.datetime.now()
+    # Formata a data e hora no formato desejado (yyyy-MM-dd hh-MM-ss)
+    formatted_datetime = now.strftime('%Y-%m-%d %H:%M:%S')
+
+    elements.append(Paragraph(f'{formatted_datetime}', os_paragraph_style))
+
+    # Adicione uma tabela para as informações da empresa
+    empresa_info = resultados[0]  # A primeira linha dos resultados contém as informações da empresa
+
+    # Empresa
+    elements.append(Paragraph(f'<b>{empresa_info[2]}</b>', title_style_names))
+    elements.append(Paragraph(f'CNPJ: {empresa_info[3]}  |  Telefone: {empresa_info[6]}', header_style))
+    elements.append(Paragraph(f'{empresa_info[8]}, {empresa_info[9]} - {empresa_info[7]}, {empresa_info[11]}', header_style))
+    # Adicione um espaço em branco
+    elements.append(Spacer(1, 16))
+
+    # Adicione informações do cliente com quebras de linha
+    elements.append(Paragraph(f'{os_data["cliente"]}', title_style_names))
+    elements.append(Paragraph(f'CPF: {os_data["cpf"]}', header_style))
+    elements.append(Paragraph(f'Telefone: {os_data["telefone"]}', header_style))
+    # Adicione um espaço em branco
+    elements.append(Spacer(1, 16))
+
+    # Crie uma tabela para as informações do aparelho
+    aparelho_data = [
+        ['Modelo', 'IMEI', 'Estado do Aparelho'],
+        [os_data["modelo"], os_data["imei"], os_data["estadoAparelho"]]
+    ]
+
+    aparelho_table_style = TableStyle([
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.orange),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER')
+    ])
+
+    aparelho_table = Table(aparelho_data, style=aparelho_table_style, colWidths=[100, 100, 200])
+    elements.append(aparelho_table)
+
+    # Adicione uma quebra de linha
+    elements.append(Spacer(1, 12))
+
+    # Adicione informações de chip, cartão de memória e película em uma tabela
+    table_data = [['Chip', 'Cartão de Memória', 'Película'],
+                  [os_data["chip"], os_data["cartaoMemoria"], os_data["pelicula"]]]
+    table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.orange),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER')
+    ])
+    table = Table(data=table_data, style=table_style)
+    elements.append(table)
+
+    # Adicione uma quebra de linha
+    elements.append(Spacer(1, 12))
+
+    # Adicione as informações de "Defeito Relatado" e "Serviço a ser Realizado" em uma tabela com quebras de linha
+    defeito_servico_table_data = [['Defeito Relatado', 'Serviço a ser Realizado'],
+                                  [os_data["defeitoRelatado"], os_data["servicoARealizar"]]]
+    defeito_servico_table_style = TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.orange),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT')
+    ])
+    defeito_servico_table = Table(defeito_servico_table_data, style=defeito_servico_table_style, colWidths=[225, 225])
+    elements.append(defeito_servico_table)
+
+    # Adicione uma quebra de linha
+    elements.append(Spacer(1, 12))
+
+    # Adicione a tabela de produtos, valores e descontos
+    produtos_data = [["Produto", "Valor", "Desconto", "Quantidade", "Total"]]
+    for item in os_data["itens"]:
+        produto = item["produto"]
+        valor = item["preco"]
+        desconto = item["desconto"]
+        quantidade = item["quantidade"]
+        total = item["total"]
+
+        # Adicione cada linha à tabela
+        produtos_data.append([produto, f'R$ {valor:.2f}', f'R$ {desconto:.2f}', quantidade, total])
+
+    produtos_table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.orange),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER')
+    ])
+
+    produtos_table = Table(produtos_data, style=produtos_table_style)
+    elements.append(produtos_table)
+    # Adicione uma quebra de linha
+    elements.append(Spacer(1, 48))
+
+    signature_line = "______________________________"
+    elements.append(Paragraph(signature_line, line_style))
+    elements.append((Paragraph('Cliente', line_style_txt)))
+
+    # Adicione o valor à direita
+    elements.append(Paragraph(f'<b>Valor: R$ {os_data["valorInicial"]:.2f}</b>', value_style))
+
+    # Adicione uma quebra de linha
+    elements.append(Spacer(1, 12))
+
+    # Combine as informações em uma única string
+    informacoes_combinadas = f'{empresa_info[2]}{empresa_info[3]}{formatted_datetime}{os_data["cliente"]}{os_data["telefone"]}{os_data["cpf"]}'
+
+    # Crie um hash MD5 das informações combinadas
+    codigo_unico = hashlib.md5(informacoes_combinadas.encode()).hexdigest()
+
+    # Adicione o código único no rodapé da página
+    footer_code = codigo_unico
+    footer_style = ParagraphStyle(name='footer', alignment=2, fontSize=10, textColor=colors.black)
+    elements.append(Paragraph(f'Código Único: {footer_code}', footer_style))
+
+    # Feche o documento PDF
+    doc.build(elements)
+
+    # Obtenha os bytes do buffer e crie uma resposta para o cliente
+    pdf_bytes = buffer.getvalue()
+    response = make_response(pdf_bytes)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'inline; filename=os_report_{os_number}.pdf'
+
+    return response
+
+
+
+
+
+

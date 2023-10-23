@@ -1,0 +1,6 @@
+/* zoom.css */
+@media (max-width: 1079px) {
+    body {
+        zoom: 80%;
+    }
+}

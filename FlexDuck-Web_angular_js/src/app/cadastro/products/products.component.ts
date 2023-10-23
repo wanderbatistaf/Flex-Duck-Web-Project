@@ -471,7 +471,6 @@ export class ProductsComponent implements OnInit {
     if (confirmUpdate) {
       this.productService.updateProductById(productId, updatedProduct).subscribe(
         (response) => {
-          this.savingModalVisible = true;
           alert('Produto atualizado com sucesso!');
           this.getProduct();
           this.setActiveTab('consulta');
@@ -492,7 +491,7 @@ export class ProductsComponent implements OnInit {
     const preco = this.formCad.get('preco_venda')?.value;
 
     const qrCodeValue = `Código: ${codigo}\nNome: ${nome}\nQuantidade: ${quantidade}\nPreço: ${preco}\n\nDescrição: ${descricao}`;
-    const urlProduct: string = `https://www.${this.currentHost}/products/qrscan/${codigo}`;
+    const urlProduct: string = `https://www.${this.currentHost}/#/products/qrscan/${codigo}`;
 
     this.formCad.get('qrcode')?.setValue(qrCodeValue);
     // Redireciona para a página "products/qrscan"

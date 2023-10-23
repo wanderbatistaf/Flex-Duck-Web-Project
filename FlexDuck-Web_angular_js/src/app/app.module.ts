@@ -43,6 +43,12 @@ import {NgxDatatableModule} from "@swimlane/ngx-datatable";
 import {MatNativeDateModule} from "@angular/material/core";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatInputModule} from "@angular/material/input";
+// import {ChatRoomComponent} from "@app/template/navbar/support_chat/chat-room.component";
+// import {SocketIoConfig, SocketIoModule} from "ngx-socket-io";
+import {environment} from "@environments/environment";
+import { ServicosComponent } from './custom_client_modules/servicos/servicos.component';
+
+// const config: SocketIoConfig = { url: `${environment.ChatApiUrl}`, options: {withCredentials:false} };
 
 
 @NgModule({
@@ -66,7 +72,8 @@ import {MatInputModule} from "@angular/material/input";
     NgxDatatableModule,
     MatDatepickerModule,
     MatInputModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    // SocketIoModule.forRoot(config)
   ],
   declarations: [
     AppComponent,
@@ -93,6 +100,8 @@ import {MatInputModule} from "@angular/material/input";
     FilterPipeC,
     SkeletonTableDisplay,
     DashboardComponent,
+    // ChatRoomComponent,
+    ServicosComponent,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
@@ -100,7 +109,8 @@ import {MatInputModule} from "@angular/material/input";
     { provide: HTTP_INTERCEPTORS, useClass: CustomHttpInterceptor, multi: true },
     { provide: LocationStrategy, useClass: HashLocationStrategy },
     JwtHelperService,
-    SharedService
+    SharedService,
+    // ChatService
   ],
   bootstrap: [AppComponent]
 })

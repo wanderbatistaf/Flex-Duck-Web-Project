@@ -57,6 +57,9 @@
       <select class="form-control mr-sm-2 flex-grow-1" [(ngModel)]="selectedVendedor">
         <option *ngFor="let vendedor of vendedores" [value]="vendedor">{{ vendedor }}</option>
       </select>
+      <select class="form-control mr-sm-2 flex-grow-1" [(ngModel)]="selectedModules">
+        <option *ngFor="let module of modules" [ngValue]="module.id">{{ module.modulo }}</option>
+      </select>
       <button class="btn btn-outline-success my-2 my-sm-0" (click)="filterSales()">Filtrar</button>
       <button class="btn btn-outline-success my-2 my-sm-0" (click)="clearFilter()">Limpar</button>
     </div>

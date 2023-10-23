@@ -6,7 +6,61 @@
   <!-- Ícone de sino com base em uma condição -->
   <ul class="navbar-nav ml-auto">
     <li class="nav-item">
-      <a class="nav-link" href="#" (click)="toggleDropdown()">
+      <a class="nav-link support-link" (click)="toggleChatDropdown()">
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+      </a>
+
+      <!-- Menu suspenso de Suporte -->
+      <header class="custom-dropdown_chat" *ngIf="showChatDropdown">
+          <h6 class="dropdown-header">Suporte Técnico</h6>
+          <hr>
+          <p>Olá!</p>
+          <p class="welcome-message">Bem-vindo ao nosso suporte técnico!</p>
+          <p class="welcome-message">Estamos aqui para ajudar.</p>
+          <p class="welcome-message">Se você tiver alguma dúvida, problema ou precisar de assistência, não hesite em entrar em contato conosco.</p>
+        <div class="initial-message-container">
+          <textarea id="initial-message" name="initial-message" placeholder="Digite sua mensagem inicial" class="custom-textarea" [(ngModel)]="initialMessage"></textarea>
+        </div>
+        <div class="button-container">
+<!--            <button type="button" id="create" name="create" class="open-ticket-button" (click)="abrirSalaDeChat()">Abrir Chamado</button>-->
+          <button type="button" id="create" name="create" class="open-ticket-button">Abrir Chamado</button>
+
+          </div>
+      </header>
+    </li>
+
+<!--    <div id="live-chat" *ngIf="isChatOpen" [ngClass]="{'minimized-chat': isChatMinimized, 'maximized-chat': !isChatMinimized}">-->
+<!--      <header class="clearfix" (click)="toggleChat()">-->
+<!--        <a style="cursor: pointer" class="chat-close" (click)="closeChatAndLogout()">x</a>-->
+<!--        <h4>Suporte FlexDuck</h4>-->
+<!--        <span class="chat-message-counter">{{ notificationCount }}</span>-->
+<!--      </header>-->
+<!--      <div class="chat">-->
+<!--        <div class="chat-history">-->
+<!--          &lt;!&ndash; Aqui você pode iterar sobre as mensagens do chat usando *ngFor &ndash;&gt;-->
+<!--          <div class="chat-message clearfix" *ngFor="let message of messages">-->
+<!--            <img src="http://gravatar.com/avatar/2c0ad52fc5943b78d6abe069cc08f320?s=32" alt="" width="32" height="32">-->
+<!--            <div class="chat-message-content clearfix">-->
+<!--              <span class="chat-time">{{ message?.time }}</span>-->
+<!--              <h5>{{ message?.sender }}</h5>-->
+<!--              <p>{{ message?.text }}</p>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <form action="#" method="post">-->
+<!--          <fieldset>-->
+<!--            <input type="text" placeholder="Digite sua mensagem..." (keyup.enter)="sendMessage(newMessage)"-->
+<!--                   [(ngModel)]="newMessage" name="message">-->
+<!--&lt;!&ndash;            <button (click)="checkForNewMessages()">Att</button>&ndash;&gt;-->
+<!--          </fieldset>-->
+<!--        </form>-->
+<!--      </div>-->
+<!--    </div>-->
+
+
+
+    <li class="nav-item">
+      <a class="nav-link" style="cursor: pointer" (click)="toggleDropdown()" [ngbPopover]="'Notificações'">
         <ng-container *ngIf="hasNotifications; else noNotifications">
           <i class="bi bi-bell-fill"></i> <!-- Ícone de sino preenchido se houver notificações -->
           <span *ngIf="notificationCount > 0" class="notification-count">{{ notificationCount }}</span>
