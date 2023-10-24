@@ -162,7 +162,7 @@ def gerar_os_pdf():
     buffer = BytesIO()
 
     # Crie um documento PDF usando o ReportLab
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, title=f"os_report_{os_data['numeroOrdem']}")
 
     # Crie uma lista para armazenar os elementos do PDF
     elements = []
@@ -265,14 +265,23 @@ def gerar_os_pdf():
     # Adicione a tabela de produtos, valores e descontos
     produtos_data = [["Produto", "Valor", "Desconto", "Quantidade", "Total"]]
     for item in os_data["itens"]:
-        produto = item["produto"]
-        valor = item["preco"]
+        if "produto" in item:
+            produto = item["produto"]
+        else:
+            produto = item["nomeProduto"]
+        if "preco" in item:
+            valor = item["preco"]
+        else:
+            valor = item["precoUnitario"]
         desconto = item["desconto"]
         quantidade = item["quantidade"]
-        total = item["total"]
+        if "total" in item:
+            total = item["total"]
+        else:
+            total = item["subtotal"]
 
         # Adicione cada linha à tabela
-        produtos_data.append([produto, f'R$ {valor:.2f}', f'R$ {desconto:.2f}', quantidade, total])
+        produtos_data.append([produto, f'R$ {valor}', f'R$ {desconto}', quantidade, total])
 
     produtos_table_style = TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.orange),
@@ -290,7 +299,7 @@ def gerar_os_pdf():
     elements.append((Paragraph('Cliente', line_style_txt)))
 
     # Adicione o valor à direita
-    elements.append(Paragraph(f'<b>Valor: R$ {os_data["valorInicial"]:.2f}</b>', value_style))
+    elements.append(Paragraph(f'<b>Valor: R$ {os_data["valorInicial"]}</b>', value_style))
 
     # Adicione uma quebra de linha
     elements.append(Spacer(1, 12))
@@ -314,6 +323,7 @@ def gerar_os_pdf():
     response = make_response(pdf_bytes)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=os_report_{os_number}.pdf'
+    response.headers['Content-Title'] = f'os_report_{os_number}'
 
     return response
 

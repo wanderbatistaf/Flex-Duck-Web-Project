@@ -15,9 +15,6 @@
     <li class="nav-item" [hidden]="true">
       <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('edicao')">Edição</a>
     </li>
-    <li class="nav-item" [hidden]="true">
-      <a class="nav-link" [class.active]="isTabActive('detalhes')" (click)="setActiveTab('edicao')">Detalhes</a>
-    </li>
   </ul>
 
   <!--NavBar superior (Search+Adicionar)-->
@@ -49,7 +46,7 @@
                       </div>
 
                       <div class="form-group col-md-8">
-                        <label for="servico">Nome do Serviço</label>
+                        <label for="servicoName">Nome do Serviço</label>
                         <input type="text" id="servicoName" class="form-control" [(ngModel)]="novoServico.servico" name="servico" required>
                       </div>
                     </div>
@@ -330,6 +327,293 @@
           </div>
         </div>
 
+
+      <div *ngIf="activeTab === 'edicao'">
+        <div class="container">
+          <!-- Formulário de Cadastro de Serviços -->
+          <form (ngSubmit)="cadastrarServico()" class="row">
+            <!-- Seção de Informações de Texto -->
+            <div class="col-md-6">
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="numeroOrdem_edit">Número de Ordem</label>
+                  <input type="text" id="numeroOrdem_edit" class="form-control" [(ngModel)]="servicoSelecionado.numeroOrdem" name="numeroOrdem" readonly>
+                </div>
+
+                <div class="form-group col-md-8">
+                  <label for="servicoName_edit">Nome do Serviço</label>
+                  <input type="text" id="servicoName_edit" class="form-control" [(ngModel)]="servicoSelecionado.servico" name="servico" readonly>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="inputVendedor_edit">Responsavel:</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" id="inputVendedor_edit" [(ngModel)]="servicoSelecionado.responsavel" name="responsavel" (dblclick)="openVendorModal()" >
+                        <div class="input-group-append">
+                          <span class="input-group-text" (click)="openVendorModal()" data-toggle="tooltip" title="Buscar Responsavel" style="cursor: pointer"><i class="fas fa-search"></i></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <label for="inputCliente">Cliente:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="inputCliente_edit" [(ngModel)]="servicoSelecionado.cliente" (dblclick)="openSearchClientModal()" name="cliente" data-toggle="tooltip" title="Buscar Cliente" readonly>
+                  <input type="hidden" id="inputClienteID_edit" [(ngModel)]="SelectedClienteId">
+                  <div class="input-group-append">
+                    <span class="input-group-text" style="cursor: pointer" data-toggle="tooltip" title="Buscar Cliente"><i class="fas fa-search"></i></span>
+                    <span class="input-group-text" style="cursor: pointer" data-toggle="tooltip" title="Adicionar Cliente"><i class="fas fa-plus"></i></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="inputTelefone_edit">Telefone</label>
+                  <input type="text" id="inputTelefone_edit" class="form-control" [(ngModel)]="servicoSelecionado.telefone" name="telefone" [disabled]="true" readonly>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="inputCpf_edit">CPF</label>
+                  <input type="text" id="inputCpf_edit" class="form-control" [(ngModel)]="servicoSelecionado.cpf" name="cpf" [disabled]="true" readonly>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="modelo_edit">Modelo do Aparelho</label>
+                  <input type="text" id="modelo_edit" class="form-control" [(ngModel)]="servicoSelecionado.modelo" name="modelo" [disabled]="true" readonly>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="imei_edit">IMEI</label>
+                  <input type="text" id="imei_edit" class="form-control" [(ngModel)]="servicoSelecionado.imei" name="imei" [disabled]="true" readonly>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="estadoAparelho_edit">Estado do Aparelho</label>
+                <input type="text" id="estadoAparelho_edit" class="form-control" [(ngModel)]="servicoSelecionado.estadoAparelho" name="estadoAparelho" [disabled]="true" readonly>
+              </div>
+            </div>
+
+            <!-- Seção de Checkbox -->
+            <div class="col-md-6">
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="chip_edit" style="text-align: center">Chip</label>
+                  <select id="chip_edit" class="form-control" [(ngModel)]="servicoSelecionado.chip" name="chip" [disabled]="true" readonly>
+                    <option value="SIM">SIM</option>
+                    <option value="NÃO">NÃO</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="cartaoMemoria_edit" style="text-align: center">Cartão de Memória</label>
+                  <select id="cartaoMemoria_edit" class="form-control" [(ngModel)]="servicoSelecionado.cartaoMemoria" name="cartaoMemoria" [disabled]="true" readonly>
+                    <option value="SIM">SIM</option>
+                    <option value="NÃO">NÃO</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="pelicula_edit" style="text-align: center">Pelicula</label>
+                  <select id="pelicula_edit" class="form-control" [(ngModel)]="servicoSelecionado.pelicula" name="pelicula" [disabled]="true" readonly>
+                    <option value="SIM">SIM</option>
+                    <option value="NÃO">NÃO</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="defeitoRelatado_edit">Defeito relatado</label>
+                <textarea id="defeitoRelatado_edit" class="form-control" [(ngModel)]="servicoSelecionado.defeitoRelatado" name="defeitoRelatado" rows="5"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="servicoARealizar_edit">Serviço a ser realizado</label>
+                <textarea id="servicoARealizar_edit" class="form-control" [(ngModel)]="servicoSelecionado.servicoARealizar" name="servicoARealizar" style="height: 201px;"></textarea>
+              </div>
+            </div>
+          </form>
+
+          <!-- Seção de Produtos -->
+          <div class="form-row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="codigoProduto_edit">Código:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="codigoProduto_edit" (keydown.enter)="onCodigoProdutoEnter($event)">
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="inputProduto_edit">Produto:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="inputProduto_edit" (dblclick)="openProdutoModal()">
+                  <div class="input-group-append">
+                    <span class="input-group-text" (click)="openProdutoModal()" data-toggle="tooltip" title="Buscar Responsavel" style="cursor: pointer"><i class="fas fa-search"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="inputQuantidade_edit">Quantidade:</label>
+                <input type="number" min="1" class="form-control" id="inputQuantidade_edit">
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary mr-2" id="btnAdicionar_edit" (click)="adicionarProduto()" data-toggle="tooltip" title="Adicionar Produto">Adicionar</button>
+          <button class="btn btn-success mr-2" id="labor_edit" (click)="adicionarMaodeObra()" data-toggle="tooltip" title="Adicionar Mão de Obra" [disabled]="isMaoDeObraInList()"><i class="bi bi-hand-index-fill"></i></button>
+          <button class="btn btn-danger" (click)="confirmarLimparLista()" data-toggle="tooltip" title="Limpar Lista"><i class="bi bi-trash3-fill"></i></button>
+          <hr>
+
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table">
+                      <thead>
+                      <tr>
+                        <th class="text-center">CÓDIGO</th>
+                        <th class="text-center">NOME</th>
+                        <th class="text-center">PREÇO</th>
+                        <th class="text-center">DESCONTO</th>
+                        <th class="text-center">QUANTIDADE</th>
+                        <th class="text-center">TOTAL</th>
+                      </tr>
+                      </thead>
+                      <tbody id="listaProdutos_edit">
+                      <tr *ngFor="let item of servicoSelecionado.itens">
+                        <td class="text-center">{{ item.codigoProduto }}</td>
+                        <td class="text-center">{{ item.nomeProduto }}</td>
+                        <td class="text-center">
+                          <ng-container *ngIf="item.codigoProduto === 'S-000001'; else item.precoUnitario">
+                            <!-- Se for Mão de Obra (código 'S-000001') e não estiver editando o preço, exibe o preço fixo -->
+                            <ng-container *ngIf="!editandoPrecoMaoDeObra">
+                              <div (click)="iniciarEdicaoPrecoMaoDeObra()">
+                                R$ {{ item.precoUnitario }}
+                              </div>
+                            </ng-container>
+
+                            <!-- Se estiver editando o preço, exibe um campo de entrada de preço -->
+                            <ng-container *ngIf="editandoPrecoMaoDeObra">
+                              <input type="number" [(ngModel)]="item.precoUnitario" (ngModelChange)="atualizarPrecoMaoDeObra(item, $event)" class="form-control"
+                                     (blur)="salvarPrecoMaoDeObra(item.precoUnitario)">
+                            </ng-container>
+                          </ng-container>
+                          <ng-template #precoFixo>
+                            <!-- Se não for Mão de Obra, exibe o preço fixo -->
+                            R$ {{ item.precoUnitario }}
+                          </ng-template>
+                        </td>
+                        <td class="text-center">R$ {{ item.desconto }}</td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-danger" (click)="removerProduto(item.codigoProduto)">-</button>
+                          {{ item.quantidade }}
+                          <button class="btn btn-sm btn-success" (click)="adicionarQuantidade(item.codigoProduto)" [disabled]="item.codigoProduto === 'S-000001'">
+                            <i class="bi bi-plus"></i></button>
+                        </td>
+                        <td class="text-center">
+                          <ng-container *ngIf="item.codigoProduto === 'S-000001'; else totalFixo">
+                            <!-- Se for Mão de Obra (código 'S-000001'), exibe um campo de entrada de preço -->
+                            R$ {{ item.precoUnitario }}
+                          </ng-container>
+                          <ng-template #totalFixo>
+                            <!-- Se não for Mão de Obra, exibe o preço fixo -->
+                            R$ {{ item.total }}
+                          </ng-template>
+                        </td>
+                        <!--                    <td class="text-center">R$ {{ produto.total.toFixed(2) }}</td>-->
+                      </tr>
+                      </tbody>
+
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <form (ngSubmit)="cadastrarServico()" class="row">
+                <!-- Seção de Valor -->
+                <div class="col-md-6">
+                  <div class="form-row">
+                  </div>
+
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="input-group">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                    </div>
+                    <div class="form-group col-md-6">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                    </div>
+                    <div class="form-group col-md-6">
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                  </div>
+                </div>
+
+                <!-- Seção de Valor -->
+                <div class="col-md-6">
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-8" style="text-align: right">
+                      <label for="valorInicial_edit" style="text-align: right; margin-top: 7px;">Valor do Serviço:</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input style="text-align: center" type="text" id="valorInicial_edit" class="form-control" name="valorInicial_edit"
+                               currency min="0" disabled [value]="parseFloat(valorInicialFormatado).toFixed(2)" [(ngModel)]="servicoSelecionado.valorInicial">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              <button type="button" class="btn btn-primary mr-2">
+                Salvar
+              </button>
+              <button type="button" class="btn btn-danger mr-2" (click)="setActiveTab('consulta')" >
+                Sair
+              </button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       <div class="table-responsive" *ngIf="activeTab === 'consulta'">
         <!-- Lista de Serviços -->
         <table class="table table-condensed table-hover">
@@ -362,7 +646,7 @@
                   <span *ngIf="servico.status !== 'Cancelado'">R$ {{ servico.valorInicial }}</span>
                 </td>
                 <td style="text-align: center">
-                  <button class="btn btn-outline-secondary" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Editar">
+                  <button class="btn btn-outline-secondary" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Editar" (click)="setServicoSelecionado(servico)">
                     <span class="bi bi-pencil-fill"></span>
                   </button>
                   <button class="btn btn-outline-success" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Concluir" (click)="atualizarStatus(servico, 'Concluído')">
@@ -373,6 +657,9 @@
                   </button>
                   <button class="btn btn-outline-danger" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Cancelar" (click)="cancelarServicoComConfirmacao(servico)">
                     <span class="bi bi-x-circle-fill"></span>
+                  </button>
+                  <button class="btn btn-outline-secondary" title="Imprimir OS">
+                    <span class="bi bi-printer-fill" (click)="selecionarEImprimirServico(servico)"></span>
                   </button>
                 </td>
               </tr>
