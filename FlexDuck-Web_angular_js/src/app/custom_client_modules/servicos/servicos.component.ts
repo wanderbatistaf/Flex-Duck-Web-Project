@@ -109,6 +109,7 @@ export class ServicosComponent implements OnInit {
   maxPages: number = Math.ceil(this.totalItems / this.itemsPerPage);
   pages: number[] = Array.from({ length: this.maxPages }, (_, i) => i + 1);
   lastOsCode: any;
+  servicoSelecionado: any;
 
   novoServico = {
     numeroOrdem: 0,
@@ -140,7 +141,7 @@ export class ServicosComponent implements OnInit {
 
   constructor(private modalService: NgbModal,private userService: UserService,
               private sharedService: SharedService, private productService: ProductService,
-              private servicoService: ServicosService) { }
+              private servicoService: ServicosService) { this.servicoSelecionado = {}; }
 
   ngOnInit(): void {
     this.selectedId = this.sharedService.selectedId;
@@ -229,6 +230,8 @@ export class ServicosComponent implements OnInit {
 
         // Imprima o JSON das informações no console
         console.log('Informações do Serviço:', JSON.stringify(novoServico, null, 2));
+
+        this.getAllServicos();
 
         this.activeTab = 'consulta';
 
@@ -860,6 +863,21 @@ export class ServicosComponent implements OnInit {
         });
     }
 
+  selecionarEImprimirServico(servico: any) {
+    this.servicoSelecionado = servico;
+
+    // Chame a função de impressão e passe o serviço selecionado
+    this.servicoService.printOS(this.servicoSelecionado).subscribe((pdfBlob: Blob) => {
+      const url = window.URL.createObjectURL(pdfBlob);
+      window.open(url, '_blank');
+    });
+  }
+
+  setServicoSelecionado(servico: any) {
+    this.servicoSelecionado = servico;
+    this.setActiveTab('edicao'); // Ative a aba de edição após definir o serviço selecionado
+    console.log(this.servicoSelecionado);
+  }
 
 
     protected readonly parseFloat = parseFloat;

@@ -41,6 +41,12 @@ export class ServicosService {
         return this.http.patch<Servico>(`${environment.apiUrl}/servicos/update_status/${numeroOrdem}`, statusUpdate);
     }
 
+    printOS(ordemServico: any): Observable<Blob> {
+      return this.http.post(`${environment.apiUrl}/reports/os-print`, ordemServico, {
+        responseType: 'blob'
+      });
+    }
+
 
 
 }

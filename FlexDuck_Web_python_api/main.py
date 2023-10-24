@@ -3,22 +3,14 @@ import sys
 import subprocess
 import threading
 import time
-import smtplib
 import secrets
-from uuid import uuid4
 
 import mysql.connector
 
 from datetime import timedelta
-from threading import Thread
 from flask import Flask, jsonify, request, session, redirect, url_for, render_template, make_response
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
-from flask_socketio import SocketIO, join_room, leave_room, send
-
-from email.mime.text import MIMEText
-
-from Utils.chat_utils import generate_room_code
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
