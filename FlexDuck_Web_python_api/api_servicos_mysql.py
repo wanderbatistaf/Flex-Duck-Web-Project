@@ -71,16 +71,17 @@ def buscar_dados():
                 'defeitoRelatado': row[12],
                 'servicoARealizar': row[13],
                 'status': row[14],
-                'valorInicial': row[15],
+                'status_pgt': row[15],
+                'valorInicial': row[16],
                 'itens': []
             }
         item = {
-            'codigoProduto': row[17],
-            'nomeProduto': row[18],
-            'precoUnitario': row[19],
-            'quantidade': row[20],
-            'desconto': row[21],
-            'subtotal': row[22]
+            'codigoProduto': row[27],
+            'nomeProduto': row[28],
+            'precoUnitario': float(row[29]),
+            'quantidade': float(row[30]),
+            'desconto': float(row[31]),
+            'subtotal': float(row[32])
         }
         current_service['itens'].append(item)
 
@@ -109,6 +110,7 @@ def inserir_dados():
     db = get_db_connection(subdomain)
     dados = request.json
     itens = dados['itens']
+    print(dados['itens'])
     cursor = db.cursor()
 
     # Deduza os itens do estoque
@@ -132,10 +134,36 @@ def inserir_dados():
                 sql_atualizar_estoque = 'UPDATE produtos_servicos SET quantidade = %s WHERE codigo = %s'
                 cursor.execute(sql_atualizar_estoque, (novo_estoque, codigo))
 
-    # Agora, prossiga com a inserção dos dados do serviço e dos itens relacionados
-    sql_servico = 'INSERT INTO servicos (numeroOrdem, servico, responsavel, cliente, telefone, cpf, modelo, imei, estadoAparelho, chip, cartaoMemoria, pelicula, defeitoRelatado, servicoARealizar, status, valorInicial) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-    val_servico = (dados['numeroOrdem'], dados['servico'], dados['responsavel'], dados['cliente'], dados['telefone'], dados['cpf'], dados['modelo'], dados['imei'], dados['estadoAparelho'], dados['chip'], dados['cartaoMemoria'], dados['pelicula'], dados['defeitoRelatado'], dados['servicoARealizar'], dados['status'], dados['valorInicial'])
-    cursor.execute(sql_servico, val_servico)
+        # Agora, prossiga com a inserção dos dados do serviço e dos itens relacionados
+        sql_servico = 'INSERT INTO servicos (numeroOrdem, servico, responsavel, cliente, telefone, cpf, modelo, imei, estadoAparelho, chip, cartaoMemoria, pelicula, defeitoRelatado, servicoARealizar, status, status_pgt, valorInicial, forma_pagamento_id, bandeira_id, parcelamento, subtotal, desconto, valor_total, valor_total_pago, troco) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        val_servico = (
+            dados['numeroOrdem'],
+            dados['servico'],
+            dados['responsavel'],
+            dados['cliente'],
+            dados['telefone'],
+            dados['cpf'],
+            dados['modelo'],
+            dados['imei'],
+            dados['estadoAparelho'],
+            dados['chip'],
+            dados['cartaoMemoria'],
+            dados['pelicula'],
+            dados['defeitoRelatado'],
+            dados['servicoARealizar'],
+            dados['status'],
+            dados['status_pgt'],
+            dados['valorInicial'],
+            None,  # forma_pagamento_id
+            None,  # bandeira_id
+            None,  # parcelamento
+            None,  # subtotal
+            None,  # desconto
+            None,  # valor_total
+            None,  # valor_total_pago
+            None,  # troco
+        )
+        cursor.execute(sql_servico, val_servico)
 
     # Obtém o ID do serviço inserido
     numeroOrdem = dados['numeroOrdem']

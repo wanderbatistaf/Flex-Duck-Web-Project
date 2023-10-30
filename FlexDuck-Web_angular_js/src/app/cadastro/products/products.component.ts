@@ -491,7 +491,7 @@ export class ProductsComponent implements OnInit {
     const preco = this.formCad.get('preco_venda')?.value;
 
     const qrCodeValue = `Código: ${codigo}\nNome: ${nome}\nQuantidade: ${quantidade}\nPreço: ${preco}\n\nDescrição: ${descricao}`;
-    const urlProduct: string = `https://www.${this.currentHost}/#/products/qrscan/${codigo}`;
+    const urlProduct: string = `https://${this.currentHost}/#/products/qrscan/${codigo}`;
 
     this.formCad.get('qrcode')?.setValue(qrCodeValue);
     // Redireciona para a página "products/qrscan"
@@ -508,7 +508,7 @@ export class ProductsComponent implements OnInit {
     const preco = this.formEdit.get('preco_venda')?.value;
 
     const qrCodeValue = `Código: ${codigo}\nNome: ${nome}\nQuantidade: ${quantidade}\nPreço: ${preco}\n\nDescrição: ${descricao}`;
-    const urlproduct: string =  `https://www.${this.currentHost}/products/qrscan/${codigo}`
+    const urlproduct: string =  `https://${this.currentHost}/#/products/qrscan/${codigo}`
 
     this.formEdit.get('qrcode')?.setValue(qrCodeValue);
     // Redireciona para a página "products/qrscan"
@@ -539,7 +539,7 @@ export class ProductsComponent implements OnInit {
     this.formCad.get('qrcode')?.setValue(codigo);
 
     if (this.isMobileDevice()) {
-      const urlproduct: string = `${environment.webUrl}/products/qrscan/${codigo}`;
+      const urlproduct: string = `${environment.webUrl}/#/products/qrscan/${codigo}`;
 
       // Redireciona para a página "products/qrscan"
       this.router.navigate(['products/qrscan'], { state: { urlproduct } });

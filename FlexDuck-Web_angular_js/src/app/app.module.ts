@@ -46,7 +46,11 @@ import {MatInputModule} from "@angular/material/input";
 // import {ChatRoomComponent} from "@app/template/navbar/support_chat/chat-room.component";
 // import {SocketIoConfig, SocketIoModule} from "ngx-socket-io";
 import {environment} from "@environments/environment";
-import { ServicosComponent } from './custom_client_modules/servicos/servicos.component';
+import {
+  FilterByStatusPipe,
+  FilterPipeServ,
+  ServicosComponent
+} from './custom_client_modules/servicos/servicos.component';
 
 // const config: SocketIoConfig = { url: `${environment.ChatApiUrl}`, options: {withCredentials:false} };
 
@@ -98,10 +102,12 @@ import { ServicosComponent } from './custom_client_modules/servicos/servicos.com
     FilterPipeP,
     FilterPipeV,
     FilterPipeC,
+    FilterPipeServ,
     SkeletonTableDisplay,
     DashboardComponent,
     // ChatRoomComponent,
     ServicosComponent,
+    FilterByStatusPipe
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

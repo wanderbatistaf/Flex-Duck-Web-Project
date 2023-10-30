@@ -45,7 +45,7 @@ export class LoginComponent implements OnInit {
       }
     });
 
-    this.checkDbConnection()
+    this.checkDbConnection();
   }
 
   // Getter for easy access to form fields
@@ -122,4 +122,5 @@ export class LoginComponent implements OnInit {
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
+
 }

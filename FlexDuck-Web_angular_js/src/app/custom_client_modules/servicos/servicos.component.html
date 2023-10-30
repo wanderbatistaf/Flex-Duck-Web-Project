@@ -15,6 +15,9 @@
     <li class="nav-item" [hidden]="true">
       <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('edicao')">Edição</a>
     </li>
+    <li class="nav-item" [hidden]="true">
+      <a class="nav-link" [class.active]="isTabActive('edicao')" (click)="setActiveTab('detalhes')">Detalhes</a>
+    </li>
   </ul>
 
   <!--NavBar superior (Search+Adicionar)-->
@@ -25,7 +28,14 @@
       <input class="form-control mr-sm-2 flex-grow-1" type="search" [(ngModel)]="pesquisaServicos" placeholder="Search" name="searchText">
       <button class="btn btn-outline-success my-2 my-sm-0" type="submit"
               style="margin-right: 5px;">Buscar</button>
-      <button class="btn btn-outline-success my-2 my-sm-0" type="button">Limpar</button>
+      <button class="btn btn-outline-success my-2 my-sm-0 mr-sm-2" type="button">Limpar</button>
+      <select class="form-control mr-sm-2 flex-grow-1" [(ngModel)]="pesquisaStatus" name="searchStatus">
+        <option value="">Todos</option>
+        <option value="Na Fila">Na Fila</option>
+        <option value="Em Andamento">Em Andamento</option>
+        <option value="Cancelado">Cancelado</option>
+        <option value="Concluído">Concluído</option>
+      </select>
     </form>
   </nav>
 
@@ -194,6 +204,18 @@
                 <button class="btn btn-primary mr-2" id="btnAdicionar" (click)="adicionarProduto()" data-toggle="tooltip" title="Adicionar Produto">Adicionar</button>
                 <button class="btn btn-success mr-2" id="labor" (click)="adicionarMaodeObra()" data-toggle="tooltip" title="Adicionar Mão de Obra" [disabled]="isMaoDeObraInList()"><i class="bi bi-hand-index-fill"></i></button>
                 <button class="btn btn-danger" (click)="confirmarLimparLista()" data-toggle="tooltip" title="Limpar Lista"><i class="bi bi-trash3-fill"></i></button>
+            <hr>
+            <div class="form-row">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <select id="status_pgt" class="form-control" name="status_pgt" [ngClass]="{'status-aguardando': status_pgt === 'AGUARDANDO', 'status-pago': status_pgt === 'PAGO'}" [(ngModel)]="status_pgt">
+                    <option value="Aguardando Pagamento">Aguardando Pagamento</option>
+                    <option value="Pagamento Efetuado">Pagamento Efetuado</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
                 <hr>
 
                 <div class="row mt-4">
@@ -613,6 +635,252 @@
         </div>
       </div>
 
+      <div *ngIf="activeTab === 'detalhes'">
+        <div class="container">
+          <!-- Formulário de Cadastro de Serviços -->
+          <form (ngSubmit)="cadastrarServico()" class="row">
+            <!-- Seção de Informações de Texto -->
+            <div class="col-md-6">
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="numeroOrdem_detail">Número de Ordem</label>
+                  <input type="text" id="numeroOrdem_detail" class="form-control" [(ngModel)]="servicoSelecionado.numeroOrdem" name="numeroOrdem" readonly>
+                </div>
+
+                <div class="form-group col-md-8">
+                  <label for="servicoName_detail">Nome do Serviço</label>
+                  <input type="text" id="servicoName_detail" class="form-control" [(ngModel)]="servicoSelecionado.servico" name="servico" readonly>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="inputVendedor_detail">Responsavel:</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" id="inputVendedor_detail" [(ngModel)]="servicoSelecionado.responsavel" name="responsavel" (dblclick)="openVendorModal()" readonly>
+                        <div class="input-group-append">
+                          <span class="input-group-text" (click)="openVendorModal()" data-toggle="tooltip" title="Buscar Responsavel" style="cursor: pointer" readonly><i class="fas fa-search"></i></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <label for="inputCliente">Cliente:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="inputCliente_detail" [(ngModel)]="servicoSelecionado.cliente" (dblclick)="openSearchClientModal()" name="cliente" data-toggle="tooltip" title="Buscar Cliente" readonly>
+                  <input type="hidden" id="inputClienteID_detail" [(ngModel)]="SelectedClienteId">
+                  <div class="input-group-append">
+                    <span class="input-group-text" style="cursor: pointer" data-toggle="tooltip" title="Buscar Cliente" readonly><i class="fas fa-search"></i></span>
+                    <span class="input-group-text" style="cursor: pointer" data-toggle="tooltip" title="Adicionar Cliente" readonly><i class="fas fa-plus"></i></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="inputTelefone_edit">Telefone</label>
+                  <input type="text" id="inputTelefone_detail" class="form-control" [(ngModel)]="servicoSelecionado.telefone" name="telefone" [disabled]="true" readonly>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="inputCpf_edit">CPF</label>
+                  <input type="text" id="inputCpf_detail" class="form-control" [(ngModel)]="servicoSelecionado.cpf" name="cpf" [disabled]="true" readonly>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="modelo_detail">Modelo do Aparelho</label>
+                  <input type="text" id="modelo_detail" class="form-control" [(ngModel)]="servicoSelecionado.modelo" name="modelo" [disabled]="true" readonly>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="imei_edit">IMEI</label>
+                  <input type="text" id="imei_detail" class="form-control" [(ngModel)]="servicoSelecionado.imei" name="imei" [disabled]="true" readonly>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="estadoAparelho_detail">Estado do Aparelho</label>
+                <input type="text" id="estadoAparelho_detail" class="form-control" [(ngModel)]="servicoSelecionado.estadoAparelho" name="estadoAparelho" [disabled]="true" readonly>
+              </div>
+            </div>
+
+            <!-- Seção de Checkbox -->
+            <div class="col-md-6">
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="chip_detail" style="text-align: center">Chip</label>
+                  <select id="chip_detail" class="form-control" [(ngModel)]="servicoSelecionado.chip" name="chip" [disabled]="true" readonly>
+                    <option value="SIM">SIM</option>
+                    <option value="NÃO">NÃO</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="cartaoMemoria_detail" style="text-align: center">Cartão de Memória</label>
+                  <select id="cartaoMemoria_detail" class="form-control" [(ngModel)]="servicoSelecionado.cartaoMemoria" name="cartaoMemoria" [disabled]="true" readonly>
+                    <option value="SIM">SIM</option>
+                    <option value="NÃO">NÃO</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label for="pelicula_detail" style="text-align: center">Pelicula</label>
+                  <select id="pelicula_detail" class="form-control" [(ngModel)]="servicoSelecionado.pelicula" name="pelicula" [disabled]="true" readonly>
+                    <option value="SIM">SIM</option>
+                    <option value="NÃO">NÃO</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="defeitoRelatado_detail">Defeito relatado</label>
+                <textarea id="defeitoRelatado_detail" class="form-control" [(ngModel)]="servicoSelecionado.defeitoRelatado" name="defeitoRelatado" rows="5" [disabled]="true" readonly></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="servicoARealizar_detail">Serviço a ser realizado</label>
+                <textarea id="servicoARealizar_detail" class="form-control" [(ngModel)]="servicoSelecionado.servicoARealizar" name="servicoARealizar" style="height: 201px;" [disabled]="true" readonly></textarea>
+              </div>
+            </div>
+          </form>
+
+          <!-- Seção de Produtos -->
+          <hr>
+
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table">
+                      <thead>
+                      <tr>
+                        <th class="text-center">CÓDIGO</th>
+                        <th class="text-center">NOME</th>
+                        <th class="text-center">PREÇO</th>
+                        <th class="text-center">DESCONTO</th>
+                        <th class="text-center">QUANTIDADE</th>
+                        <th class="text-center">TOTAL</th>
+                      </tr>
+                      </thead>
+                      <tbody id="listaProdutos_detail">
+                      <tr *ngFor="let item of servicoSelecionado.itens">
+                        <td class="text-center">{{ item.codigoProduto }}</td>
+                        <td class="text-center">{{ item.nomeProduto }}</td>
+                        <td class="text-center">
+                          <ng-container *ngIf="item.codigoProduto === 'S-000001'; else item.precoUnitario">
+                            <!-- Se for Mão de Obra (código 'S-000001') e não estiver editando o preço, exibe o preço fixo -->
+                            <ng-container *ngIf="!editandoPrecoMaoDeObra">
+                              <div (click)="iniciarEdicaoPrecoMaoDeObra()">
+                                R$ {{ item.precoUnitario }}
+                              </div>
+                            </ng-container>
+
+                            <!-- Se estiver editando o preço, exibe um campo de entrada de preço -->
+                            <ng-container *ngIf="editandoPrecoMaoDeObra">
+                              <input type="number" [(ngModel)]="item.precoUnitario" (ngModelChange)="atualizarPrecoMaoDeObra(item, $event)" class="form-control"
+                                     (blur)="salvarPrecoMaoDeObra(item.precoUnitario)">
+                            </ng-container>
+                          </ng-container>
+                          <ng-template #precoFixo>
+                            <!-- Se não for Mão de Obra, exibe o preço fixo -->
+                            R$ {{ item.precoUnitario }}
+                          </ng-template>
+                        </td>
+                        <td class="text-center">R$ {{ item.desconto }}</td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-danger" (click)="removerProduto(item.codigoProduto)" [disabled]="true" readonly>-</button>
+                          {{ item.quantidade }}
+                          <button class="btn btn-sm btn-success" (click)="adicionarQuantidade(item.codigoProduto)" [disabled]="true" readonly>
+                            <i class="bi bi-plus"></i></button>
+                        </td>
+                        <td class="text-center">
+                          <ng-container *ngIf="item.codigoProduto === 'S-000001'; else totalFixo" readonly>
+                            <!-- Se for Mão de Obra (código 'S-000001'), exibe um campo de entrada de preço -->
+                            R$ {{ item.precoUnitario }}
+                          </ng-container>
+                          <ng-template #totalFixo>
+                            <!-- Se não for Mão de Obra, exibe o preço fixo -->
+                            R$ {{ item.total }}
+                          </ng-template>
+                        </td>
+                        <!--                    <td class="text-center">R$ {{ produto.total.toFixed(2) }}</td>-->
+                      </tr>
+                      </tbody>
+
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <form (ngSubmit)="cadastrarServico()" class="row">
+                <!-- Seção de Valor -->
+                <div class="col-md-6">
+                  <div class="form-row">
+                  </div>
+
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="input-group">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                    </div>
+                    <div class="form-group col-md-6">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                    </div>
+                    <div class="form-group col-md-6">
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                  </div>
+                </div>
+
+                <!-- Seção de Valor -->
+                <div class="col-md-6">
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-8" style="text-align: right">
+                      <label for="valorInicial_detail" style="text-align: right; margin-top: 7px;">Valor do Serviço:</label>
+                    </div>
+                    <div class="form-group col-md-4">
+                      <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input style="text-align: center" type="text" id="valorInicial_detail" class="form-control" name="valorInicial_edit"
+                               currency min="0" disabled [value]="parseFloat(valorInicialFormatado).toFixed(2)" [(ngModel)]="servicoSelecionado.valorInicial">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              <button type="button" class="btn btn-danger mr-2" (click)="setActiveTab('consulta')" >
+                Sair
+              </button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <div class="table-responsive" *ngIf="activeTab === 'consulta'">
         <!-- Lista de Serviços -->
@@ -625,12 +893,13 @@
                 <th style="text-align: center">Telefone</th>
                 <th style="text-align: center">Responsavel</th>
                 <th style="text-align: center">Status</th>
+                <th style="text-align: center">Pagamento</th>
                 <th style="text-align: center">Valor</th>
                 <th style="text-align: center">Ações</th>
               </tr>
               </thead>
               <tbody>
-              <tr *ngFor="let servico of servicos | filter: pesquisaServicos | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
+              <tr *ngFor="let servico of servicos | filter: pesquisaServicos | filterByStatus: pesquisaStatus | paginate: { itemsPerPage: pageSize, currentPage: currentPage }">
                 <td style="text-align: center">{{ servico.numeroOrdem }}</td>
                 <td style="text-align: center">{{ servico.servico }}</td>
                 <td style="text-align: center">{{ servico.cliente }}</td>
@@ -641,26 +910,44 @@
                                            'highlighted-green': servico.status === 'Concluído'}">
                   {{ servico.status }}
                 </td>
+                <td style="text-align: center" [ngClass]="{'highlighted-mustard': servico.status_pgt === 'Aguardando Pagamento',
+                                           'highlighted-green': servico.status_pgt === 'Pago'}">{{ servico.status_pgt }}
+                </td>
                 <td style="text-align: center" currency>
                   <s *ngIf="servico.status === 'Cancelado'">R$ {{ servico.valorInicial }}</s>
                   <span *ngIf="servico.status !== 'Cancelado'">R$ {{ servico.valorInicial }}</span>
                 </td>
                 <td style="text-align: center">
-                  <button class="btn btn-outline-secondary" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Editar" (click)="setServicoSelecionado(servico)">
-                    <span class="bi bi-pencil-fill"></span>
+                  <ng-container *ngIf="servico.status === 'Concluído'; else editarOrVisualizar">
+                  <button class="btn btn-outline-secondary" title="Visualizar" (click)="setServicoSelecionadoDetail(servico)">
+                    <span class="bi bi-eye"></span>
                   </button>
-                  <button class="btn btn-outline-success" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Concluir" (click)="atualizarStatus(servico, 'Concluído')">
-                    <span class="bi bi-check-square-fill"></span>
-                  </button>
-                  <button class="btn btn-outline-warning" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Em andamento" (click)="atualizarStatus(servico, 'Em andamento')">
-                    <span class="bi bi-stopwatch-fill"></span>
-                  </button>
-                  <button class="btn btn-outline-danger" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Cancelar" (click)="cancelarServicoComConfirmacao(servico)">
-                    <span class="bi bi-x-circle-fill"></span>
-                  </button>
-                  <button class="btn btn-outline-secondary" title="Imprimir OS">
-                    <span class="bi bi-printer-fill" (click)="selecionarEImprimirServico(servico)"></span>
-                  </button>
+                  </ng-container>
+                  <ng-template #editarOrVisualizar>
+                    <button class="btn btn-outline-secondary" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Editar" (click)="setServicoSelecionado(servico)">
+                      <span class="bi bi-pencil-fill"></span>
+                    </button>
+                  </ng-template>
+                  <ng-container *ngIf="servico.status === 'Concluído' || servico.status === 'Cancelado'; else concluidoButtons">
+<!--                    <button class="btn btn-outline-success" title="Pagamento" (click)="atualizarStatus(servico, 'Concluído')" [disabled]="servico.status_pgt === 'Pago' || servico.status === 'Cancelado'">-->
+                      <button class="btn btn-outline-success" title="Pagamento" (click)="finalizarOsSelecionada(servico, true)" [disabled]="servico.status_pgt === 'Pago' || servico.status === 'Cancelado'">
+                      <span class="bi bi-cash-coin"></span>
+                    </button>
+                  </ng-container>
+                  <ng-template #concluidoButtons>
+                    <button class="btn btn-outline-success" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Concluir" (click)="atualizarStatus(servico, 'Concluído')">
+                      <span class="bi bi-check-square-fill"></span>
+                    </button>
+                    <button class="btn btn-outline-warning" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Em andamento" (click)="atualizarStatus(servico, 'Em andamento')">
+                      <span class="bi bi-stopwatch-fill"></span>
+                    </button>
+                    <button class="btn btn-outline-danger" [disabled]="servico.status === 'Cancelado' || servico.status === 'Concluído'" title="Cancelar" (click)="cancelarServicoComConfirmacao(servico)">
+                      <span class="bi bi-x-circle-fill"></span>
+                    </button>
+                    <button class="btn btn-outline-secondary" title="Imprimir OS">
+                      <span class="bi bi-printer-fill" (click)="selecionarEImprimirServico(servico)"></span>
+                    </button>
+                  </ng-template>
                 </td>
               </tr>
               </tbody>
@@ -753,4 +1040,206 @@
 </div>
 <!-- Fim do Modal -->
 </div>
+</div>
+
+
+<!-- Modal de Finalizar -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'d-block': modalFinalizarOSVisivel}" (keydown.esc)="fecharCupomFiscalModal()">
+  <div class="modal-dialog modal-lg modal-80p modal-custom-width">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel"> Finalizar Venda </h4>
+        <button type="button" class="close" aria-label="Close" (click)="fecharModalFinalizarOS()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <div class="row">
+          <!-- left column -->
+          <div class="col-sm-6 modal-custom-height">
+            <div class="modal-header">
+              <h5 class="modal-title">Cupom Fiscal</h5>
+            </div>
+            <div class="modal-body">
+              <table id="cupom-fiscal" class="printer-ticket scrollable-table" bgcolor="#fbfdd1">
+                <thead>
+                <tr>
+                  <th class="title; text-center" colspan="3">--- {{ companyInfo?.nome_fantasia }} ---</th>
+                </tr>
+                <tr>
+                  <th colspan="3" class="text-center">CNPJ: {{ companyInfo?.cnpj }}<br />
+                    Tel: {{ companyInfo?.telephone }}</th>
+                </tr>
+                <tr>
+                  <th class="text-center" colspan="3">{{ CfiscalDataHora }}<br />
+                </tr>
+                <br/>
+                <tr>
+                  <th class="text-center" colspan="3">
+                    {{ servicoSelecionado.cliente }} <br />
+                    {{ servicoSelecionado.telefone }}
+                  </th>
+                </tr>
+                <br/>
+                </thead>
+                <tbody>
+                <tr class="sup">
+                  <td colspan="3" align="center">
+                    <b>-----PEDIDO:-----</b>
+                  </td>
+                </tr>
+                <!-- Loop through the products and display them in separate rows -->
+                <tr class="top">
+                  <td colspan="1" style="text-align: left;">Nome:</td>
+                  <td colspan="1" style="text-align: center;">Qtd:</td>
+                  <td colspan="1" class="total" style="text-align: right;">Total:</td>
+                </tr>
+                <ng-container *ngFor="let item of servicoSelecionado.itens">
+                  <tr class="top">
+                    <td colspan="3" style="text-align: left;">{{ item.nomeProduto }}</td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: left;">R$ {{ item.precoUnitario }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: right;" class="total">R$ {{ (item.precoUnitario * item.quantidade) }}</td>
+                  </tr>
+                </ng-container>
+                <hr>
+                <tr class="ttn">
+                  <td colspan="2" style="text-align: left;">Total</td>
+                  <td class="total" align="right"><b>R$ {{ Total }}</b></td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <br/>
+                <tr class="sup">
+                  <td colspan="3" align="center" style="font-style: italic;">
+                    *Esse ticket não é documento fiscal*
+                  </td>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+          <!-- right column -->
+          <div class="col-sm-6">
+            <div class="modal-header">
+              <h5 class="modal-title">Finalizar Venda</h5>
+            </div>
+            <div class="modal-body">
+              <div class="form-row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="descontoValor">Desconto R$:</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="descontoValor" [(ngModel)]="descontoValor" (keyup)="atualizarDescontoValor()" readonly>
+                      <div class="input-group-append">
+                        <span class="input-group-text" (click)="abrirModalSenhaValor()"><i class="fas fa-key"></i></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="descontoPercent">Desconto %:</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="descontoPercent" [(ngModel)]="descontoPercent" (input)="atualizarDescontoPercent()" readonly>
+                      <div class="input-group-append">
+                        <span class="input-group-text" (click)="abrirModalSenhaPercent()"><i class="fas fa-key"></i></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="total">Total:</label>
+                    <input type="text" class="form-control" id="total" [value]="formatarTotal()" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="formaPagamento">Forma de Pagamento:</label>
+                    <select class="form-control" id="formaPagamento" (change)="onFormaPagamentoDinheiro()">
+                      <option value="">Selecione a forma de pagamento:</option>
+                      <option *ngFor="let paytype of paytypes" [value]="paytype.id">{{ paytype.nome }}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="bandeira">Bandeira:</label>
+                    <select class="form-control" id="bandeira" [(ngModel)]="bandeira" [disabled]="bandeiraReadonly" (change)="onFormaPagamentoDinheiro()">
+                      <option value="select">Selecione a bandeira:</option>
+                      <option *ngFor="let bandtype of bandtypes" [value]="bandtype.id">{{ bandtype.nome }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="parcelamento">Parcelamento:</label>
+                    <input type="number" class="form-control" id="parcelamento" min="1" max="12" value="1" [(ngModel)]="parcelamento" [disabled]="parcelamentoReadonly">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row" *ngIf="bandeira === '6'">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="valorPago">Valor Pago:</label>
+                    <input type="number" class="form-control" id="valorPago" [(ngModel)]="valorPago" (change)="checkValorPago()">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="troco">Troco:</label>
+                    <input type="number" class="form-control" id="troco" [value]="calcularTroco().toFixed(2)" [readonly]="true">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="fecharModalFinalizarOS()">Cancelar</button>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalVenda" (click)="finalizarVenda();">Finalizar Venda</button>
+
+        </div><!-- End Modal Footer -->
+      </div> <!-- End modal body div -->
+    </div> <!-- End modal content div -->
+  </div> <!-- End modal dialog div -->
+</div> <!-- End modal div -->
+<!-- Fim do Modal -->
+
+<div class="modal fade" id="modalVenda" tabindex="-1" role="dialog" aria-labelledby="modalVendaLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalVendaLabel">Venda Realizada com Sucesso</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        A Venda foi cadastrada com sucesso!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-primary" (click)="prepararParaImpressao();" data-toggle="modal" data-target="#modalImpressao">Imprimir</button>
+        <button type="button" class="btn btn-primary" (click)="gerarPdf()">Gerar PDF</button>
+      </div>
+    </div>
+  </div>
 </div>

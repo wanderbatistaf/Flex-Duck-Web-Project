@@ -30,6 +30,11 @@ def gerar_pdf():
     cupom_fiscal_data = data.get('cupomFiscal', {})
     print(cupom_fiscal_data)
 
+    if not cupom_fiscal_data:
+        # Se cupom_fiscal_data estiver vazio, use os dados completos do data
+        cupom_fiscal_data = data
+        print("Usando dados completos do data")
+
     # Crie um buffer de bytes para armazenar o PDF gerado
     buffer = BytesIO()
 
@@ -40,7 +45,10 @@ def gerar_pdf():
     elements = []
 
     # Adicione o número da nota fiscal ao cabeçalho (canto direito)
-    numero_nf = cupom_fiscal_data.get('numeroNF', '')
+    if 'numeroNF' in cupom_fiscal_data:
+        numero_nf = cupom_fiscal_data['numeroNF']
+    else:
+        numero_nf = cupom_fiscal_data.get('numeroOrdem', '')
     numero_nf_style = ParagraphStyle(name='numero_nf', alignment=2, fontSize=12, textColor=colors.black)
     elements.append(Paragraph(f'CF {numero_nf}', numero_nf_style))
 
@@ -63,17 +71,34 @@ def gerar_pdf():
     # Adicione o cabeçalho do cupom fiscal ao PDF
     elements.append(Paragraph(f'CNPJ: 12.345.678/0001-01 | Tel: (27) 3244-6491', header_style))
     elements.append(Paragraph(f'Data e Hora: {cupom_fiscal_data.get("CfiscalDataHora", "")}', body_style))
-    elements.append(Paragraph(f'Vendedor(a): {cupom_fiscal_data.get("vendorName", "")}', body_style))
-    elements.append(Paragraph(f'Cliente: {cupom_fiscal_data.get("ClienteName", "")} | {cupom_fiscal_data.get("ClienteCPF_CNPJ", "")}', body_style))
+    if 'vendorName' in cupom_fiscal_data:
+        nome_vendedor = cupom_fiscal_data['vendorName']
+    else:
+        nome_vendedor = cupom_fiscal_data.get('responsavel', '')
+    elements.append(Paragraph(f'Vendedor(a): {nome_vendedor}', body_style))
+    if 'ClienteName' in cupom_fiscal_data:
+        cliente_nome = cupom_fiscal_data['ClienteName']
+    else:
+        cliente_nome = cupom_fiscal_data.get('cliente', '')
+    if 'ClienteCPF_CNPJ' in cupom_fiscal_data:
+        cliente_cpf_cnpj = cupom_fiscal_data['ClienteCPF_CNPJ']
+    else:
+        cliente_cpf_cnpj = cupom_fiscal_data.get('cpf', '')
+    elements.append(Paragraph(f'Cliente: {cliente_nome} | {cliente_cpf_cnpj}', body_style))
     elements.append(Spacer(1, 12))
 
     # Crie uma tabela para os produtos
     table_data = []
     table_data.append(['Nome', 'Qtd', 'Preço', 'Desconto', 'Total'])
-    for produto in cupom_fiscal_data.get('listaProdutos', []):
+    if 'listaProdutos' in cupom_fiscal_data and cupom_fiscal_data['listaProdutos']:
+        produtos = cupom_fiscal_data['listaProdutos']
+    else:
+        produtos = cupom_fiscal_data.get('itens', [])
+
+    for produto in produtos:
         table_data.append([
-            produto.get('nome', ''),
-            produto.get('qtd', ''),
+            produto.get('nome', produto.get('produto', '')),
+            produto.get('qtd', produto.get('quantidade', '')),
             f'R$ {produto.get("preco", 0):.2f}',
             f'R$ {produto.get("desconto", 0):.2f}',
             f'R$ {produto.get("total", 0):.2f}',
@@ -88,25 +113,47 @@ def gerar_pdf():
 
 
     # Adicione a seção de Totais
-    elements.append(Paragraph(f'Subtotal R$ {cupom_fiscal_data.get("SubTotal", 0):.2f}', body_style))
+
+    if 'SubTotal' in cupom_fiscal_data:
+        SubTotal = cupom_fiscal_data.get("SubTotal")
+    else:
+        SubTotal = cupom_fiscal_data.get("subtotal")
+
+    if 'Total' in cupom_fiscal_data:
+        Total = cupom_fiscal_data.get("Total")
+    else:
+        Total = cupom_fiscal_data.get("valor_total")
+
+    elements.append(Paragraph(f'Subtotal R$ {SubTotal:.2f}', body_style))
     elements.append(Paragraph(f'Desconto {cupom_fiscal_data.get("DescontoPercent", 0):.2f}%', body_style))
-    elements.append(Paragraph(f'Total R$ {cupom_fiscal_data.get("Total", 0):.2f}', body_style))
+    elements.append(Paragraph(f'Total R$ {Total:.2f}', body_style))
     elements.append(Spacer(1, 12))
 
     # Calcular o valor do desconto em reais
     desconto_reais = cupom_fiscal_data.get('DescontoValor', 0)
     # Calcular o total a pagar após o desconto
-    total_ = cupom_fiscal_data.get('Total', 0)
+    total_ = Total
+
+    if 'parcelamento' in cupom_fiscal_data:
+        parcelamento = cupom_fiscal_data.get("parcelamento")
+    else:
+        parcelamento = cupom_fiscal_data.get("parcelamento")
+
+    if 'valorPago' in cupom_fiscal_data:
+        valorPago = cupom_fiscal_data.get("valorPago")
+    else:
+        valorPago = cupom_fiscal_data.get("valor_total_pago")
+
     # Obter o número de parcelas
-    parcelas = cupom_fiscal_data.get('parcelamento', 1)
+    parcelas = parcelamento
     # Calcular o valor de cada parcela
-    valor_parcela = cupom_fiscal_data.get('Total', 0) / parcelas
+    valor_parcela = (Total / parcelas)
 
     # Adicione a seção de Pagamentos
-    elements.append(Paragraph(f'Parcelamento em {cupom_fiscal_data.get("parcelamento", 0)}x - {cupom_fiscal_data.get("bandeira", 0)}', body_style))
+    elements.append(Paragraph(f'Parcelamento em {parcelamento}x - {cupom_fiscal_data.get("bandeira", 0)}', body_style))
     elements.append(Paragraph(f'Parcela R$ {valor_parcela:.2f}', body_style))
     elements.append(Spacer(1, 12))
-    elements.append(Paragraph(f'Valor Pago R$ {cupom_fiscal_data.get("valorPago", 0):.2f}', body_style))
+    elements.append(Paragraph(f'Valor Pago R$ {valorPago:.2f}', body_style))
     elements.append(Paragraph(f'Troco R$ {cupom_fiscal_data.get("troco", 0):.2f}', body_style))
 
     elements.append(Paragraph(f'<b>TOTAL PAGO R$ {total_:.2f}</b>', body_style))
@@ -125,6 +172,8 @@ def gerar_pdf():
     response = make_response(pdf_bytes)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=FlexDuckCF{numero_nf}.pdf'
+
+    print(nome_vendedor, numero_nf, cliente_nome, cliente_cpf_cnpj)
     return response
 
 @reports.route('/reports/os-print', methods=['POST'])

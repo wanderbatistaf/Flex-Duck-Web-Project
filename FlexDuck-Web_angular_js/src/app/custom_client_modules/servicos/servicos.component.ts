@@ -1,12 +1,25 @@
-import { AfterContentChecked, Component, ElementRef, HostListener, OnInit, Pipe, PipeTransform, ViewChild } from '@angular/core';
+import {
+  AfterContentChecked,
+  Component,
+  ElementRef,
+  HostListener,
+  Injectable,
+  OnInit,
+  Pipe,
+  PipeTransform,
+  ViewChild
+} from '@angular/core';
 import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
 import {ClienteModalComponent} from "@app/modals/cliente-modal/cliente-modal.component";
-import {ProductService, ServicosService, UserService} from "@app/_services";
+import {FuncPaymentsService, ProductService, ServicosService, UserService, CompanySettingsService} from "@app/_services";
 import {SharedService} from "@app/_services/SharedService";
 import {ProdutoModalComponent} from "@app/modals/produto-modal/produto-modal.component";
 import {VendedorModalComponent} from "@app/modals/vendedor-modal/vendedor-modal.component";
 import { map } from 'rxjs/operators';
-import {Observable} from "rxjs";
+import {from, Observable} from "rxjs";
+import {FormBuilder, FormGroup} from "@angular/forms";
+import {Bandeiras, Company, Paytype} from "@app/_models";
+import {DatePipe} from "@angular/common";
 
 @Pipe({
     name: 'filter'
@@ -25,6 +38,27 @@ export class FilterPipeServ implements PipeTransform {
         });
     }
 }
+
+@Pipe({
+  name: 'filterByStatus',
+})
+export class FilterByStatusPipe implements PipeTransform {
+  transform(items: any[], status: string): any[] {
+    console.log('items:', items);
+    console.log('status:', status);
+
+    if (!items || !Array.isArray(items) || !status || !status.trim()) {
+      return items;
+    }
+
+    status = status.toLowerCase();
+
+    return items.filter((item) => {
+      return item.status.toLowerCase() === status;
+    });
+  }
+}
+
 
 interface Produto {
   codigo: string;
@@ -51,8 +85,27 @@ interface Servico {
     defeitoRelatado: string;
     servicoARealizar: string;
     status: string;
+    status_pgt: string;
     valorInicial: number;
     itens: ItemServico[];
+}
+
+interface ItemIntermediario extends ItemServico, CupomFiscal {
+    precoUnitario: number;
+    nomeProduto: string;
+    codigoProduto: string;
+}
+
+interface CupomFiscal extends Servico {
+  forma_pagamento_id: string;
+  bandeira_id: string;
+  parcelamento: number;
+  subtotal: number;
+  desconto: number;
+  valor_total: number;
+  valor_total_pago: number;
+  troco: number;
+  quantidade_itens: number;
 }
 
 interface ItemServico {
@@ -102,6 +155,7 @@ export class ServicosComponent implements OnInit {
   valorInicialFormatado: string = '';
   activeTab = 'consulta';
   pesquisaServicos: string = '';
+  pesquisaStatus: string = '';
   pageSize: number = 10; // Tamanho da página (quantidade de itens por página)
   currentPage: number = 1; // Página atual
   totalItems: number = 0;
@@ -110,6 +164,28 @@ export class ServicosComponent implements OnInit {
   pages: number[] = Array.from({ length: this.maxPages }, (_, i) => i + 1);
   lastOsCode: any;
   servicoSelecionado: any;
+  status_pgt: string = 'Aguardando Pagamento';
+  cupomFiscalModalAberto: boolean = false;
+  modalFinalizarOSVisivel: boolean = false;
+  descontoPercent = 0;
+  descontoValor = 0;
+  subtotal = 0;
+  troco = 0;
+  Total = 0;
+  valorPago = 0;
+  modalSenhaVisivel_val = false;
+  modalSenhaVisivel_perc = false;
+  bandeira: string = '';
+  formComp: FormGroup;
+  bandeiraReadonly!: boolean;
+  parcelamentoReadonly!: boolean;
+  parcelamento!: number;
+  paytypes: any[] = [];
+  bandtypes: any[] = [];
+  CfiscalDataHora?: string;
+  companyInfo?: Company;
+  company?: Company[];
+  dadosDaVenda?: CupomFiscal;
 
   novoServico = {
     numeroOrdem: 0,
@@ -127,6 +203,7 @@ export class ServicosComponent implements OnInit {
     defeitoRelatado: '',
     servicoARealizar: '',
     status: 'Na fila',
+    status_pgt: '',
     valorInicial: 0,
     itens: [{
         codigo: '',
@@ -141,13 +218,30 @@ export class ServicosComponent implements OnInit {
 
   constructor(private modalService: NgbModal,private userService: UserService,
               private sharedService: SharedService, private productService: ProductService,
-              private servicoService: ServicosService) { this.servicoSelecionado = {}; }
+              private servicoService: ServicosService, private paytypeService: FuncPaymentsService,
+              private CompanySettingsService: CompanySettingsService, private fb: FormBuilder)
+  {
+    this.servicoSelecionado = {};
+
+    this.formComp = this.fb.group({
+    razao_social: [''],
+    nome_fantasia: [''],
+    cnpj: [''],
+    state_registration: [''],
+    municipal_registration: [''],
+    telephone: [''],
+    pix_key: ['']
+  }); }
 
   ngOnInit(): void {
     this.selectedId = this.sharedService.selectedId;
     this.calcularValorTotalServico();
     this.getLastServiceCode();
     this.getAllServicos();
+    this.buscarPaytypes();
+    this.buscarBandTypes();
+    this.onFormaPagamentoDinheiro();
+    this.getInfos();
   }
 
   ngOnChanges() {
@@ -178,6 +272,7 @@ export class ServicosComponent implements OnInit {
         const servicoARealizar = (document.getElementById('servicoARealizar') as HTMLInputElement).value;
         const valorInicial = (document.getElementById('valorInicial') as HTMLInputElement).value;
         const chip = (document.getElementById('chip') as HTMLInputElement).value;
+        const status_pgt = (document.getElementById('status_pgt') as HTMLInputElement).value;
 
         // Crie um novo objeto para representar o serviço
         const novoServico: Servico = {
@@ -196,6 +291,7 @@ export class ServicosComponent implements OnInit {
             defeitoRelatado: defeitoRelatado,
             servicoARealizar: servicoARealizar,
             status: 'Na fila',
+            status_pgt: status_pgt,
             valorInicial: Number(valorInicial),
             itens: []
         };
@@ -345,6 +441,7 @@ export class ServicosComponent implements OnInit {
   abrirModal() {
     this.modalAberto = true;
   }
+
 
   fecharModal() {
     this.modalAberto = false;
@@ -582,7 +679,7 @@ export class ServicosComponent implements OnInit {
     this.calcularValorTotalServico();
   }
 
-  calcularSubtotal(): number {
+  calcularSubtotal(): any {
     let subtotal = 0;
 
     this.listaProdutos.forEach(produto => {
@@ -782,6 +879,7 @@ export class ServicosComponent implements OnInit {
 
   this.valorInicialFormatado = this.novoServico.valorInicial.toFixed(2);
 
+
       return this.valorTotalServico;
 }
 
@@ -879,6 +977,360 @@ export class ServicosComponent implements OnInit {
     console.log(this.servicoSelecionado);
   }
 
+  setServicoSelecionadoDetail(servico: any) {
+    this.servicoSelecionado = servico;
+    this.setActiveTab('detalhes'); // Ative a aba de edição após definir o serviço selecionado
+    console.log(this.servicoSelecionado);
+  }
 
-    protected readonly parseFloat = parseFloat;
+  fecharCupomFiscalModal() {
+    this.cupomFiscalModalAberto = false;
+  }
+
+  fecharModalFinalizarOS(): void {
+    this.modalFinalizarOSVisivel = false;
+    this.cupomFiscalModalAberto = false;
+    this.subtotal = 0;
+    this.descontoValor = 0;
+    this.descontoPercent = 0;
+    this.total = 0;
+  }
+
+  atualizarDescontoValor(): void {
+    const subtotal = this.calcularSubtotal();
+
+    if (this.servicoSelecionado.SubTotal === 0) {
+      this.descontoPercent = 0;
+    } else {
+      this.descontoPercent = +((this.descontoValor / subtotal) * 100);
+      this.descontoPercent = Math.min(this.descontoPercent, 100); // Garante que o desconto em % não ultrapasse 100%
+    }
+
+    this.aplicarDesconto(); // Adicione esta linha para atualizar o valor total
+  }
+
+  atualizarDescontoPercent(): void {
+    const total = this.servicoSelecionado.totalAPagar || 0; // Certifique-se de que a mesa selecionada não é nula
+
+    this.descontoValor = +(total * (this.descontoPercent / 100));
+    this.descontoValor = Math.min(this.descontoValor, total); // Garante que o desconto em R$ não ultrapasse o total
+
+    this.aplicarDesconto(); // Adicione esta linha para atualizar o valor total
+  }
+
+  aplicarDesconto(): void {
+    if (this.servicoSelecionado) {
+      this.calcularTotalAPagar(this.servicoSelecionado);
+      this.total = this.servicoSelecionado.totalAPagar;
+    }
+  }
+
+  abrirModalFinalizarOs(): void {
+    this.modalFinalizarOSVisivel = true;
+    this.cupomFiscalModalAberto = true;
+    const currentDateTime = new Date();
+    const day = currentDateTime.getDate().toString().padStart(2, '0');
+    const month = (currentDateTime.getMonth() + 1).toString().padStart(2, '0'); // Mês começa em 0
+    const year = currentDateTime.getFullYear();
+    const hours = currentDateTime.getHours().toString().padStart(2, '0');
+    const minutes = currentDateTime.getMinutes().toString().padStart(2, '0');
+    const seconds = currentDateTime.getSeconds().toString().padStart(2, '0');
+
+    this.CfiscalDataHora = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+
+    console.log(this.servicos);
+
+    // Certifique-se de que this.servicoSelecionado contenha o serviço selecionado
+    this.gerarCupomFiscal(this.servicoSelecionado);
+  }
+
+
+  calcularTotalAPagar(servico: Servico): void {
+    const subtotal = this.calcularSubtotalVenda(servico);
+
+    if (this.descontoValor > 0) {
+      // Se houver um desconto em valor, aplique-o diretamente
+      servico.valorInicial = subtotal - this.descontoValor;
+    } else if (this.descontoPercent > 0) {
+      // Se houver um desconto percentual, calcule o valor do desconto e aplique-o
+      const descontoValor = (this.descontoPercent / 100) * subtotal;
+      servico.valorInicial = subtotal - descontoValor;
+    } else {
+      // Se não houver desconto, o valor inicial é igual ao subtotal
+      servico.valorInicial = subtotal;
+    }
+    // Atualize a propriedade Total com o valor final
+    this.Total = servico.valorInicial;
+  }
+
+
+  finalizarVenda() {
+    console.log('Finalizar Venda')
+    this.modalFinalizarOSVisivel = false
+  }
+
+
+  calcularTroco(): number {
+    this.Total = parseFloat(
+      (document.getElementById('total') as HTMLSelectElement).value.replace(
+        /[^0-9.-]/g,
+        ''
+      )
+    );
+    if (this.valorPago >= this.Total) {
+      this.troco = this.valorPago - this.Total;
+    } else {
+      this.troco = 0; // Caso o valor pago seja menor que o total da compra, o troco será zero
+    }
+    return this.troco;
+  }
+
+  abrirModalSenhaValor(): void {
+    // Lógica para abrir o modal de senha para adicionar valor de desconto
+    this.modalSenhaVisivel_val = true;
+  }
+
+  abrirModalSenhaPercent(): void {
+    this.modalSenhaVisivel_perc = true;
+  }
+
+  checkValorPago(): void {
+    let formaPagamento = (
+      document.getElementById('formaPagamento') as HTMLSelectElement
+    ).value;
+    if (formaPagamento === 'Dinheiro') {
+      if (this.valorPago === null || isNaN(this.valorPago)) {
+        this.valorPago = 0;
+      }
+    }
+  }
+
+  onFormaPagamentoDinheiro() {
+    const formaPagamento = (
+      document.getElementById('formaPagamento') as HTMLSelectElement
+    ).value;
+
+    if (formaPagamento === '1') {
+      // 1 representa a forma de pagamento "Dinheiro"
+      this.bandeiraReadonly = true;
+      this.parcelamentoReadonly = true;
+      this.bandeira = '6'; // "6" representa "À vista"
+      this.parcelamento = 1;
+    } else {
+      this.bandeiraReadonly = false;
+      this.parcelamentoReadonly = false;
+      this.bandeira = 'select';
+    }
+  }
+
+  finalizarOsSelecionada(servico: Servico, abrirModal: boolean): void {
+    this.servicoSelecionado = servico;
+    this.calcularSubtotal();
+    this.calcularTotalAPagar(servico);
+    this.aplicarDesconto();
+
+    if (abrirModal) {
+      this.abrirModalFinalizarOs();
+    }
+  }
+
+  formatarTotal(): string {
+    return Number(this.Total).toFixed(2);
+  }
+
+  buscarPaytypes() {
+    this.paytypeService.getAllPayTypes().subscribe(
+      (paytypes: Paytype[]) => {
+        this.paytypes = paytypes.map((paytype: Paytype) => ({
+          id: paytype.forma_pagamento_id,
+          nome: paytype.descricao,
+        }));
+        // this.loading = false;
+      },
+      (error) => {
+        console.log('Ocorreu um erro ao solicitar os tipos de pagamento.');
+      }
+    );
+  }
+
+  buscarBandTypes() {
+    this.paytypeService.getAllBandsTypes().subscribe(
+      (bandtypes: Bandeiras[]) => {
+        this.bandtypes = bandtypes.map((bandtype: Bandeiras) => ({
+          id: bandtype.bandeira_id,
+          nome: bandtype.descricao,
+        }));
+        // this.loading = false;
+      },
+      (error) => {
+        console.log('Ocorreu um erro ao solicitar os tipos de bandeiras.');
+      }
+    );
+  }
+
+  getInfos() {
+    this.CompanySettingsService.getAllInfos()
+      .pipe(
+        map((response: any) => response.items as Company[])
+      )
+      .subscribe(
+        (company: Company[]) => {
+          this.company = company;
+          this.companyInfo = company[0];
+        },
+        // ... lidar com erro ...
+      );
+  }
+
+
+  calcularSubtotalVenda(servico: Servico) {
+    // Defina a função para calcular o subtotal
+    const calcularSubtotal = (item: ItemIntermediario) => {
+      return (item.precoUnitario - item.desconto) * item.quantidade;
+    }
+
+    let subtotal = 0;
+    const itens = servico.itens;
+
+    itens.forEach(item => {
+      // Converta o item para o tipo intermediário
+      const itemIntermediario: ItemIntermediario = { ...item } as ItemIntermediario;
+
+      // Calcule o subtotal para cada item
+      const total = calcularSubtotal(itemIntermediario);
+      subtotal += total;
+    });
+
+    console.log(subtotal);
+    return subtotal;
+  }
+
+
+  gerarCupomFiscal(servico: Servico): CupomFiscal {
+
+    function mapearItens(itens: any): any[] {
+      return itens.map((item: { precoUnitario: any; produto: any; codigo: any; codigoProduto:any; nomeProduto:any; desconto:any; quantidade:any; subtotal:any}) => ({
+        codigo: item.codigoProduto,
+        produto: item.nomeProduto,
+        preco: item.precoUnitario,
+        desconto: item.desconto,
+        quantidade: item.quantidade,
+        total: item.subtotal,
+      }));
+    }
+
+    const itensMapeados = mapearItens(servico.itens);
+
+      console.log("Informações do Serviço:", servico);
+      console.log("Itens Originais do Serviço:", servico.itens)
+
+      console.log("Itens do Serviço:", itensMapeados);
+
+      const {
+        numeroOrdem,
+        cliente,
+        responsavel,
+        telefone,
+        cpf,
+        modelo,
+        imei,
+        estadoAparelho,
+        chip,
+        cartaoMemoria,
+        pelicula,
+        defeitoRelatado,
+        servicoARealizar,
+        status,
+        status_pgt,
+        valorInicial
+      } = servico;
+
+      const dadosDaVenda: CupomFiscal = {
+        numeroOrdem: numeroOrdem,
+        servico: servicoARealizar,
+        responsavel: responsavel,
+        cliente: cliente,
+        telefone: telefone,
+        cpf: cpf,
+        modelo: modelo,
+        imei: imei,
+        estadoAparelho: estadoAparelho,
+        chip: chip,
+        cartaoMemoria: cartaoMemoria,
+        pelicula: pelicula,
+        defeitoRelatado: defeitoRelatado,
+        servicoARealizar: servicoARealizar,
+        status: status,
+        status_pgt: 'Pagamento Efetuado',
+        valorInicial: valorInicial,
+        forma_pagamento_id: (document.getElementById('formaPagamento') as HTMLSelectElement).value,
+        bandeira_id: this.bandeira,
+        parcelamento: this.parcelamento,
+        subtotal: this.Total,
+        desconto: this.descontoValor,
+        valor_total: this.Total,
+        valor_total_pago: this.valorPago,
+        troco: this.troco,
+        quantidade_itens: servico.itens.length,
+        itens: itensMapeados,
+      };
+
+      console.log("Dados do Cupom Fiscal:", dadosDaVenda);
+      this.dadosDaVenda = dadosDaVenda
+      return dadosDaVenda;
+    }
+
+  imprimirCupom() {
+    const printContents = document.getElementById('cupom-fiscal')?.innerHTML;
+    const originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents!;
+    window.print();
+    document.body.innerHTML = originalContents;
+  }
+
+  gerarPdf() {
+    const dadosDaVenda = this.dadosDaVenda
+
+    const valorPagoElement = document.getElementById('valorPago') as HTMLInputElement;
+    const trocoElement = document.getElementById('troco') as HTMLInputElement;
+    const parcelamentoElement = document.getElementById('parcelamento') as HTMLInputElement;
+    const formaPagamentoElement = document.getElementById('formaPagamento') as HTMLInputElement;
+    const bandeiraElement = document.getElementById('bandeira') as HTMLInputElement;
+
+    dadosDaVenda!.valor_total_pago = valorPagoElement ? Number(valorPagoElement.value) : 0;
+    dadosDaVenda!.troco = trocoElement ? Number(trocoElement.value) : 0;
+    dadosDaVenda!.parcelamento = parcelamentoElement ? Number(parcelamentoElement.value) : 0;
+    dadosDaVenda!.forma_pagamento_id = formaPagamentoElement ? String(formaPagamentoElement.value) : '0';
+    dadosDaVenda!.bandeira_id = bandeiraElement ? String(bandeiraElement.value) : '0';
+
+
+    this.paytypeService.gerarPdf(dadosDaVenda).subscribe(
+      (data: BlobPart) => {
+        // Cria um blob com os dados recebidos do backend
+        const blob = new Blob([data], { type: 'application/pdf' });
+
+        // Cria um objeto URL para o blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Cria um link temporário para fazer o download do PDF
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'cupom-fiscal.pdf';
+        link.click();
+
+        // Libera o objeto URL e o link temporário
+        window.URL.revokeObjectURL(url);
+        link.remove();
+
+        console.log(dadosDaVenda);
+      },
+      (error) => {
+        console.error('Erro ao gerar o PDF:', error);
+      }
+    );
+  }
+
+
+
+protected readonly parseFloat = parseFloat;
 }
