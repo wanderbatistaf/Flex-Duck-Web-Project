@@ -1,23 +1,23 @@
-#layoutAuthentication {
-  width: 100%;
-  height: 100%;
-}
+/*#layoutAuthentication {*/
+/*  width: 100%;*/
+/*  height: 100%;*/
+/*}*/
 
-main {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+/*main {*/
+/*  margin: 0;*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*  justify-content: center;*/
+/*  align-items: center;*/
+/*  height: 100vh;*/
+/*}*/
 
-.card-login {
-  margin: auto;
-}
+/*.card-login {*/
+/*  margin: auto;*/
+/*}*/
 
-.card-login-content {
-  width: 60%;
-  border: solid 1px gray;
-  border-radius: 8px;
-}
+/*.card-login-content {*/
+/*  width: 60%;*/
+/*  border: solid 1px rgb(128, 128, 128);*/
+/*  border-radius: 8px;*/
+/*}*/
