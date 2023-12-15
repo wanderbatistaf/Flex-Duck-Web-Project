@@ -395,9 +395,9 @@
               <span class="bi bi-printer"></span>
             </button>
             <button id="AddButton" class="btn btn-outline-secondary" title="Adicionar" (click)="toggleInput(product)">
-              <span *ngIf="!mostrarInput">➕</span>
-              <span *ngIf="mostrarInput && product === produtoAtivo" (click)="atualizarQuantidade(product.id, valor)">✔️</span>
-              <span *ngIf="mostrarInput && product !== produtoAtivo">➕</span>
+              <span *ngIf="!mostrarInput"><i class="bi bi-plus-square"></i></span>
+              <span *ngIf="mostrarInput && product === produtoAtivo" (click)="atualizarQuantidade(product.id, valor)"><i class="bi bi-check-square-fill"></i></span>
+              <span *ngIf="mostrarInput && product !== produtoAtivo"><i class="bi bi-plus-square"></i></span>
             </button>
 
 

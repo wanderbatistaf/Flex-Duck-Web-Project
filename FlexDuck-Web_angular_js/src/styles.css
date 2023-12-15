@@ -5,6 +5,7 @@
 @import "bootstrap/dist/css/bootstrap.css";
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'open-iconic/font/css/open-iconic-bootstrap.css';
+@import 'zoom.css';
 /*!
 * Start Bootstrap - SB Admin v6.0.0 (https://startbootstrap.com/templates/sb-admin)
 * Copyright 2013-2020 Start Bootstrap
@@ -59,6 +60,7 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
+
 
 article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
   display: block;
@@ -10238,3 +10240,15 @@ body {
 .sb-sidenav-light .sb-sidenav-footer {
   background-color: #e9ecef;
 }
+
+@media (max-width: 1079px) {
+  body {
+    transform: scale(0.8) !important;
+    transform-origin: top !important;
+    width: 125% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+

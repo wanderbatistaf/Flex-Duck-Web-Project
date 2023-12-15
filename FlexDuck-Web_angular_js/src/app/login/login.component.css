@@ -3,21 +3,38 @@
 /*  height: 100%;*/
 /*}*/
 
-/*main {*/
-/*  margin: 0;*/
-/*  display: flex;*/
-/*  flex-direction: column;*/
-/*  justify-content: center;*/
-/*  align-items: center;*/
-/*  height: 100vh;*/
-/*}*/
+main {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-/*.card-login {*/
-/*  margin: auto;*/
-/*}*/
+.card-login {
+  margin: auto;
+}
 
-/*.card-login-content {*/
-/*  width: 60%;*/
-/*  border: solid 1px rgb(128, 128, 128);*/
-/*  border-radius: 8px;*/
-/*}*/
+.card-login-content {
+  width: 60%;
+  border: solid 1px rgb(128, 128, 128);
+  border-radius: 8px;
+}
+
+@media (max-width: 1079px) {
+  body, html {
+    transform: scale(0.8);
+    transform-origin: top;
+    width: 125%; /* Aumente a largura para compensar o redimensionamento */
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* Estilize a imagem para ocupar 100% da largura do elemento pai */
+.img-fluid {
+  max-width: 65%;
+  height: auto;
+}
+

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
 import { Servico } from "@app/_models";
 import { Observable } from 'rxjs';
+import {ServicoPayment} from "@app/custom_client_modules/servicos/servicos.component";
 
 @Injectable({ providedIn: 'root' })
 export class ServicosService {
@@ -39,6 +40,11 @@ export class ServicosService {
     updateStatus(numeroOrdem: number, novoStatus: string): Observable<Servico> {
         const statusUpdate = { status: novoStatus };
         return this.http.patch<Servico>(`${environment.apiUrl}/servicos/update_status/${numeroOrdem}`, statusUpdate);
+    }
+
+    updatePayment(numeroOrdem: number, atualizacao: ServicoPayment): Observable<Servico> {
+      const url = `${environment.apiUrl}/servicos/update_payment/${numeroOrdem}`;
+      return this.http.patch<Servico>(url, atualizacao);
     }
 
     printOS(ordemServico: any): Observable<Blob> {

@@ -122,6 +122,17 @@ export interface ApiResponse {
     mensagem: string;
 }
 
+export interface ServicoPayment {
+  forma_pagamento_id?: number;
+  bandeira_id?: string;
+  parcelamento?: number;
+  subtotal?: number;
+  desconto?: number;
+  valor_total?: number;
+  valor_total_pago?: number;
+  troco?: number;
+}
+
 
 @Component({
   selector: 'app-servicos',
@@ -219,7 +230,8 @@ export class ServicosComponent implements OnInit {
   constructor(private modalService: NgbModal,private userService: UserService,
               private sharedService: SharedService, private productService: ProductService,
               private servicoService: ServicosService, private paytypeService: FuncPaymentsService,
-              private CompanySettingsService: CompanySettingsService, private fb: FormBuilder)
+              private CompanySettingsService: CompanySettingsService, private fb: FormBuilder,
+              private el: ElementRef)
   {
     this.servicoSelecionado = {};
 
@@ -1065,9 +1077,50 @@ export class ServicosComponent implements OnInit {
 
 
   finalizarVenda() {
-    console.log('Finalizar Venda')
-    this.modalFinalizarOSVisivel = false
+    console.log("Venda Finalizada!")
   }
+  //   const dadosDaVenda = this.dadosDaVenda
+  //
+  //   const valorPagoElement = document.getElementById('valorPago') as HTMLInputElement;
+  //   const trocoElement = document.getElementById('troco') as HTMLInputElement;
+  //   const parcelamentoElement = document.getElementById('parcelamento') as HTMLInputElement;
+  //   const formaPagamentoElement = document.getElementById('formaPagamento') as HTMLInputElement;
+  //   const bandeiraElement = this.el.nativeElement.querySelector('#bandeira') as HTMLSelectElement;
+  //   const nomeBandeiraSelecionada = bandeiraElement.options[bandeiraElement.selectedIndex].text;
+  //
+  //   dadosDaVenda!.valor_total_pago = valorPagoElement ? Number(valorPagoElement.value) : 0;
+  //   dadosDaVenda!.troco = trocoElement ? Number(trocoElement.value) : 0;
+  //   dadosDaVenda!.parcelamento = parcelamentoElement ? Number(parcelamentoElement.value) : 0;
+  //   dadosDaVenda!.forma_pagamento_id = formaPagamentoElement ? String(formaPagamentoElement.value) : '0';
+  //   dadosDaVenda!.bandeira_id = bandeiraElement ? String(bandeiraElement.value) : '0';
+  //
+  //   console.log(this.dadosDaVenda);
+  //   console.log(nomeBandeiraSelecionada);
+  //   console.log('Finalizar Venda');
+  //   this.modalFinalizarOSVisivel = false;
+  //
+  //   //Preparar para levar as informações extras da venda ao BD através do PATCH (Montar rota no Back-end)
+  //   // Chamando a função PATCH do serviço
+  //   this.servicoService.updatePayment(dadosDaVenda.numeroOrdem, {
+  //     forma_pagamento_id: dadosDaVenda.forma_pagamento_id,
+  //     bandeira_id: dadosDaVenda.bandeira_id,
+  //     parcelamento: dadosDaVenda.parcelamento,
+  //     subtotal: dadosDaVenda.subtotal,
+  //     desconto: dadosDaVenda.desconto,
+  //     valor_total: dadosDaVenda.valor_total,
+  //     valor_total_pago: dadosDaVenda.valor_total_pago,
+  //     troco: dadosDaVenda.troco,
+  //   }).subscribe(
+  //     (resposta) => {
+  //       // Lide com a resposta do servidor, se necessário
+  //       console.log('Resposta do servidor:', resposta);
+  //     },
+  //     (erro) => {
+  //       // Lide com erros, se necessário
+  //       console.error('Erro ao fazer PATCH:', erro);
+  //     }
+  //   );
+  // }
 
 
   calcularTroco(): number {
@@ -1295,7 +1348,8 @@ export class ServicosComponent implements OnInit {
     const trocoElement = document.getElementById('troco') as HTMLInputElement;
     const parcelamentoElement = document.getElementById('parcelamento') as HTMLInputElement;
     const formaPagamentoElement = document.getElementById('formaPagamento') as HTMLInputElement;
-    const bandeiraElement = document.getElementById('bandeira') as HTMLInputElement;
+    const bandeiraElement = this.el.nativeElement.querySelector('#bandeira') as HTMLSelectElement;
+    const nomeBandeiraSelecionada = bandeiraElement.options[bandeiraElement.selectedIndex].text;
 
     dadosDaVenda!.valor_total_pago = valorPagoElement ? Number(valorPagoElement.value) : 0;
     dadosDaVenda!.troco = trocoElement ? Number(trocoElement.value) : 0;

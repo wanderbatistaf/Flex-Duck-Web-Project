@@ -51,6 +51,7 @@ import {
   FilterPipeServ,
   ServicosComponent
 } from './custom_client_modules/servicos/servicos.component';
+import {ZoomOutDirective} from "@app/zoom-out.directive";
 
 // const config: SocketIoConfig = { url: `${environment.ChatApiUrl}`, options: {withCredentials:false} };
 
@@ -107,7 +108,8 @@ import {
     DashboardComponent,
     // ChatRoomComponent,
     ServicosComponent,
-    FilterByStatusPipe
+    FilterByStatusPipe,
+    ZoomOutDirective
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
