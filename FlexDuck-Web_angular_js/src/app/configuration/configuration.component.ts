@@ -133,7 +133,7 @@ export class ConfigurationComponent implements OnInit {
         this.formMod.get('moduloVarejo')?.setValue(moduloVarejo.status === 'true');
       }
 
-      const moduloServicos = modulos.find((modulo: any) => modulo.modulo === 'Varejo');
+      const moduloServicos = modulos.find((modulo: any) => modulo.modulo === 'Servicos');
       if (moduloServicos) {
         this.formMod.get('moduloServicos')?.setValue(moduloServicos.status === 'true');
       }
