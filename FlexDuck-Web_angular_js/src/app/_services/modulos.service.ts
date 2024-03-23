@@ -31,4 +31,8 @@ export class ModulosService {
     return this.http.put<Modulo>(`${environment.apiUrl}/modules/varejo/toggle`, null);
   }
 
+  toggleModuloServicosStatus(): Observable<Modulo> {
+    return this.http.put<Modulo>(`${environment.apiUrl}/modules/varejo/toggle`, null);
+  }
+
 }

@@ -224,7 +224,7 @@ export class ConfigurationComponent implements OnInit {
 
   toggleModuloServicos() {
     this.savingModalVisible = true; // Mostrar o modal de salvamento
-    this.ModulosService.toggleModuloVarejoStatus().subscribe((newModule: Modulo) => {
+    this.ModulosService.toggleModuloServicosStatus().subscribe((newModule: Modulo) => {
       if (newModule) {
         // Limpar informações do localStorage
         localStorage.removeItem('modules');
