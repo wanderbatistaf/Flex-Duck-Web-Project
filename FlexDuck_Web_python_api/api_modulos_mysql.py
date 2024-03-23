@@ -173,5 +173,50 @@ def alternar_status_modulo_mesas():
     else:
         return abort(404)
 
+# Modulo de Varejo
+@api_modulos.route('/modules/servicos/toggle', methods=['PUT'])
+@jwt_required()
+def alternar_status_modulo_servicos():
+    current_user = get_jwt_identity()
+    if not current_user:
+        return abort(404)
+
+    # Obtém o subdomínio a partir da requisição Flask
+    subdomain = request.headers.get('X-Subdomain')
+
+    # Configura a conexão com o banco de dados MySQL
+    db = get_db_connection(subdomain)
+    cursor = db.cursor()
+
+    # Obtém o status atual do módulo "Mesas" da tabela modulos
+    sql = 'SELECT * FROM modulos WHERE modulo = "Servicos"'
+    cursor.execute(sql)
+    modulo_servicos = cursor.fetchone()
+    print(modulo_servicos)
+
+    if modulo_servicos:
+        # Converte o valor do status para int e inverte
+        novo_status = not bool(int(modulo_servicos[2]))
+
+        # Atualiza o status do módulo "Mesas" na tabela modulos
+        sql = 'UPDATE modulos SET status = %s WHERE id = %s'
+        cursor.execute(sql, (int(novo_status), modulo_servicos[0]))
+        db.commit()
+
+        cursor.close()
+
+        # Converte o valor do status para string ('true' ou 'false')
+        status_convertido = "true" if novo_status else "false"
+
+        status_modulo_servicos = {
+            'id': modulo_servicos[0],
+            'modulo': modulo_servicos[1],
+            'status': status_convertido
+        }
+
+        print(status_modulo_servicos)
+        return jsonify(status_modulo_servicos)
+    else:
+        return abort(404)
 
 

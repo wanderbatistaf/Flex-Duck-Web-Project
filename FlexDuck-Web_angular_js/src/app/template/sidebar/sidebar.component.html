@@ -17,7 +17,7 @@
              style="color: white"
              onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'; this.style.backgroundColor='rgba(0,0,0,0.2)'"
              onmouseout="this.style.boxShadow=''; this.style.backgroundColor=''">
-          <div class="sb-sidenav-menu-heading"><i class="fas fa-list"></i> Interface</div>
+          <i class="fas fa-list"></i> <div class="sb-sidenav-menu-heading">Sistema</div>
         </div>
         <div *ngIf="isInterfaceMenuOpen">
           <a class="nav-link collapsed" *ngIf="modulosAtivos['Varejo'] === 'true'" routerLink="/sales" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
@@ -39,7 +39,7 @@
              style="color: white"
              onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'; this.style.backgroundColor='rgba(0,0,0,0.2)'"
              onmouseout="this.style.boxShadow=''; this.style.backgroundColor=''">
-          <div class="sb-sidenav-menu-heading"><i class="fas fa-list"></i> Cadastro</div>
+          <i class="fas fa-list"></i> Cadastro
         </div>
 
         <div *ngIf="isCadastroMenuOpen">
@@ -68,7 +68,7 @@
              style="color: white"
              onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'; this.style.backgroundColor='rgba(0,0,0,0.2)'"
              onmouseout="this.style.boxShadow=''; this.style.backgroundColor=''" *ngIf="isLevel >= 15">
-          <div class="sb-sidenav-menu-heading"><i class="fas fa-list"></i> Contabilidade</div>
+          <i class="fas fa-list"></i> Contabilidade
         </div>
         <div *ngIf="isContabilidadeMenuOpen">
           <a class="nav-link collapsed" routerLink="/contabil" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts" *ngIf="isLevel >= 15"
